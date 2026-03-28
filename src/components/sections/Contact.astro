@@ -1,0 +1,76 @@
+---
+// src/components/sections/Contact.astro
+import { personal } from "@/data/personal";
+import ContactForm from "@/components/react/ContactForm.tsx";
+import FadeIn from "@/components/react/FadeIn.tsx";
+import { Mail, Github, Linkedin } from "lucide-react";
+---
+
+<section id="contact" class="py-24 bg-zinc-50/50 dark:bg-zinc-900/30">
+  <div class="mx-auto max-w-5xl px-6">
+    <FadeIn client:visible>
+      <div class="mb-16 text-center">
+        <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+          Get in Touch
+        </p>
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Let's Work Together
+        </h2>
+        <p class="mt-4 mx-auto max-w-lg text-muted">
+          Have a project in mind? I'd love to hear about it. Drop me a message
+          and I'll get back to you within 24 hours.
+        </p>
+      </div>
+    </FadeIn>
+
+    <div class="grid gap-12 lg:grid-cols-5">
+      {/* Contact Info */}
+      <FadeIn client:visible direction="left">
+        <div class="space-y-6 lg:col-span-2">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-brand-500">
+              <Mail size={18} />
+            </div>
+            <div>
+              <p class="text-sm text-muted">Email</p>
+              <a href={`mailto:${personal.email}`} class="text-sm font-medium hover:text-brand-500">
+                {personal.email}
+              </a>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-brand-500">
+              <Github size={18} />
+            </div>
+            <div>
+              <p class="text-sm text-muted">GitHub</p>
+              <a href={personal.socials.github} target="_blank" rel="noopener noreferrer" class="text-sm font-medium hover:text-brand-500">
+                @yourusername
+              </a>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-brand-500">
+              <Linkedin size={18} />
+            </div>
+            <div>
+              <p class="text-sm text-muted">LinkedIn</p>
+              <a href={personal.socials.linkedin} target="_blank" rel="noopener noreferrer" class="text-sm font-medium hover:text-brand-500">
+                in/yourusername
+              </a>
+            </div>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* Contact Form */}
+      <FadeIn client:visible direction="right">
+        <div class="lg:col-span-3">
+          <ContactForm client:visible />
+        </div>
+      </FadeIn>
+    </div>
+  </div>
+</section>

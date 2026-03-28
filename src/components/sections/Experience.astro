@@ -1,0 +1,46 @@
+---
+// src/components/sections/Experience.astro
+import { experiences } from "@/data/experience";
+import FadeIn from "@/components/react/FadeIn.tsx";
+---
+
+<section id="experience" class="py-24">
+  <div class="mx-auto max-w-5xl px-6">
+    <FadeIn client:visible>
+      <div class="mb-16">
+        <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+          Career
+        </p>
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Work Experience
+        </h2>
+      </div>
+    </FadeIn>
+
+    <div class="relative space-y-12">
+      {/* Timeline line */}
+      <div class="absolute left-[7px] top-2 bottom-2 w-px bg-border dark:bg-border-dark md:left-1/2 md:-translate-x-px" />
+
+      {experiences.map((exp, idx) => (
+        <FadeIn client:visible delay={idx * 0.15} direction={idx % 2 === 0 ? "left" : "right"}>
+          <div class="relative grid gap-6 md:grid-cols-2 md:gap-12">
+            {/* Timeline dot */}
+            <div class="absolute left-0 top-2 h-3.5 w-3.5 rounded-full border-2 border-brand-500 bg-white dark:bg-surface-dark md:left-1/2 md:-translate-x-1/2" />
+
+            <div class:list={["md:text-right md:pr-12", idx % 2 !== 0 && "md:col-start-2 md:text-left md:pl-12 md:pr-0"]}>
+              <h3 class="text-lg font-semibold">{exp.role}</h3>
+              <p class="text-brand-500 font-medium">{exp.company}</p>
+              <p class="mt-1 text-sm text-muted">{exp.period}</p>
+              <p class="mt-3 text-sm text-muted">{exp.description}</p>
+              <ul class="mt-3 space-y-1">
+                {exp.achievements.map((a) => (
+                  <li class="text-sm text-muted">• {a}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  </div>
+</section>

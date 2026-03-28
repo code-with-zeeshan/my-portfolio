@@ -1,7 +1,65 @@
+/* src/styles/global.css */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+
+/* ===== DESIGN TOKENS ===== */
+@theme {
+  /* Brand Colors */
+  --color-brand-50: oklch(0.97 0.01 260);
+  --color-brand-100: oklch(0.93 0.02 260);
+  --color-brand-500: oklch(0.65 0.15 260);
+  --color-brand-600: oklch(0.55 0.15 260);
+  --color-brand-700: oklch(0.45 0.15 260);
+
+  /* Neutral Palette */
+  --color-surface: oklch(0.99 0.00 0);
+  --color-surface-dark: oklch(0.13 0.00 0);
+  --color-muted: oklch(0.55 0.00 0);
+  --color-border: oklch(0.90 0.00 0);
+  --color-border-dark: oklch(0.25 0.00 0);
+
+  /* Typography */
+  --font-sans: "Inter", "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+
+  /* Spacing */
+  --spacing-section: 6rem;
+
+  /* Custom breakpoint */
+  --breakpoint-3xl: 120rem;
+}
+
+/* ===== BASE STYLES ===== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface);
+    color: oklch(0.20 0.00 0);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Dark mode */
+  .dark body {
+    background-color: var(--color-surface-dark);
+    color: oklch(0.90 0.00 0);
+  }
+
+  ::selection {
+    background-color: var(--color-brand-500);
+    color: white;
+  }
+}
+
+/* ===== TYPOGRAPHY PLUGIN (optional) ===== */
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -115,16 +173,4 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
-    }
 }

@@ -1,0 +1,68 @@
+---
+// src/layouts/BlogLayout.astro
+import BaseLayout from "./BaseLayout.astro";
+import { formatDate } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  heroImage?: string;
+  tags?: string[];
+}
+
+const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} ogImage={heroImage}>
+  <article class="mx-auto max-w-3xl px-6 py-24 pt-32">
+    {/* Back link */}
+    <a
+      href="/blog"
+      class="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-brand-500 transition-colors"
+    >
+      <ArrowLeft size={14} />
+      Back to Blog
+    </a>
+
+    {/* Header */}
+    <header class="mb-12">
+      <div class="flex flex-wrap gap-2 mb-4">
+        {tags.map((tag) => (
+          <span class="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-500">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+        {title}
+      </h1>
+
+      <div class="mt-4 flex items-center gap-4 text-sm text-muted">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        {updatedDate && (
+          <span>
+            (Updated: <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>)
+          </span>
+        )}
+      </div>
+    </header>
+
+    {/* Hero Image */}
+    {heroImage && (
+      <img
+        src={heroImage}
+        alt={title}
+        class="mb-12 w-full rounded-2xl object-cover"
+      />
+    )}
+
+    {/* Content */}
+    <div class="prose prose-zinc mx-auto dark:prose-invert prose-headings:font-semibold prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>

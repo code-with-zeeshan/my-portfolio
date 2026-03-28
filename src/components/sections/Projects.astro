@@ -1,0 +1,48 @@
+---
+// src/components/sections/Projects.astro
+import { projects } from "@/data/projects";
+import AnimatedCard from "@/components/react/AnimatedCard.tsx";
+import FadeIn from "@/components/react/FadeIn.tsx";
+
+const featuredProjects = projects.filter((p) => p.featured);
+---
+
+<section id="projects" class="py-24">
+  <div class="mx-auto max-w-5xl px-6">
+    <FadeIn client:visible>
+      <div class="mb-16">
+        <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+          Portfolio
+        </p>
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Selected Work
+        </h2>
+        <p class="mt-4 max-w-xl text-muted">
+          A curated collection of projects that showcase my skills in building
+          modern, performant web applications.
+        </p>
+      </div>
+    </FadeIn>
+
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {featuredProjects.map((project, index) => (
+        <AnimatedCard
+          client:visible
+          project={project}
+          index={index}
+        />
+      ))}
+    </div>
+
+    <FadeIn client:visible delay={0.3}>
+      <div class="mt-12 text-center">
+        <a
+          href="/projects"
+          class="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:underline"
+        >
+          View All Projects →
+        </a>
+      </div>
+    </FadeIn>
+  </div>
+</section>

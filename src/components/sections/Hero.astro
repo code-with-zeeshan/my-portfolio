@@ -1,0 +1,63 @@
+---
+// src/components/sections/Hero.astro
+import { personal } from "@/data/personal";
+import FadeIn from "@/components/react/FadeIn.tsx";
+import { ArrowDown, MapPin } from "lucide-react";
+---
+
+<section id="hero" class="relative flex min-h-[90vh] items-center pt-16">
+  <div class="mx-auto max-w-5xl px-6 py-24">
+    <FadeIn client:load>
+      <div class="flex items-center gap-2 text-sm text-muted mb-6">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500"></span>
+        </span>
+        {personal.availability}
+      </div>
+    </FadeIn>
+
+    <FadeIn client:load delay={0.1}>
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+        Hi, I'm <span class="text-brand-500">{personal.name}</span>
+      </h1>
+    </FadeIn>
+
+    <FadeIn client:load delay={0.2}>
+      <p class="mt-4 text-xl text-muted sm:text-2xl lg:text-3xl font-light">
+        {personal.title}
+      </p>
+    </FadeIn>
+
+    <FadeIn client:load delay={0.3}>
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+        {personal.tagline}
+      </p>
+    </FadeIn>
+
+    <FadeIn client:load delay={0.4}>
+      <div class="mt-8 flex flex-wrap items-center gap-4">
+        <a
+          href="/#projects"
+          class="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-brand-500 dark:bg-white dark:text-zinc-900 dark:hover:bg-brand-500 dark:hover:text-white"
+        >
+          View My Work
+          <ArrowDown size={16} />
+        </a>
+        <a
+          href="/#contact"
+          class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-zinc-100 dark:border-border-dark dark:hover:bg-zinc-800"
+        >
+          Get In Touch
+        </a>
+      </div>
+    </FadeIn>
+
+    <FadeIn client:load delay={0.5}>
+      <div class="mt-6 flex items-center gap-1 text-sm text-muted">
+        <MapPin size={14} />
+        {personal.location}
+      </div>
+    </FadeIn>
+  </div>
+</section>

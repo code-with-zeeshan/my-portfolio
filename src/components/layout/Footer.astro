@@ -1,0 +1,44 @@
+---
+// src/components/layout/Footer.astro
+import { Github, Linkedin, Twitter, Mail } from "lucide-react";
+
+const socials = [
+  { href: "https://github.com/yourusername", icon: Github, label: "GitHub" },
+  { href: "https://linkedin.com/in/yourusername", icon: Linkedin, label: "LinkedIn" },
+  { href: "https://twitter.com/yourusername", icon: Twitter, label: "Twitter" },
+  { href: "mailto:you@email.com", icon: Mail, label: "Email" },
+];
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-border/40 dark:border-border-dark/40">
+  <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row">
+    <div class="flex flex-col items-center md:items-start gap-2">
+      <span class="text-lg font-semibold">
+        YN<span class="text-brand-500">.</span>
+      </span>
+      <p class="text-sm text-muted">
+        Building modern web experiences.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      {socials.map(({ href, icon: Icon, label }) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded-full p-2.5 text-muted transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          aria-label={label}
+        >
+          <Icon size={18} />
+        </a>
+      ))}
+    </div>
+
+    <p class="text-sm text-muted">
+      &copy; {currentYear} Your Name. All rights reserved.
+    </p>
+  </div>
+</footer>
