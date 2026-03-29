@@ -15,7 +15,10 @@ export default defineConfig({
   integrations: [react(), mdx(), sitemap()],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ["lucide-react", "motion"],
+    },
   },
   markdown: {
     shikiConfig: {

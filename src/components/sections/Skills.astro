@@ -2,16 +2,17 @@
 // src/components/sections/Skills.astro
 import { skillCategories } from "@/data/skills";
 import FadeIn from "@/components/react/FadeIn.tsx";
+import { StaggerContainer, StaggerItem } from "@/components/react/StaggerChildren.tsx";
 ---
 
-<section id="skills" class="py-24 bg-zinc-50/50 dark:bg-zinc-900/30">
+<section id="skills" class="py-24 bg-zinc-50 dark:bg-zinc-900/50">
   <div class="mx-auto max-w-5xl px-6">
     <FadeIn client:visible>
       <div class="mb-16">
         <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
           Expertise
         </p>
-        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
           Skills & Technologies
         </h2>
       </div>
@@ -20,15 +21,17 @@ import FadeIn from "@/components/react/FadeIn.tsx";
     <div class="grid gap-8 md:grid-cols-3">
       {skillCategories.map((category, catIdx) => (
         <FadeIn client:visible delay={catIdx * 0.1}>
-          <div class="rounded-2xl border border-border bg-white p-8 dark:border-border-dark dark:bg-zinc-900">
-            <h3 class="mb-6 text-lg font-semibold">{category.title}</h3>
-            <div class="flex flex-wrap gap-2">
-              {category.skills.map((skill) => (
-                <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                  {skill}
-                </span>
+          <div class="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 class="mb-6 text-lg font-semibold text-zinc-900 dark:text-zinc-50">{category.title}</h3>
+            <StaggerContainer client:visible className="flex flex-wrap gap-2" staggerDelay={0.06}>
+              {category.skills.map((skill, skillIdx) => (
+                <StaggerItem client:visible index={skillIdx} staggerDelay={0.06}>
+                  <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {skill}
+                  </span>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </FadeIn>
       ))}

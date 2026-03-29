@@ -1,0 +1,45 @@
+---
+// src/pages/projects/index.astro
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import FadeIn from "@/components/react/FadeIn.tsx";
+import AnimatedCard from "@/components/react/AnimatedCard.tsx";
+import { projects } from "@/data/projects";
+---
+
+<BaseLayout title="Projects" description="A collection of projects I've built.">
+  <section class="mx-auto max-w-5xl px-6 py-24 pt-32">
+    <FadeIn client:load>
+      <div class="mb-16">
+        <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+          Portfolio
+        </p>
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          All Projects
+        </h1>
+        <p class="mt-4 max-w-xl text-muted">
+          A comprehensive collection of my work — from full-stack applications to
+          open-source tools.
+        </p>
+      </div>
+    </FadeIn>
+
+    {projects.length > 0 ? (
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project, index) => (
+          <AnimatedCard
+            client:visible
+            project={project}
+            index={index}
+          />
+        ))}
+      </div>
+    ) : (
+      <FadeIn client:visible>
+        <div class="rounded-2xl border border-dashed border-border p-16 text-center dark:border-border-dark">
+          <p class="text-xl font-semibold mb-2">Projects coming soon! 🚧</p>
+          <p class="text-muted">I'm currently working on some exciting projects. Check back soon!</p>
+        </div>
+      </FadeIn>
+    )}
+  </section>
+</BaseLayout>

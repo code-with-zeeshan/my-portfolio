@@ -3,6 +3,7 @@
 import "../styles/global.css";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
+import ScrollProgress from "@/components/react/ScrollProgress.tsx";
 
 interface Props {
   title: string;
@@ -16,7 +17,11 @@ const {
   ogImage = "/og-image.png",
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// ─── Safe URL construction ───
+// Astro.site can be undefined if not configured or invalid
+const siteUrl = Astro.site?.toString() ?? "https://localhost:4321";
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageURL = new URL(ogImage, siteUrl).toString();
 ---
 
 <!doctype html>
@@ -37,19 +42,19 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image" content={ogImageURL} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+    <meta name="twitter:image" content={ogImageURL} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Fonts: Inter + Geist -->
+    <!-- Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -58,16 +63,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     />
 
     <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Person",
-      "name": "Your Name",
+      "name": "Mohammad Zeeshan",
       "url": canonicalURL,
       "jobTitle": "Full-Stack Developer",
       "sameAs": [
-        "https://github.com/yourusername",
-        "https://linkedin.com/in/yourusername",
-        "https://twitter.com/yourusername"
+        "https://github.com/code-with-zeeshan",
+        "https://linkedin.com/in/mohammad-zeeshan-37637a1a5",
+        "https://x.com/yourusername"
       ]
     })} />
 
@@ -83,7 +88,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     </script>
   </head>
 
-  <body class="min-h-screen bg-surface text-zinc-900 dark:bg-surface-dark dark:text-zinc-100 antialiased transition-colors duration-300">
+  <body class="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased transition-colors duration-300">
+    <ScrollProgress client:load />
     <Header />
     <main>
       <slot />

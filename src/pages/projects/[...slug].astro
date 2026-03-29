@@ -1,0 +1,100 @@
+---
+// src/pages/projects/[...slug].astro
+import { getCollection, render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/ui/Icons.astro";
+import { formatDate } from "@/lib/utils";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const pubDate = project.data.pubDate instanceof Date
+  ? project.data.pubDate
+  : new Date(project.data.pubDate);
+const pubDateISO = !isNaN(pubDate.getTime()) ? pubDate.toISOString() : "";
+const pubDateFormatted = !isNaN(pubDate.getTime()) ? formatDate(pubDate) : "";
+---
+
+<BaseLayout title={project.data.title} description={project.data.description} ogImage={project.data.image}>
+  <article class="mx-auto max-w-3xl px-6 py-24 pt-32">
+    <a
+      href="/projects"
+      class="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-brand-500 transition-colors"
+    >
+      <Icon name="arrow-left" size={14} />
+      Back to Projects
+    </a>
+
+    <header class="mb-12">
+      <div class="flex flex-wrap gap-2 mb-4">
+        {project.data.tags.map((tag: string) => (
+          <span class="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-500">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+        {project.data.title}
+      </h1>
+
+      <p class="mt-4 text-lg text-muted">
+        {project.data.description}
+      </p>
+
+      <div class="mt-6 flex flex-wrap items-center gap-4">
+        {project.data.liveUrl && (
+          <a
+            href={project.data.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-500 dark:bg-white dark:text-zinc-900 dark:hover:bg-brand-500 dark:hover:text-white transition-colors"
+          >
+            <Icon name="external-link" size={16} />
+            Live Demo
+          </a>
+        )}
+        {project.data.githubUrl && (
+          <a
+            href={project.data.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium hover:bg-zinc-100 dark:border-border-dark dark:hover:bg-zinc-800 transition-colors"
+          >
+            <Icon name="github" size={16} />
+            View Source
+          </a>
+        )}
+      </div>
+
+      {pubDateISO && (
+        <time
+          datetime={pubDateISO}
+          class="mt-4 block text-sm text-muted"
+        >
+          {pubDateFormatted}
+        </time>
+      )}
+    </header>
+
+    {project.data.image && (
+      <img
+        src={project.data.image}
+        alt={project.data.title}
+        class="mb-12 w-full rounded-2xl object-cover shadow-lg"
+      />
+    )}
+
+    <div class="prose prose-zinc mx-auto dark:prose-invert prose-headings:font-semibold prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

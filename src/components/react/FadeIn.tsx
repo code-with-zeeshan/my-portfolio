@@ -1,33 +1,65 @@
-// src/data/experience.ts
-export interface Experience {
-    company: string;
-    role: string;
-    period: string;
-    description: string;
-    achievements: string[];
-  }
-  
-  export const experiences: Experience[] = [
-    {
-      company: "Tech Corp",
-      role: "Senior Full-Stack Developer",
-      period: "2023 — Present",
-      description: "Leading frontend architecture for the main product.",
-      achievements: [
-        "Reduced page load time by 45% through performance optimization",
-        "Led migration from CRA to Next.js, improving SEO scores by 30%",
-        "Mentored 4 junior developers",
-      ],
-    },
-    {
-      company: "StartupXYZ",
-      role: "Frontend Developer",
-      period: "2021 — 2023",
-      description: "Built and maintained the core product UI.",
-      achievements: [
-        "Shipped 15+ features from ideation to production",
-        "Implemented design system used across 3 products",
-        "Improved test coverage from 20% to 85%",
-      ],
-    },
-  ];
+// src/components/react/FadeIn.tsx
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+interface FadeInProps {
+  children: ReactNode;
+  delay?: number;
+  duration?: number;
+  direction?: "up" | "down" | "left" | "right" | "none";
+  className?: string;
+}
+
+const directionOffsets = {
+  up: { y: 40, x: 0 },
+  down: { y: -40, x: 0 },
+  left: { x: 40, y: 0 },
+  right: { x: -40, y: 0 },
+  none: { x: 0, y: 0 },
+};
+
+export default function FadeIn({
+  children,
+  delay = 0,
+  duration = 0.5,
+  direction = "up",
+  className = "",
+}: FadeInProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Add delay before triggering animation
+          setTimeout(() => setIsVisible(true), delay * 1000);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: "-50px" }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  const offset = directionOffsets[direction];
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible
+          ? "translate3d(0, 0, 0)"
+          : `translate3d(${offset.x}px, ${offset.y}px, 0)`,
+        transition: `opacity ${duration}s cubic-bezier(0.21, 0.47, 0.32, 0.98), transform ${duration}s cubic-bezier(0.21, 0.47, 0.32, 0.98)`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}

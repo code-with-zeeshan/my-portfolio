@@ -6,12 +6,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string | undefined | null): string {
+  if (!date) return "Unknown date";
+
+  const d = date instanceof Date ? date : new Date(date);
+
+  // Guard against Invalid Date
+  if (isNaN(d.getTime())) return "Unknown date";
+
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
-  }).format(date);
+  }).format(d);
 }
 
 export function readingTime(text: string): string {

@@ -2,7 +2,7 @@
 // src/layouts/BlogLayout.astro
 import BaseLayout from "./BaseLayout.astro";
 import { formatDate } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import Icon from "@/components/ui/Icons.astro";
 
 interface Props {
   title: string;
@@ -14,20 +14,32 @@ interface Props {
 }
 
 const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro.props;
+
+const pubDateISO = pubDate instanceof Date && !isNaN(pubDate.getTime())
+  ? pubDate.toISOString()
+  : "";
+const pubDateFormatted = pubDate instanceof Date && !isNaN(pubDate.getTime())
+  ? formatDate(pubDate)
+  : "Unknown date";
+
+const updatedDateISO = updatedDate instanceof Date && !isNaN(updatedDate.getTime())
+  ? updatedDate.toISOString()
+  : "";
+const updatedDateFormatted = updatedDate instanceof Date && !isNaN(updatedDate.getTime())
+  ? formatDate(updatedDate)
+  : "";
 ---
 
 <BaseLayout title={title} description={description} ogImage={heroImage}>
   <article class="mx-auto max-w-3xl px-6 py-24 pt-32">
-    {/* Back link */}
     <a
       href="/blog"
       class="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-brand-500 transition-colors"
     >
-      <ArrowLeft size={14} />
+      <Icon name="arrow-left" size={14} />
       Back to Blog
     </a>
 
-    {/* Header */}
     <header class="mb-12">
       <div class="flex flex-wrap gap-2 mb-4">
         {tags.map((tag) => (
@@ -42,16 +54,17 @@ const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro
       </h1>
 
       <div class="mt-4 flex items-center gap-4 text-sm text-muted">
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-        {updatedDate && (
+        {pubDateISO && (
+          <time datetime={pubDateISO}>{pubDateFormatted}</time>
+        )}
+        {updatedDateISO && (
           <span>
-            (Updated: <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>)
+            (Updated: <time datetime={updatedDateISO}>{updatedDateFormatted}</time>)
           </span>
         )}
       </div>
     </header>
 
-    {/* Hero Image */}
     {heroImage && (
       <img
         src={heroImage}
@@ -60,7 +73,6 @@ const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro
       />
     )}
 
-    {/* Content */}
     <div class="prose prose-zinc mx-auto dark:prose-invert prose-headings:font-semibold prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
       <slot />
     </div>

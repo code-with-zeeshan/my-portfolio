@@ -2,7 +2,9 @@
 // src/components/sections/Projects.astro
 import { projects } from "@/data/projects";
 import AnimatedCard from "@/components/react/AnimatedCard.tsx";
+import ProjectCarousel from "@/components/react/ProjectCarousel.tsx";
 import FadeIn from "@/components/react/FadeIn.tsx";
+import Icon from "@/components/ui/Icons.astro";
 
 const featuredProjects = projects.filter((p) => p.featured);
 ---
@@ -14,16 +16,24 @@ const featuredProjects = projects.filter((p) => p.featured);
         <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
           Portfolio
         </p>
-        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
           Selected Work
         </h2>
-        <p class="mt-4 max-w-xl text-muted">
+        <p class="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
           A curated collection of projects that showcase my skills in building
           modern, performant web applications.
         </p>
       </div>
     </FadeIn>
 
+    <!-- Featured Carousel (Desktop) -->
+    <FadeIn client:visible>
+      <div class="mb-12 hidden lg:block">
+        <ProjectCarousel client:visible projects={featuredProjects} />
+      </div>
+    </FadeIn>
+
+    <!-- Card Grid (All screens, mobile primary) -->
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {featuredProjects.map((project, index) => (
         <AnimatedCard
@@ -40,7 +50,8 @@ const featuredProjects = projects.filter((p) => p.featured);
           href="/projects"
           class="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:underline"
         >
-          View All Projects →
+          View All Projects
+          <Icon name="arrow-right" size={14} />
         </a>
       </div>
     </FadeIn>

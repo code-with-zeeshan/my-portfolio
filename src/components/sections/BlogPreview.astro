@@ -1,0 +1,111 @@
+---
+// src/components/sections/BlogPreview.astro
+import FadeIn from "@/components/react/FadeIn.tsx";
+import { getCollection } from "astro:content";
+import { formatDate } from "@/lib/utils";
+import Icon from "@/components/ui/Icons.astro";
+
+let posts: any[] = [];
+
+try {
+  const allPosts = await getCollection("blog");
+  posts = allPosts
+    .filter((post) => !post.data.draft)
+    .filter((post) => post.data.pubDate instanceof Date && !isNaN(post.data.pubDate.getTime()))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    .slice(0, 3);
+} catch (error) {
+  console.warn("BlogPreview: Could not load blog posts:", error);
+  posts = [];
+}
+---
+
+<section id="blog" class="py-24">
+  <div class="mx-auto max-w-5xl px-6">
+    <FadeIn client:visible>
+      <div class="mb-16 flex items-end justify-between">
+        <div>
+          <p class="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+            Blog
+          </p>
+          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+            Latest Articles
+          </h2>
+          <p class="mt-4 max-w-xl text-muted">
+            Thoughts on web development, design patterns, and lessons learned.
+          </p>
+        </div>
+        <a
+          href="/blog"
+          class="hidden items-center gap-1 text-sm font-medium text-brand-500 hover:underline sm:inline-flex"
+        >
+          View All
+          <Icon name="arrow-right" size={14} />
+        </a>
+      </div>
+    </FadeIn>
+
+    {posts.length > 0 ? (
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post, idx) => (
+          <FadeIn client:visible delay={idx * 0.1}>
+            <a
+              href={`/blog/${post.id}`}
+              class="group block rounded-2xl border border-border bg-white p-6 transition-all hover:border-brand-500/30 hover:shadow-lg dark:border-border-dark dark:bg-zinc-900"
+            >
+              {post.data.heroImage && (
+                <div class="mb-4 aspect-video overflow-hidden rounded-xl">
+                  <img
+                    src={post.data.heroImage}
+                    alt={post.data.title}
+                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              <div class="flex flex-wrap gap-2 mb-3">
+                {post.data.tags.slice(0, 2).map((tag: string) => (
+                  <span class="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-medium text-brand-500">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <h3 class="text-lg font-semibold group-hover:text-brand-500 transition-colors line-clamp-2">
+                {post.data.title}
+              </h3>
+
+              <p class="mt-2 text-sm text-muted line-clamp-2">
+                {post.data.description}
+              </p>
+
+              {post.data.pubDate && (
+                <time
+                  datetime={post.data.pubDate.toISOString()}
+                  class="mt-4 block text-xs text-muted"
+                >
+                  {formatDate(post.data.pubDate)}
+                </time>
+              )}
+            </a>
+          </FadeIn>
+        ))}
+      </div>
+    ) : (
+      <FadeIn client:visible>
+        <div class="rounded-2xl border border-dashed border-border p-12 text-center dark:border-border-dark">
+          <p class="text-muted">Blog posts coming soon! 🚀</p>
+        </div>
+      </FadeIn>
+    )}
+
+    <a
+      href="/blog"
+      class="mt-8 inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline sm:hidden"
+    >
+      View All Posts
+      <Icon name="arrow-right" size={14} />
+    </a>
+  </div>
+</section>

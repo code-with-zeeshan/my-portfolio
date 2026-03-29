@@ -1,15 +1,15 @@
 // src/data/personal.ts
 export const personal = {
-    name: "Your Name",
+    name: "Mohammad Zeeshan",
     title: "Full-Stack Developer",
     tagline: "I craft modern, performant web experiences that users love.",
     bio: "I'm a passionate developer with 5+ years of experience building web applications. I specialize in React, TypeScript, and Node.js. I love turning complex problems into simple, beautiful solutions.",
-    location: "San Francisco, CA",
-    email: "you@email.com",
+    location: "New Delhi, India",
+    email: "zeeshansayfyebusiness@gmail.com",
     availability: "Open to freelance & full-time opportunities",
     socials: {
-      github: "https://github.com/yourusername",
-      linkedin: "https://linkedin.com/in/yourusername",
+      github: "https://github.com/code-with-zeeshan",
+      linkedin: "https://linkedin.com/in/mohammad-zeeshan-37637a1a5",
       twitter: "https://twitter.com/yourusername",
     },
   } as const;
