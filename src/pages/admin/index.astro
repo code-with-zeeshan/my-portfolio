@@ -1,0 +1,11 @@
+---
+// src/pages/admin/index.astro
+export const prerender = false; // Must be SSR
+
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import AdminDashboard from "@/components/react/AdminDashboard.tsx";
+---
+
+<AdminLayout title="Dashboard">
+  <AdminDashboard client:load />
+</AdminLayout>

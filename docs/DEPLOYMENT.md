@@ -4,50 +4,48 @@
 
 ### First Deployment
 
-1. Push code to GitHub:
-   ```bash
-   git add .
-   git commit -m "feat: complete portfolio website"
-   git push origin main
-   ```
+```bash
+git add .
+git commit -m "feat: complete portfolio website"
+git push origin main
+```
 
-2. Go to [vercel.com](https://vercel.com) and sign in with GitHub
-
-3. Click **"Add New Project"**
-
-4. Select your `my-portfolio` repository
-
-5. Vercel auto-detects Astro — leave all settings as default
-
-6. Click **"Deploy"**
-
-7. Your site is live at `your-project.vercel.app`
-
-### Automatic Deployments
-
-Every `git push` to `main` triggers a new deployment. Pull requests get preview URLs.
-
-### Custom Domain
-
-1. Purchase a domain from Namecheap, Cloudflare, or Porkbun
-2. In Vercel: Project → Settings → Domains → Add
-3. Follow DNS instructions (usually add an A record or CNAME)
-4. Vercel provides free automatic HTTPS
-5. Update `site` in `astro.config.mjs` to your new domain
+1. Go to [vercel.com](https://vercel.com) → sign in with GitHub
+2. Click **Add New Project** → select `my-portfolio`
+3. Vercel auto-detects Astro — click **Deploy**
+4. Site is live at `your-project.vercel.app`
 
 ### Environment Variables
 
-If using Formspree or analytics, add variables in:
-Vercel Dashboard → Project → Settings → Environment Variables
+In Vercel: **Project → Settings → Environment Variables**
+
+| Variable | Value | Required |
+|---|---|---|
+| `PUBLIC_SITE_URL` | `https://yourdomain.com` | For custom domain |
+| `PUBLIC_SUPABASE_URL` | `https://xxxxx.supabase.co` | ✅ Yes |
+| `PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOi...` | ✅ Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOi...` | ✅ Yes |
+| `PUBLIC_CLOUDINARY_CLOUD_NAME` | `your_cloud_name` | ✅ Yes |
+| `PUBLIC_CLOUDINARY_UPLOAD_PRESET` | `portfolio_unsigned` | ✅ Yes |
+| `PUBLIC_CLOUDINARY_API_KEY` | `your_api_key` | ✅ Yes |
+
+> ⚠️ Set all variables for **Production**, **Preview**, and **Development** environments.
+
+### Custom Domain
+
+1. Purchase a domain (Namecheap, Cloudflare, Porkbun)
+2. Vercel → Project → Settings → Domains → **Add**
+3. Follow DNS instructions (A record or CNAME)
+4. Vercel provides free automatic HTTPS
+5. Update `PUBLIC_SITE_URL` in Vercel environment variables
+6. Redeploy (or wait for next push)
+
+### Automatic Deployments
+
+Every `git push origin main` triggers a new production deployment.
+Pull requests automatically get preview URLs.
 
 ## Alternative Platforms
-
-### Cloudflare Pages
-
-```bash
-npm run build
-npx wrangler pages deploy dist
-```
 
 ### Netlify
 
@@ -56,13 +54,24 @@ npm run build
 npx netlify deploy --prod --dir=dist
 ```
 
+### Cloudflare Pages
+
+```bash
+npm run build
+npx wrangler pages deploy dist
+```
+
 ## Post-Deployment Checklist
 
-- [ ] Site loads correctly at your domain
-- [ ] Dark mode toggle works
-- [ ] All navigation links work
-- [ ] Contact form submits successfully
-- [ ] Blog posts render correctly
-- [ ] Mobile layout looks good
-- [ ] Open Graph preview works (test at https://opengraph.xyz)
-- [ ] Submit sitemap to Google Search Console
+- [ ] Site loads at your domain
+- [ ] Dark mode toggle works and persists
+- [ ] All nav links work correctly
+- [ ] `Ctrl+Shift+A` opens login modal
+- [ ] Admin panel loads after login
+- [ ] Contact form submits (check Admin → Messages)
+- [ ] Resume download triggers file save
+- [ ] Blog posts load
+- [ ] Project pages load
+- [ ] Mobile layout looks correct
+- [ ] OG preview correct (test at [opengraph.xyz](https://opengraph.xyz))
+- [ ] Submit sitemap to [Google Search Console](https://search.google.com/search-console)

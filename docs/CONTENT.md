@@ -1,75 +1,86 @@
 # Content Management Guide
 
-## How Content Works
+## Two Ways to Manage Content
 
-This portfolio uses **Astro Content Collections** with the `glob` loader to manage blog posts and project case studies as MDX files.
-
-### Content Configuration
-
-**File:** `src/content.config.ts`
-
-Defines schemas for `blog` and `projects` collections using Zod validation.
-
-### Content Locations
-
-| Content Type | Directory | Format |
+| Method | Best For | How |
 |---|---|---|
-| Blog posts | `src/data/blog/` | `.mdx` |
-| Project case studies | `src/data/projects/` | `.mdx` |
-| Personal info | `src/data/personal.ts` | TypeScript |
-| Project list | `src/data/projects.ts` | TypeScript |
-| Skills | `src/data/skills.ts` | TypeScript |
-| Experience | `src/data/experience.ts` | TypeScript |
+| **Admin Panel** | Quick edits, new blog posts, updating projects | `Ctrl+Shift+A` → login |
+| **Static files** | Initial setup, version-controlled content | Edit `src/data/*.ts` + MDX files |
+
+Both methods are always available. Static files serve as fallback if Supabase is unreachable.
+
+## Static Data Files
+
+| File | Content |
+|---|---|
+| `src/data/personal.ts` | Name, bio, title, location, email, social links |
+| `src/data/projects.ts` | Project list with descriptions, tags, URLs |
+| `src/data/skills.ts` | Skill categories and technology tags |
+| `src/data/experience.ts` | Work history, roles, achievements |
+| `src/data/testimonials.ts` | Client/colleague testimonials |
+
+## MDX Content Files
+
+| Directory | Content | URL Pattern |
+|---|---|---|
+| `src/data/blog/` | Blog posts | `/blog/[filename]` |
+| `src/data/projects/` | Project case studies | Rendered via `[...slug].astro` |
 
 ## Blog Post Frontmatter
 
 ```yaml
 ---
 title: "Post Title"              # Required
-description: "Summary"           # Required
-pubDate: "2026-04-01"            # Required (quote the date!)
+description: "SEO summary"       # Required
+pubDate: "2026-04-01"            # Required — always quote the date!
 updatedDate: "2026-04-15"        # Optional
-heroImage: "/images/blog/x.webp" # Optional
+heroImage: ""                    # Optional — Cloudinary URL or local path
 tags: ["Tag1", "Tag2"]           # Optional, defaults to []
-draft: false                     # Optional, defaults to false
+draft: false                     # Optional — true hides from listings
 ---
+
+Your content in Markdown/MDX here.
 ```
 
-## Project Frontmatter
+## Project MDX Frontmatter
 
 ```yaml
 ---
-title: "Project Name"                    # Required
-description: "One-line summary"          # Required
-image: "/images/projects/x.webp"         # Required
-tags: ["React", "TypeScript"]            # Required
-liveUrl: "https://demo.com"              # Optional
-githubUrl: "https://github.com/you/x"   # Optional
-pubDate: "2026-01-15"                    # Required (quote the date!)
-featured: true                           # Optional, defaults to false
+title: "Project Name"
+description: "One-line summary"
+image: "/images/projects/x.webp"
+tags: ["React", "TypeScript"]
+liveUrl: "https://demo.com"      # Optional
+githubUrl: "https://github.com/you/x"  # Optional
+pubDate: "2026-01-15"            # Always quote!
+featured: true                   # Shows on homepage
 ---
 ```
 
+## Adding Content via Admin
+
+### New Blog Post
+1. `Ctrl+Shift+A` → Blog tab → **+ New Post**
+2. Fill in title, description, slug, tags, content (Markdown)
+3. Toggle **Published** when ready
+4. Click **Save**
+
+### New Project
+1. Admin → Projects tab → **+ Add Project**
+2. Fill in fields, upload image via Cloudinary drag & drop
+3. Toggle **Featured on homepage** if desired
+4. Click **Save**
+
 ## Important Notes
 
-1. **Always quote dates** in frontmatter: `pubDate: "2026-04-01"` not `pubDate: 2026-04-01`
+1. **Always quote dates** in frontmatter: `"2026-04-01"` not `2026-04-01`
 2. **Restart dev server** after adding/removing MDX files
-3. **File names become IDs** — `first-post.mdx` → URL `/blog/first-post`
-4. **Draft posts** (`draft: true`) are hidden from listings but still accessible by direct URL in dev mode
+3. **File names become slugs** — `first-post.mdx` → `/blog/first-post`
+4. **Draft posts** are hidden from listings but accessible by direct URL in dev
 
-## Updating Content Workflow
+## Blog Routing
 
-```bash
-# 1. Edit/add files in src/data/
-# 2. Check locally
-npm run dev
+Static MDX posts (`src/data/blog/*.mdx`) are served via `src/pages/blog/[...slug].astro`.
+Dynamic Supabase posts are served via `src/pages/blog/[slug].astro` (SSR, `prerender = false`).
 
-# 3. Build to verify
-npm run build
-
-# 4. Deploy
-git add .
-git commit -m "content: add new blog post"
-git push origin main
-# Vercel auto-deploys
-```
+Both routes coexist — MDX posts use their file `id` as slug, Supabase posts use their `slug` field.

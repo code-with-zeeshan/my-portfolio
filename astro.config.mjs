@@ -1,25 +1,42 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
+import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
+import vercel from "@astrojs/vercel";
 
-import react from '@astrojs/react';
-
-import tailwindcss from '@tailwindcss/vite';
-
-import mdx from '@astrojs/mdx';
-
-import sitemap from '@astrojs/sitemap';
-
-// https://astro.build/config
 export default defineConfig({
-  site: "https://yourname.dev", // Replace with your domain
-  integrations: [react(), mdx(), sitemap()],
+  site: process.env.PUBLIC_SITE_URL || "https://my-portfolio-gamma-six-70.vercel.app",
+  
+  adapter: vercel(),
+  
+  integrations: [
+    react(),
+    mdx(),
+    sitemap(),
+  ],
 
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      // Force Vite to use ONE copy of React across all dependencies
+      dedupe: ["react", "react-dom", "react-dom/server", "react/jsx-runtime"],
+    },
     ssr: {
-      noExternal: ["lucide-react", "motion"],
+      // Bundle these instead of treating them as external CJS modules
+      noExternal: [
+        "lucide-react",
+        "motion",
+        "@supabase/supabase-js",
+      ],
+    },
+    optimizeDeps: {
+      // Pre-bundle React to prevent duplicate instances
+      include: ["react", "react-dom", "react-dom/server"],
     },
   },
+
   markdown: {
     shikiConfig: {
       theme: "github-dark-default",

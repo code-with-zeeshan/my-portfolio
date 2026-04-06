@@ -1,0 +1,13 @@
+---
+// src/pages/projects/[id].astro
+// Dynamic project pages fetched from Supabase
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import DynamicProjectPage from "@/components/react/sections/DynamicProjectPage.tsx";
+
+export const prerender = false;
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Project">
+  <DynamicProjectPage client:load projectId={id || ""} />
+</BaseLayout>

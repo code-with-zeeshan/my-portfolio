@@ -4,156 +4,107 @@
 
 ### 1. Personal Information
 
-**File:** `src/data/personal.ts`
+Via **Admin Panel** (recommended): `Ctrl+Shift+A` → Profile tab
 
-Replace ALL placeholder values:
+Or directly in `src/data/personal.ts`:
 
 ```typescript
 export const personal = {
-  name: "Your Real Name",        // ← Change
-  title: "Your Job Title",       // ← Change
-  tagline: "Your tagline.",      // ← Change
-  bio: "Your bio paragraph.",    // ← Change
-  location: "City, Country",     // ← Change
-  email: "real@email.com",       // ← Change
-  availability: "Open to work",  // ← Change
+  name: "Your Real Name",
+  title: "Your Job Title",
+  tagline: "Your tagline.",
+  bio: "Your bio. Use \\n\\n for paragraph breaks.",
+  location: "City, Country",
+  email: "your@email.com",
+  availability: "Open to opportunities",
   socials: {
-    github: "https://github.com/YOU",       // ← Change
-    linkedin: "https://linkedin.com/in/YOU", // ← Change
-    twitter: "https://x.com/YOU",            // ← Change
+    github: "https://github.com/yourusername",
+    linkedin: "https://linkedin.com/in/yourusername",
+    twitter: "https://x.com/yourusername",
   },
 };
 ```
 
-### 2. Projects
+### 2. Branding / Initials
 
-**File:** `src/data/projects.ts`
+Search and replace in these files:
 
-Replace sample projects with your real work. Each project needs:
-
-- `title` — Project name
-- `description` — One-line summary
-- `longDescription` — Detailed description
-- `image` — Screenshot path (add to `public/images/projects/`)
-- `tags` — Technologies used
-- `liveUrl` — Live demo link (optional)
-- `githubUrl` — Source code link (optional)
-- `outcome` — Measurable result ("Increased X by Y%")
-- `featured` — `true` to show on homepage
-
-### 3. Skills
-
-**File:** `src/data/skills.ts`
-
-Update skill categories and individual skills to match yours.
-
-### 4. Work Experience
-
-**File:** `src/data/experience.ts`
-
-Replace with your actual work history.
-
-### 5. Images
-
-| Image | Location | Size |
+| Find | Replace | Files |
 |---|---|---|
-| Profile photo | `public/images/profile.webp` | Square, min 600×600px |
-| Project screenshots | `public/images/projects/*.webp` | 16:9 ratio, min 1200×675px |
-| OG Image | `public/og-image.png` | Exactly 1200×630px |
-| Favicon | `public/favicon.svg` | SVG format |
-| Resume | `public/resume.pdf` | PDF format |
+| `YN.` | Your initials + `.` | `Header.astro`, `Footer.astro`, `AdminDashboard.tsx` |
+| `Your Name` | Your real name | `Footer.astro` |
+| `Mohammad Zeeshan` | Your name | `BaseLayout.astro`, `lib/config.ts` |
+
+### 3. Top Skills (Skill Bars)
+
+Via Admin → Profile → **Top Skills**:
+- Click **+ Add Skill**
+- Type skill name, set % level (0–100)
+- Live bar preview shown immediately
+- Click **Save Top Skills**
+
+### 4. Highlights (Stat Cards)
+
+Via Admin → Profile → **Highlights**:
+- Edit icon name, label, value
+- Available icons: `briefcase`, `calendar`, `coffee`, `heart`, `star`, `user`
+- Click **Save Highlights**
+
+### 5. Colors
+
+Edit in `src/styles/global.css`:
+
+```css
+@theme {
+  --color-brand-500: oklch(0.60 0.16 260); /* Change 260 to rotate hue */
+}
+```
+
+| Hue | Color |
+|---|---|
+| `260` | Purple/Indigo (default) |
+| `220` | Blue |
+| `160` | Green/Teal |
+| `30` | Orange |
+| `350` | Pink/Rose |
 
 ### 6. Site URL
 
-**File:** `astro.config.mjs`
-
-```javascript
-site: "https://yourdomain.com",  // ← Your real domain
+`astro.config.mjs`:
+```js
+site: "https://yourdomain.com"
 ```
 
-### 7. Branding in Templates
+Also update `PUBLIC_SITE_URL` in your `.env` and Vercel environment variables.
 
-Search and replace across these files:
+### 7. Images
 
-| Find | Replace With | Files |
+| Image | Location | Recommended Size |
 |---|---|---|
-| `YN.` | Your initials + `.` | `Header.astro`, `Footer.astro` |
-| `Your Name` | Your real name | `BaseLayout.astro`, `Footer.astro` |
-| `yourusername` | Your GitHub username | All social links |
+| Profile photo | `public/images/profile.webp` or upload via Admin | Square, min 600×600px |
+| Project screenshots | `public/images/projects/*.webp` or upload via Admin | 16:9, min 1280×720px |
+| OG/Social share | `public/og-image.png` | Exactly 1200×630px |
+| Favicon | `public/favicon.svg` | SVG format |
+| Resume | Upload via Admin → Resume tab | PDF only |
 
-## Adding Blog Posts
+### 8. Blog Posts
 
-Create a new `.mdx` file in `src/data/blog/`:
+Add `.mdx` files to `src/data/blog/` or create via Admin → Blog → **+ New Post**.
 
-```mdx
----
-title: "Post Title"
-description: "Brief summary for SEO and previews."
-pubDate: "2026-04-15"
-tags: ["Tag1", "Tag2"]
-heroImage: "/images/blog/post-image.webp"
-draft: false
----
+### 9. Projects
 
-Write your content using Markdown syntax.
+Edit `src/data/projects.ts` or use Admin → Projects → **+ Add Project**.
 
-## Subheading
+## Adding New Icon Names
 
-Regular paragraph text with **bold** and *italic*.
+If you need an icon not in `ReactIcon.tsx` or `Icons.astro`:
 
-- Bullet list
-- Another item
+1. Find the icon path at [lucide.dev](https://lucide.dev)
+2. Add the SVG path string to **both** `Icons.astro` and `ReactIcon.tsx`:
 
-```javascript
-// Code blocks with syntax highlighting
-const greeting = "Hello, World!";
-```
+```ts
+// In Icons.astro and ReactIcon.tsx — add to the icons object:
+"icon-name": '<path d="M..."/>',
 ```
 
-## Adding Project Case Studies
-
-Create a new `.mdx` file in `src/data/projects/`:
-
-```mdx
----
-title: "Project Name"
-description: "One-line project summary."
-image: "/images/projects/project-name.webp"
-tags: ["React", "Node.js"]
-liveUrl: "https://project-demo.com"
-githubUrl: "https://github.com/you/project"
-pubDate: "2026-03-01"
-featured: true
----
-
-# Project Name
-
-## The Challenge
-What problem did this solve?
-
-## My Role
-What did you specifically do?
-
-## Results
-- **Metric 1:** X% improvement
-- **Metric 2:** Y users served
-```
-
-## Changing Colors
-
-**File:** `src/styles/global.css`
-
-The brand color is defined in OKLCH color space. Change the hue value:
-
-```css
---color-brand-500: oklch(0.60 0.16 HUE);
-```
-
-| Hue | Color | Example |
-|---|---|---|
-| 260 | Purple/Indigo | Default |
-| 220 | Blue | Tech/Corporate |
-| 160 | Green/Teal | Nature/Growth |
-| 30 | Orange/Amber | Creative/Warm |
-| 350 | Pink/Rose | Bold/Modern |
-| 0 | Red | Passionate |
+Both files must stay in sync.

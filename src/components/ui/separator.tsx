@@ -1,3 +1,4 @@
+// src/components/ui/seperator.tsx
 import { Separator as SeparatorPrimitive } from "@base-ui/react/separator"
 
 import { cn } from "@/lib/utils"

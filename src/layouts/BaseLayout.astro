@@ -2,8 +2,9 @@
 // src/layouts/BaseLayout.astro
 import "../styles/global.css";
 import Header from "@/components/layout/Header.astro";
-import Footer from "@/components/layout/Footer.astro";
+import DynamicFooter from "@/components/react/DynamicFooter.tsx";
 import ScrollProgress from "@/components/react/ScrollProgress.tsx";
+import AdminGate from "@/components/react/AdminGate.tsx";
 
 interface Props {
   title: string;
@@ -32,8 +33,8 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary Meta Tags -->
-    <title>{title} | Your Name</title>
-    <meta name="title" content={`${title} | Your Name`} />
+    <title>{title} | Mohammad Zeeshan</title>
+    <meta name="title" content={`${title} | Mohammad Zeeshan`} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
 
@@ -52,7 +53,11 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
     <meta name="twitter:image" content={ogImageURL} />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
 
     <!-- Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -90,10 +95,11 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
 
   <body class="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased transition-colors duration-300">
     <ScrollProgress client:load />
+    <AdminGate client:idle />
     <Header />
     <main>
       <slot />
     </main>
-    <Footer />
+    <DynamicFooter client:visible />
   </body>
 </html>

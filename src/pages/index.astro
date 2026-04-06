@@ -1,23 +1,23 @@
 ---
-// src/pages/index.astro — DIAGNOSTIC VERSION
+// src/pages/index.astro
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Hero from "@/components/sections/Hero.astro";
-import About from "@/components/sections/About.astro";
-import Projects from "@/components/sections/Projects.astro";
-import Skills from "@/components/sections/Skills.astro";
-import Experience from "@/components/sections/Experience.astro";
-import Testimonials from "@/components/sections/Testimonials.astro";
-import BlogPreview from "@/components/sections/BlogPreview.astro";
-import Contact from "@/components/sections/Contact.astro";
+import DynamicHero from "@/components/react/sections/DynamicHero.tsx";
+import DynamicAbout from "@/components/react/sections/DynamicAbout.tsx";
+import DynamicProjects from "@/components/react/sections/DynamicProjects.tsx";
+import DynamicSkills from "@/components/react/sections/DynamicSkills.tsx";
+import DynamicExperience from "@/components/react/sections/DynamicExperience.tsx";
+import DynamicTestimonials from "@/components/react/sections/DynamicTestimonials.tsx";
+import DynamicBlogPreview from "@/components/react/sections/DynamicBlogPreview.tsx";
+import DynamicContact from "@/components/react/sections/DynamicContact.tsx";  // ← NEW
 ---
 
 <BaseLayout title="Home">
-  <Hero />
-  <About />
-  <Projects />
-  <Skills />
-  <Experience />
-  <Testimonials />
-  <BlogPreview />
-  <Contact />
+  <DynamicHero client:load />
+  <DynamicAbout client:visible />
+  <DynamicProjects client:visible />
+  <DynamicSkills client:visible />
+  <DynamicExperience client:visible />
+  <DynamicTestimonials client:visible />
+  <DynamicBlogPreview client:visible />
+  <DynamicContact client:visible />
 </BaseLayout>

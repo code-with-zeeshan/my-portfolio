@@ -12,4 +12,18 @@ export const personal = {
       linkedin: "https://linkedin.com/in/mohammad-zeeshan-37637a1a5",
       twitter: "https://twitter.com/yourusername",
     },
+    profilePhoto: "/profile-photo.jpg",
+    topSkills: [
+      {"name": "React / Next.js", "level": 95},
+      {"name": "TypeScript",       "level": 90},
+      {"name": "Node.js",          "level": 85},
+      {"name": "Tailwind CSS",     "level": 92},
+      {"name": "PostgreSQL",       "level": 78},
+    ],
+    highlights: [
+      {"icon": "briefcase", "label": "Years Experience",   "value": "5+"},
+      {"icon": "calendar",  "label": "Projects Completed", "value": "30+"},
+      {"icon": "coffee",    "label": "Cups of Coffee",     "value": "∞"},
+      {"icon": "heart",     "label": "Happy Clients",      "value": "20+"}
+    ],
   } as const;

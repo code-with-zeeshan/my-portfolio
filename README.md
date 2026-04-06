@@ -1,11 +1,13 @@
 # 🚀 Personal Portfolio Website
 
-A modern, minimalist, and responsive portfolio website built with **Astro 6**, **TypeScript**, **Tailwind CSS v4**, and **React 19**.
+A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **Tailwind CSS v4**, **Supabase**, and **Cloudinary** — featuring a hidden admin dashboard for live content management.
 
 ![Astro](https://img.shields.io/badge/Astro-6.1-purple?style=flat-square&logo=astro)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38bdf8?style=flat-square&logo=tailwindcss)
-![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
+![React](https://img.shields.io/badge/React-18.3-61dafb?style=flat-square&logo=react)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-CDN-3448c5?style=flat-square&logo=cloudinary)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ## ✨ Features
@@ -16,7 +18,11 @@ A modern, minimalist, and responsive portfolio website built with **Astro 6**, *
 - **Animated Sections** — SSR-safe scroll animations using IntersectionObserver + CSS transitions
 - **Blog with MDX** — Write blog posts in Markdown/MDX with syntax highlighting
 - **Project Showcase** — Featured project carousel and card grid with case studies
-- **Contact Form** — Ready for Formspree or Web3Forms integration
+- **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
+- **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A`
+- **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
+- **Contact Form** — Messages saved to Supabase inbox, readable in admin panel
+- **Resume Management** — Upload and update resume PDF via admin; auto-downloads for visitors
 - **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data, sitemap
 - **Accessible** — Semantic HTML, ARIA labels, keyboard navigation, color contrast
 
@@ -27,8 +33,10 @@ A modern, minimalist, and responsive portfolio website built with **Astro 6**, *
 | [Astro 6](https://astro.build) | Static site framework with island architecture |
 | [TypeScript](https://typescriptlang.org) | Type-safe JavaScript |
 | [Tailwind CSS v4](https://tailwindcss.com) | Utility-first CSS framework |
-| [React 19](https://react.dev) | Interactive UI components (islands) |
-| [shadcn/ui](https://ui.shadcn.com) | Accessible component library |
+| [React 18](https://react.dev) | Interactive UI components (islands) |
+| [Supabase](https://supabase.com) | PostgreSQL database, authentication, storage |
+| [Cloudinary](https://cloudinary.com) | CDN image delivery and optimization |
+| [shadcn/ui](https://ui.shadcn.com) | Accessible component library (Base UI) |
 | [MDX](https://mdxjs.com) | Markdown with JSX for blog posts |
 | [Vercel](https://vercel.com) | Hosting and deployment |
 
@@ -36,68 +44,112 @@ A modern, minimalist, and responsive portfolio website built with **Astro 6**, *
 
 ```text
 my-portfolio/
-├── public/                        # Static assets (images, resume, favicon)
+├── public/                        # Static assets
 │   ├── images/
-│   │   ├── profile.webp           # Profile photo
-│   │   └── projects/              # Project screenshots
+│   │   ├── profile.webp           # Profile photo fallback
+│   │   └── projects/              # Project screenshot fallbacks
 │   ├── favicon.svg
 │   ├── og-image.png               # Social share image (1200×630)
-│   ├── resume.pdf
+│   ├── resume.pdf                 # Resume fallback (override via admin)
 │   └── robots.txt
 │
 ├── src/
 │   ├── components/
-│   │   ├── layout/                # Header, Footer, ThemeToggle, MobileNav
-│   │   ├── react/                 # Interactive React island components
+│   │   ├── layout/
+│   │   │   ├── Header.astro       # Fixed navbar with resume button
+│   │   │   ├── Footer.astro       # Footer with social links
+│   │   │   ├── MobileNav.tsx      # Mobile hamburger menu
+│   │   │   └── ThemeToggle.tsx    # Dark/light mode toggle
+│   │   │
+│   │   ├── react/
+│   │   │   ├── sections/          # Dynamic sections (fetch from Supabase)
+│   │   │   │   ├── DynamicHero.tsx
+│   │   │   │   ├── DynamicAbout.tsx
+│   │   │   │   ├── DynamicProjects.tsx
+│   │   │   │   ├── DynamicProjectsIndex.tsx
+│   │   │   │   ├── DynamicProjectPage.tsx
+│   │   │   │   ├── DynamicSkills.tsx
+│   │   │   │   ├── DynamicExperience.tsx
+│   │   │   │   ├── DynamicTestimonials.tsx
+│   │   │   │   ├── DynamicBlogPreview.tsx
+│   │   │   │   ├── DynamicBlogIndex.tsx
+│   │   │   │   ├── DynamicBlogPost.tsx
+│   │   │   │   └── DynamicContact.tsx
+│   │   │   ├── AdminDashboard.tsx # Full CMS dashboard
+│   │   │   ├── AdminGate.tsx      # Hidden login modal (Ctrl+Shift+A)
+│   │   │   ├── CloudinaryImage.tsx # Optimized image component
+│   │   │   ├── CloudinaryUpload.tsx # Drag & drop upload widget
+│   │   │   ├── ContactForm.tsx    # Contact form → Supabase messages
 │   │   │   ├── FadeIn.tsx         # Scroll-triggered fade animation
-│   │   │   ├── AnimatedCard.tsx   # Project card with reveal animation
-│   │   │   ├── ContactForm.tsx    # Contact form with submission states
-│   │   │   ├── TextReveal.tsx     # Word-by-word text reveal
+│   │   │   ├── MagneticHover.tsx  # Cursor-following hover effect
+│   │   │   ├── PageTransition.tsx # Page load fade-in (used in BlogLayout)
+│   │   │   ├── ReactIcon.tsx      # SVG icon system for .tsx files
+│   │   │   ├── ResumeButton.tsx   # Resume link (fetches URL from Supabase)
+│   │   │   ├── ScrollProgress.tsx # Page scroll progress bar
 │   │   │   ├── SkillBar.tsx       # Animated progress bars
 │   │   │   ├── StaggerChildren.tsx # Staggered child animations
-│   │   │   ├── MagneticHover.tsx  # Cursor-following hover effect
-│   │   │   ├── ProjectCarousel.tsx # Featured project slider
-│   │   │   ├── ScrollProgress.tsx # Page scroll progress bar
-│   │   │   └── PageTransition.tsx # Page load fade-in
-│   │   ├── sections/              # Page sections (Hero, About, Projects, etc.)
+│   │   │   └── TextReveal.tsx     # Word-by-word text reveal
+│   │   │
 │   │   └── ui/
 │   │       ├── Icons.astro        # SVG icon system for .astro files
-│   │       └── *.tsx              # shadcn/ui components
+│   │       └── *.tsx              # shadcn/ui components (Base UI)
 │   │
-│   ├── content.config.ts          # Astro 6 Content Collection schemas
-│   ├── data/
+│   ├── content.config.ts          # Astro Content Collection schemas
+│   │
+│   ├── data/                      # Static fallback data
 │   │   ├── blog/                  # MDX blog posts
 │   │   ├── projects/              # MDX project case studies
-│   │   ├── personal.ts            # Personal info (name, bio, links)
-│   │   ├── projects.ts            # Project data
-│   │   ├── skills.ts              # Skills data
-│   │   └── experience.ts          # Work experience data
+│   │   ├── personal.ts            # Personal info fallback
+│   │   ├── projects.ts            # Projects fallback
+│   │   ├── skills.ts              # Skills fallback
+│   │   ├── experience.ts          # Experience fallback
+│   │   └── testimonials.ts        # Testimonials fallback
 │   │
 │   ├── layouts/
-│   │   ├── BaseLayout.astro       # Main HTML shell with SEO
-│   │   └── BlogLayout.astro       # Blog post layout
+│   │   ├── BaseLayout.astro       # Main HTML shell with SEO meta
+│   │   ├── BlogLayout.astro       # Blog post layout with PageTransition
+│   │   └── AdminLayout.astro      # Admin-only layout (noindex)
 │   │
 │   ├── lib/
-│   │   └── utils.ts               # Utility functions (cn, formatDate)
+│   │   ├── cloudinary.ts          # Upload, delete, URL optimization helpers
+│   │   ├── config.ts              # Site URL config
+│   │   ├── data.ts                # Supabase fetch helpers with fallbacks
+│   │   ├── supabase.ts            # Supabase clients (public + admin)
+│   │   ├── syncFallbackData.ts    # One-time static → Supabase sync
+│   │   ├── types.ts               # Shared TypeScript interfaces
+│   │   └── utils.ts               # cn(), formatDate(), readingTime()
 │   │
 │   ├── pages/
-│   │   ├── index.astro            # Home page (all sections)
-│   │   ├── about.astro            # About page
+│   │   ├── index.astro            # Home (all Dynamic* sections)
+│   │   ├── about.astro            # About page (Dynamic* sections)
 │   │   ├── 404.astro              # Custom 404 page
+│   │   ├── admin/
+│   │   │   └── index.astro        # Admin dashboard (SSR, auth-gated)
+│   │   ├── api/
+│   │   │   └── sync.ts            # POST /api/sync — seed Supabase from static data
 │   │   ├── blog/
-│   │   │   ├── index.astro        # Blog listing
-│   │   │   └── [...slug].astro    # Individual blog posts
+│   │   │   ├── index.astro        # Blog listing (DynamicBlogIndex)
+│   │   │   └── [...slug].astro    # Static MDX blog posts
 │   │   └── projects/
-│   │       ├── index.astro        # Projects listing
-│   │       └── [...slug].astro    # Individual project pages
+│   │       ├── index.astro        # Projects listing (DynamicProjectsIndex)
+│   │       └── [id].astro         # Dynamic project pages (Supabase UUID)
 │   │
 │   └── styles/
 │       └── global.css             # Tailwind imports + design tokens
 │
 ├── docs/                          # Project documentation
-├── astro.config.mjs               # Astro configuration
-├── tsconfig.json                  # TypeScript configuration
+│   ├── ADMIN.md                   # Admin panel usage guide
+│   ├── ANIMATIONS.md              # Animation system reference
+│   ├── CONTENT.md                 # Content management guide
+│   ├── CUSTOMIZATION.md           # How to personalize the portfolio
+│   ├── DEPLOYMENT.md              # Deployment instructions
+│   └── SETUP.md                   # Initial setup guide
+│
+├── .env.example                   # Environment variable template
+├── astro.config.mjs               # Astro + Vite configuration
 ├── components.json                # shadcn/ui configuration
+├── tsconfig.json                  # TypeScript configuration
+├── vercel.json                    # Vercel routing rules
 └── package.json
 ```
 
@@ -105,21 +157,27 @@ my-portfolio/
 
 ### Prerequisites
 
-- **Node.js 22+** (required by Astro 6)
-- **npm** (comes with Node.js)
-- **Git**
+| Tool | Minimum Version |
+|---|---|
+| Node.js | 22.0.0+ |
+| npm | 10.0.0+ |
+| Git | 2.0+ |
 
 ### Installation
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/code-with-zeeshan/my-portfolio.git
 cd my-portfolio
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Start development server
+# 3. Copy environment variables
+cp .env.example .env
+# Fill in your Supabase and Cloudinary credentials
+
+# 4. Start development server
 npm run dev
 ```
 
@@ -130,102 +188,81 @@ Open [http://localhost:4321](http://localhost:4321) in your browser.
 | Command | Action |
 |---|---|
 | `npm run dev` | Start dev server at `localhost:4321` |
-| `npm run build` | Type-check and build for production to `./dist/` |
+| `npm run build` | Type-check and build for production |
 | `npm run preview` | Preview production build locally |
+| `npm run check` | Run Astro type checking only |
+
+## ⚙️ Environment Variables
+
+Copy `.env.example` to `.env` and fill in your values:
+
+```env
+PUBLIC_SITE_URL=https://yourdomain.com
+PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
+PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
+PUBLIC_CLOUDINARY_API_KEY=your_api_key
+```
+
+> ⚠️ `SUPABASE_SERVICE_ROLE_KEY` has no `PUBLIC_` prefix — it is server-only and never exposed to the browser.
+
+See `docs/SETUP.md` for the full setup walkthrough.
+
+## 🏗 Architecture
+
+### Data Flow
+
+```
+Static files (src/data/*.ts)
+       ↓ fallback if Supabase unreachable
+Supabase PostgreSQL ←→ Admin Dashboard (Ctrl+Shift+A)
+       ↓
+Dynamic* React components (client:visible)
+       ↓
+Portfolio pages
+```
+
+### Why Two Icon Systems?
+
+| File | Used In | Why |
+|---|---|---|
+| `Icons.astro` | `.astro` files only | Pure SVG — zero JS, SSR-safe |
+| `ReactIcon.tsx` | `.tsx` files only | React component — required for React rendering context |
+
+You **cannot** import `Icons.astro` in `.tsx` files — Astro components run server-side only and cannot cross into React's client-side rendering boundary.
+
+### Why Not Framer Motion?
+
+Framer Motion has SSR compatibility issues with Astro's server rendering. All animations use native `IntersectionObserver` + CSS transitions — achieving the same visual results with zero SSR errors and minimal bundle size.
+
+### Dark Mode Strategy
+
+Uses `@custom-variant dark (&:where(.dark, .dark *))` in Tailwind v4 for class-based toggling, with `localStorage` persistence and system preference detection on first visit.
 
 ## 🎨 Customization
 
-### Personal Information
+1. **Edit content** — Update `src/data/*.ts` files or use the admin panel
+2. **Change colors** — Edit `--color-brand-500` hue in `src/styles/global.css`
+3. **Update branding** — Replace `YN.` in `Header.astro` and `Footer.astro`
+4. **Add images** — Drop into `public/images/` or upload via admin Cloudinary integration
 
-Edit `src/data/personal.ts` with your details:
-
-```typescript
-export const personal = {
-  name: "Your Name",
-  title: "Your Title",
-  tagline: "Your tagline here.",
-  bio: "Your bio here.",
-  location: "Your City, Country",
-  email: "you@email.com",
-  availability: "Open to opportunities",
-  socials: {
-    github: "https://github.com/yourusername",
-    linkedin: "https://linkedin.com/in/yourusername",
-    twitter: "https://x.com/yourusername",
-  },
-};
-```
-
-### Projects, Skills, Experience
-
-| File | What to Edit |
-|---|---|
-| `src/data/projects.ts` | Your projects (title, description, tags, URLs) |
-| `src/data/skills.ts` | Your skill categories and technologies |
-| `src/data/experience.ts` | Your work experience |
-
-### Blog Posts
-
-Add `.mdx` files to `src/data/blog/`:
-
-```mdx
----
-title: "Your Post Title"
-description: "Brief description."
-pubDate: "2026-04-01"
-tags: ["Tag1", "Tag2"]
-draft: false
----
-
-Your content here with **Markdown** and MDX support.
-```
-
-### Theme Colors
-
-Edit the brand color in `src/styles/global.css`:
-
-```css
-@theme {
-  --color-brand-500: oklch(0.60 0.16 260);  /* Change 260 to rotate hue */
-}
-```
-
-| Hue Value | Color |
-|---|---|
-| `260` | Purple/Indigo (default) |
-| `220` | Blue |
-| `160` | Green |
-| `30` | Orange |
-| `350` | Pink/Red |
-
-### Contact Form
-
-Replace `YOUR_FORM_ID` in `src/components/react/ContactForm.tsx`:
-
-1. Sign up at [Formspree](https://formspree.io) or [Web3Forms](https://web3forms.com)
-2. Create a form and get your endpoint URL
-3. Replace the fetch URL in `ContactForm.tsx`
+See `docs/CUSTOMIZATION.md` for the complete guide.
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
+Recommended: **Vercel** (auto-detects Astro, free tier available)
 
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com) → "Add New Project"
-3. Import your GitHub repository
-4. Vercel auto-detects Astro — click "Deploy"
-5. (Optional) Add a custom domain in Project Settings → Domains
+```bash
+git push origin main  # Vercel auto-deploys on every push
+```
 
-### Custom Domain
+Set environment variables in Vercel Dashboard → Project → Settings → Environment Variables.
 
-1. Purchase a domain (Namecheap, Cloudflare, Porkbun)
-2. Add it in Vercel Dashboard → Project → Settings → Domains
-3. Update DNS records as instructed
-4. Update `site` in `astro.config.mjs`
+See `docs/DEPLOYMENT.md` for full instructions including custom domains.
 
-## 📊 Performance
-
-Target Lighthouse scores:
+## 📊 Performance Targets
 
 | Metric | Target |
 |---|---|
@@ -234,28 +271,10 @@ Target Lighthouse scores:
 | Best Practices | 95+ |
 | SEO | 100 |
 
-## 🏗 Architecture Decisions
-
-### Why Astro?
-
-Astro ships zero JavaScript by default. Interactive components (React) are loaded only where needed using Astro's island architecture (`client:load`, `client:visible`).
-
-### Why Not Framer Motion?
-
-Framer Motion (now "Motion") has SSR compatibility issues with Astro's server rendering. All animations use native `IntersectionObserver` + CSS transitions — achieving the same visual results with zero bundle size impact.
-
-### Why Inline SVG Icons?
-
-`lucide-react` imports fail during Astro's SSR pass in `.astro` files. The custom `Icons.astro` component renders pure SVG with zero JavaScript, while `.tsx` React components can still use `lucide-react` where React hydration is available.
-
-### Dark Mode Strategy
-
-Tailwind CSS v4 defaults to `@media (prefers-color-scheme)` for dark mode. This project uses `@custom-variant dark (&:where(.dark, .dark *))` to enable class-based toggling via JavaScript, with `localStorage` persistence.
-
 ## 📄 License
 
 MIT License — feel free to use this as a template for your own portfolio.
 
 ---
 
-Built with ❤️ using [Astro](https://astro.build)
+Built with ❤️ using [Astro](https://astro.build) + [Supabase](https://supabase.com) + [Cloudinary](https://cloudinary.com)

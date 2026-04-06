@@ -1,17 +1,17 @@
 ---
 // src/pages/about.astro
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import AboutSection from "@/components/sections/About.astro";
-import SkillsSection from "@/components/sections/Skills.astro";
-import ExperienceSection from "@/components/sections/Experience.astro";
-import TestimonialsSection from "@/components/sections/Testimonials.astro";
+import DynamicAbout from "@/components/react/sections/DynamicAbout.tsx";
+import DynamicSkills from "@/components/react/sections/DynamicSkills.tsx";
+import DynamicExperience from "@/components/react/sections/DynamicExperience.tsx";
+import DynamicTestimonials from "@/components/react/sections/DynamicTestimonials.tsx";
 ---
 
 <BaseLayout title="About" description="Learn more about me, my skills, experience, and what drives me.">
   <div class="pt-16">
-    <AboutSection />
-    <SkillsSection />
-    <ExperienceSection />
-    <TestimonialsSection />
+    <DynamicAbout client:load />
+    <DynamicSkills client:visible />
+    <DynamicExperience client:visible />
+    <DynamicTestimonials client:visible />
   </div>
 </BaseLayout>
