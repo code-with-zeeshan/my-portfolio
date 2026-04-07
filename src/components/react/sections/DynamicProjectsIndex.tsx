@@ -99,7 +99,13 @@ export default function DynamicProjectsIndex() {
                     alt={project.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
-                    onError={(e) => { (e.target as HTMLImageElement).src = "/images/projects/project-1.webp"; }}
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      // Guard: only fire once — prevents infinite loop if fallback also missing
+                      if (img.dataset.errored) return;
+                      img.dataset.errored = "true";
+                      img.src = "/images/projects/project-1.webp";
+                    }}
                   />
                 </div>
                 <div className="p-5">

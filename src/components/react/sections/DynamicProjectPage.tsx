@@ -130,7 +130,13 @@ export default function DynamicProjectPage({ projectId }: Props) {
           src={imgSrc}
           alt={project.title}
           className="mb-10 w-full rounded-2xl object-cover shadow-lg aspect-video"
-          onError={(e) => { (e.target as HTMLImageElement).src = "/images/projects/project-1.webp"; }}
+          onError={(e) => {
+            const img = e.target as HTMLImageElement;
+            // Guard: only fire once — prevents infinite loop if fallback also missing
+            if (img.dataset.errored) return;
+            img.dataset.errored = "true";
+            img.src = "/images/projects/project-1.webp";
+          }}
         />
 
         {/* Action Buttons */}

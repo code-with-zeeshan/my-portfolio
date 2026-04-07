@@ -1,0 +1,18 @@
+---
+// src/pages/blog/[slug].astro
+// SSR route for Supabase blog posts — handles dynamic slugs
+export const prerender = false;
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import DynamicBlogPost from "@/components/react/sections/DynamicBlogPost.tsx";
+
+const { slug } = Astro.params;
+
+// Guard: redirect MDX-based slugs to their static version if they exist
+// This prevents the SSR route from shadowing the static MDX route
+// [slug].astro only fires for slugs NOT matched by [...slug].astro
+---
+
+<BaseLayout title="Blog Post">
+  <DynamicBlogPost client:load slug={slug || ""} />
+</BaseLayout>

@@ -21,6 +21,8 @@ const STATIC_FALLBACK: Testimonial[] = [
 
 export default function DynamicTestimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>(STATIC_FALLBACK);
+  const [supabaseDown,  setSupabaseDown]  = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchTestimonials() {
@@ -30,11 +32,20 @@ export default function DynamicTestimonials() {
           .select("*")
           .order("sort_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          setTestimonials(data);
+        if (error) {
+          // ✅ Supabase returned an error (likely down or misconfigured)
+          console.warn("Supabase error — using static fallback:", error.message);
+          setSupabaseDown(true);
+        } else {
+          // ✅ Supabase is reachable — use whatever it returned (even empty array)
+          setTestimonials(data ?? []);
+          setSupabaseDown(false);
         }
       } catch {
-        // Keep fallback
+        // ✅ Network error — Supabase unreachable
+        setSupabaseDown(true);
+      } finally {
+        setLoading(false);
       }
     }
     fetchTestimonials();

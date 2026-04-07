@@ -17,6 +17,7 @@ interface SkillCategory {
 export default function DynamicSkills() {
   const [categories, setCategories] = useState<SkillCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [supabaseDown,  setSupabaseDown]  = useState(false); 
 
   useEffect(() => {
     async function fetchSkills() {
@@ -26,18 +27,18 @@ export default function DynamicSkills() {
           .select("*")
           .order("sort_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          setCategories(data);
+        if (error) {
+          // ✅ Supabase returned an error (likely down or misconfigured)
+          console.warn("Supabase error — using static fallback:", error.message);
+          setSupabaseDown(true);
         } else {
-          // Fallback
-          setCategories(
-            staticSkills.map((s, i) => ({ id: `static-${i}`, ...s, sort_order: i }))
-          );
+          // ✅ Supabase is reachable — use whatever it returned (even empty array)
+          setCategories(data ?? []);
+          setSupabaseDown(false);
         }
       } catch {
-        setCategories(
-          staticSkills.map((s, i) => ({ id: `static-${i}`, ...s, sort_order: i }))
-        );
+        // ✅ Network error — Supabase unreachable
+        setSupabaseDown(true);
       } finally {
         setLoading(false);
       }

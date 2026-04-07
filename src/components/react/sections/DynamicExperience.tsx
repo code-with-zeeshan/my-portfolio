@@ -19,6 +19,7 @@ interface Experience {
 export default function DynamicExperience() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
+  const [supabaseDown,  setSupabaseDown]  = useState(false);
 
   useEffect(() => {
     async function fetchExperiences() {
@@ -28,17 +29,18 @@ export default function DynamicExperience() {
           .select("*")
           .order("sort_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          setExperiences(data);
+        if (error) {
+          // ✅ Supabase returned an error (likely down or misconfigured)
+          console.warn("Supabase error — using static fallback:", error.message);
+          setSupabaseDown(true);
         } else {
-          setExperiences(
-            staticExperiences.map((e, i) => ({ id: `static-${i}`, ...e, sort_order: i }))
-          );
+          // ✅ Supabase is reachable — use whatever it returned (even empty array)
+          setExperiences(data ?? []);
+          setSupabaseDown(false);
         }
       } catch {
-        setExperiences(
-          staticExperiences.map((e, i) => ({ id: `static-${i}`, ...e, sort_order: i }))
-        );
+        // ✅ Network error — Supabase unreachable
+        setSupabaseDown(true);
       } finally {
         setLoading(false);
       }

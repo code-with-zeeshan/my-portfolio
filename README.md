@@ -208,7 +208,7 @@ PUBLIC_CLOUDINARY_API_KEY=your_api_key
 
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY` has no `PUBLIC_` prefix — it is server-only and never exposed to the browser.
 
-See `docs/SETUP.md` for the full setup walkthrough.
+See [`docs/SETUP.md`](docs/SETUP.md) for the full setup walkthrough.
 
 ## 🏗 Architecture
 
@@ -248,7 +248,7 @@ Uses `@custom-variant dark (&:where(.dark, .dark *))` in Tailwind v4 for class-b
 3. **Update branding** — Replace `YN.` in `Header.astro` and `Footer.astro`
 4. **Add images** — Drop into `public/images/` or upload via admin Cloudinary integration
 
-See `docs/CUSTOMIZATION.md` for the complete guide.
+See [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) for the complete guide.
 
 ## 🌐 Deployment
 
@@ -260,7 +260,7 @@ git push origin main  # Vercel auto-deploys on every push
 
 Set environment variables in Vercel Dashboard → Project → Settings → Environment Variables.
 
-See `docs/DEPLOYMENT.md` for full instructions including custom domains.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including custom domains.
 
 ## 📊 Performance Targets
 
@@ -273,8 +273,17 @@ See `docs/DEPLOYMENT.md` for full instructions including custom domains.
 
 ## 📄 License
 
-MIT License — feel free to use this as a template for your own portfolio.
+[MIT License](LICENSE) — feel free to use this as a template for your own portfolio.
 
+## 🔜 PHASE 3 Roadmap
+```
+├── Rich text / Markdown editor for blog posts
+├── Drag-and-drop mutiple image uploads
+├── Preview before publish
+├── Analytics dashboard in admin
+├── Blog post scheduling (future publish dates)
+└── SEO metadata editor per page 
+```
 ---
 
 Built with ❤️ using [Astro](https://astro.build) + [Supabase](https://supabase.com) + [Cloudinary](https://cloudinary.com)

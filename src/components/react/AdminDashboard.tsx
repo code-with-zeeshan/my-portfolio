@@ -51,6 +51,13 @@ const DEFAULT_HIGHLIGHTS: Highlight[] = [
   { icon: "heart",     label: "Happy Clients",      value: "20+" },
 ];
 
+// Converts array to textarea string for display
+const achievementsToText = (arr: string[]) => arr.join("\n");
+
+// Converts textarea string to array — only cleans up on save, not on type
+const textToAchievements = (text: string) =>
+  text.split("\n").map((a) => a.trim()).filter(Boolean);
+
 interface Project {
   id: string;
   title: string;
@@ -145,6 +152,7 @@ function TagInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();  // prevents leaking to textarea siblings
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag(inputValue);
@@ -209,9 +217,17 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("personal");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingProfile,    setSavingProfile]    = useState(false);
+  const [savingSkills,     setSavingSkills]     = useState(false);
+  const [savingHighlights, setSavingHighlights] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [user, setUser] = useState<{ email?: string } | null>(null);
-
+  
+  // ─── State declarations ───
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isReturningUser,  setIsReturningUser]  = useState(false);
+ 
   // Data
   const [personal, setPersonal] = useState<PersonalInfo | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -222,11 +238,20 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [resumeData, setResumeData] = useState<Resume | null>(null);
 
-  // ─── Auth ───
+  // ─── Auth useEffect ───
+  // localStorage check is INSIDE useEffect — safe from SSR
   useEffect(() => {
+    // Check for existing session token (browser-only, safe here)
+    const hasExistingSession = Object.keys(localStorage).some(
+      (key) => key.includes("supabase") && key.includes("auth")
+    );
+    setIsReturningUser(hasExistingSession);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) { window.location.href = "/"; return; }
       setUser(session.user);
+      setIsAuthenticated(true);
+      setAuthChecked(true);
       setLoading(false);
     });
   }, []);
@@ -338,19 +363,23 @@ export default function AdminDashboard() {
     { key: "resume", label: "Resume", icon: "📄" },
   ];
 
-  const unreadCount = messages.filter((m) => !m.read).length;
+  const unreadCount = messages.filter((m) => !m.read).length;  
 
-  if (loading && !user) {
+  // ─── Loading screen ───
+  // ✅ Uses isReturningUser state (set by useEffect) not direct localStorage access
+  if (!authChecked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-zinc-500">Checking authentication...</p>
+          <p className="mt-4 text-sm text-zinc-500">
+            {isReturningUser ? "Loading admin panel..." : "Checking authentication..."}
+          </p>
         </div>
       </div>
     );
   }
-
+  
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
 
@@ -502,6 +531,11 @@ export default function AdminDashboard() {
                     setPersonal({ ...personal, profile_photo_url: result.url });
                     notify("success", "Photo uploaded! Click Save Profile to apply.");
                   }}
+                  onRemove={() => {
+                    // Clear profile photo URL in state — Save Profile will persist null
+                    setPersonal({ ...personal, profile_photo_url: null });
+                    notify("success", "Photo removed. Click Save Profile to apply.");
+                  }}
                 />
               </Field>
 
@@ -517,11 +551,11 @@ export default function AdminDashboard() {
                 </Field>
               ))}
 
-              {/* Save ONLY basic fields — never touches top_skills or highlights */}
+              {/* Save Profile button */}
               <button
                 type="button"
                 onClick={async () => {
-                  setSaving(true);
+                  setSavingProfile(true);
                   const { error } = await supabase.from("personal").update({
                     name: personal.name,
                     title: personal.title,
@@ -533,16 +567,16 @@ export default function AdminDashboard() {
                     github_url: personal.github_url,
                     linkedin_url: personal.linkedin_url,
                     twitter_url: personal.twitter_url,
-                    profile_photo_url: personal.profile_photo_url,
+                    profile_photo_url: personal.profile_photo_url ?? null,
                   }).eq("id", personal.id);
-                  setSaving(false);
+                  setSavingProfile(false);
                   if (error) notify("error", error.message);
                   else notify("success", "Profile saved!");
                 }}
-                disabled={saving}
+                disabled={savingProfile}
                 className={btnPrimary + " px-6 py-3 text-sm"}
               >
-                {saving ? "Saving..." : "Save Profile"}
+                {savingProfile ? "Saving..." : "Save Profile"}
               </button>
             </div>
 
@@ -655,23 +689,23 @@ export default function AdminDashboard() {
                 </p>
               )}
 
-              {/* Saves ONLY top_skills — isolated from other fields */}
+              {/* Save Top Skills button */}
               <button
                 type="button"
                 onClick={async () => {
-                  setSaving(true);
+                  setSavingSkills(true);
                   const { error } = await supabase
                     .from("personal")
                     .update({ top_skills: personal.top_skills })
                     .eq("id", personal.id);
-                  setSaving(false);
+                    setSavingSkills(false);
                   if (error) notify("error", error.message);
                   else notify("success", "Top skills saved! ✅");
                 }}
-                disabled={saving}
+                disabled={savingSkills}
                 className={btnPrimary}
               >
-                {saving ? "Saving..." : "Save Top Skills"}
+                {savingSkills ? "Saving..." : "Save Top Skills"}
               </button>
             </div>
 
@@ -788,23 +822,23 @@ export default function AdminDashboard() {
                 </p>
               )}
 
-              {/* Saves ONLY highlights — isolated from other fields */}
+              {/* Save Highlights button */}
               <button
                 type="button"
                 onClick={async () => {
-                  setSaving(true);
+                  setSavingHighlights(true);
                   const { error } = await supabase
                     .from("personal")
                     .update({ highlights: personal.highlights })
                     .eq("id", personal.id);
-                  setSaving(false);
+                    setSavingHighlights(false);
                   if (error) notify("error", error.message);
                   else notify("success", "Highlights saved! ✅");
                 }}
-                disabled={saving}
+                disabled={savingHighlights}
                 className={btnPrimary}
               >
-                {saving ? "Saving..." : "Save Highlights"}
+                {savingHighlights ? "Saving..." : "Save Highlights"}
               </button>
             </div>
           </div>
@@ -1070,20 +1104,38 @@ export default function AdminDashboard() {
                     </Field>
                   </div>
                   <div className="mb-4">
+                    {/* Experience tab — achievements textarea */}
                     <Field label="Achievements (one per line — will display as bullet points)">
                       <textarea
-                        rows={4}
-                        value={exp.achievements.join("\n")}
-                        onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, achievements: e.target.value.split("\n").map((a) => a.trim()).filter(Boolean), } : x))}
+                        rows={5}
+                        // ✅ Display as newline-joined string — preserves spaces and empty lines
+                        value={achievementsToText(exp.achievements)}
+                        onChange={(e) => {
+                          // ✅ Store RAW lines during editing — no trim(), no filter()
+                          // This preserves spaces mid-word and empty lines between entries
+                          const rawLines = e.target.value.split("\n");
+                          setExperiences(
+                            experiences.map((x) =>
+                              x.id === exp.id
+                                ? { ...x, achievements: rawLines }
+                                : x
+                            )
+                          );
+                        }}
                         className={inputCls}
                         placeholder={`Reduced page load time by 45%\nLed migration from CRA to Next.js\nMentored 4 junior developers`}
                       />
                     </Field>
-                    {/* Preview */}
+                    {/* Live preview — filter here for display only */}
                     <ul className="mt-2 space-y-1">
-                      {exp.achievements.map((a, i) => (
-                        <li key={i} className="text-xs text-zinc-500 dark:text-zinc-400">• {a}</li>
-                      ))}
+                      {exp.achievements
+                        .map((a) => a.trim())
+                        .filter(Boolean)
+                        .map((a, i) => (
+                          <li key={i} className="text-xs text-zinc-500 dark:text-zinc-400">
+                            • {a}
+                          </li>
+                        ))}
                     </ul>
                   </div>
                   <Field label="Sort Order">
@@ -1092,10 +1144,29 @@ export default function AdminDashboard() {
 
                   <div className="flex gap-2 mt-4">
                     <button
+                      type="button"
                       onClick={async () => {
-                        const { error } = await supabase.from("experiences").update(exp).eq("id", exp.id);
-                        if (error) notify("error", error.message);
-                        else notify("success", `"${exp.role}" at ${exp.company} saved!`);
+                        // ✅ Clean achievements on save, not during editing
+                        const cleanedExp = {
+                          ...exp,
+                          achievements: exp.achievements
+                            .map((a) => a.trim())
+                            .filter(Boolean),
+                        };
+                        const { error } = await supabase
+                          .from("experiences")
+                          .update(cleanedExp)
+                          .eq("id", exp.id);
+
+                        // Also update local state with cleaned version
+                        if (!error) {
+                          setExperiences(
+                            experiences.map((x) => (x.id === exp.id ? cleanedExp : x))
+                          );
+                          notify("success", `"${exp.role}" at ${exp.company} saved!`);
+                        } else {
+                          notify("error", error.message);
+                        }
                       }}
                       className={btnPrimary}
                     >
@@ -1330,7 +1401,12 @@ export default function AdminDashboard() {
 
               {blogPosts.length === 0 && !loading && (
                 <div className="rounded-2xl border border-dashed border-zinc-300 p-12 text-center dark:border-zinc-700">
-                  <p className="text-zinc-500">No blog posts yet. Click "+ New Post" above.</p>
+                  <p className="text-zinc-500 mb-3">No blog posts yet.</p>
+                  <p className="text-xs text-zinc-400">
+                    Click <strong>⬆ Sync Static Data</strong> in the sidebar to import
+                    your MDX blog posts, or click <strong>+ New Post</strong> above to
+                    create one from scratch.
+                  </p>
                 </div>
               )}
             </div>

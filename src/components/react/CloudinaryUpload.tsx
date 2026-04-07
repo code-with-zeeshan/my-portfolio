@@ -11,6 +11,7 @@ interface UploadResult {
 
 interface Props {
   onUpload: (result: UploadResult) => void;
+  onRemove?: () => void;
   accept?: string;
   folder?: string;
   currentUrl?: string | null;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function CloudinaryUpload({
   onUpload,
+  onRemove,
   accept = "image/*",
   folder = "portfolio",
   currentUrl,
@@ -168,7 +170,7 @@ export default function CloudinaryUpload({
           </p>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setPreview(null); }}
+            onClick={(e) => { e.stopPropagation(); setPreview(null); onRemove?.(); }}
             className="text-xs text-zinc-400 hover:text-red-500"
           >
             Remove

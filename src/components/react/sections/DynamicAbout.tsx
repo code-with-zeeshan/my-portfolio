@@ -167,7 +167,13 @@ export default function DynamicAbout() {
                   alt={data.name}
                   className="h-full w-full object-cover"
                   loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/profile.webp"; }}
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    // Guard: only fire once — prevents infinite loop if fallback also missing
+                    if (img.dataset.errored) return;
+                    img.dataset.errored = "true";
+                    img.src = "/images/profile.webp";
+                  }}
                 />
               </div>
 

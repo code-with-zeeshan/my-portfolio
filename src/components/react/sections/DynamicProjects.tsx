@@ -64,7 +64,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             alt={project.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).src = "/images/projects/project-1.webp"; }}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              // Guard: only fire once — prevents infinite loop if fallback also missing
+              if (img.dataset.errored) return;
+              img.dataset.errored = "true";
+              img.src = "/images/projects/project-1.webp";
+            }}
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
@@ -140,7 +146,13 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
             alt={project.title}
             className="h-full w-full object-cover"
             style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
-            onError={(e) => { (e.target as HTMLImageElement).src = "/images/projects/project-1.webp"; }}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              // Guard: only fire once — prevents infinite loop if fallback also missing
+              if (img.dataset.errored) return;
+              img.dataset.errored = "true";
+              img.src = "/images/projects/project-1.webp";
+            }}
           />
           {/* Arrows */}
           <button onClick={() => navigate(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90 dark:text-zinc-50">
@@ -187,45 +199,52 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
 export default function DynamicProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
+  //const [usingFallback, setUsingFallback] = useState(false);
+  const [supabaseDown,  setSupabaseDown]  = useState(false); 
 
   useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const { data, error } = await supabase
-          .from("projects")
-          .select("*")
-          .order("sort_order", { ascending: true });
+  async function fetchProjects() {
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("sort_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          setProjects(data);
-        } else {
-          setUsingFallback(true);
-        }
-      } catch {
-        setUsingFallback(true);
-      } finally {
-        setLoading(false);
+      if (error) {
+        // ✅ Supabase returned an error (likely down or misconfigured)
+        console.warn("Supabase error — using static fallback:", error.message);
+        setSupabaseDown(true);
+      } else {
+        // ✅ Supabase is reachable — use whatever it returned (even empty array)
+        setProjects(data ?? []);
+        setSupabaseDown(false);
       }
+    } catch {
+      // ✅ Network error — Supabase unreachable
+      setSupabaseDown(true);
+    } finally {
+      setLoading(false);
     }
-    fetchProjects();
-  }, []);
+  }
+  fetchProjects();
+}, []);
 
-  const displayProjects: Project[] = usingFallback
-    ? staticProjects.map((p, i) => ({
-        id: `static-${i}`,
-        title: p.title,
-        description: p.description,
-        image_url: p.image,
-        tags: p.tags,
-        live_url: p.liveUrl || null,
-        github_url: p.githubUrl || null,
-        featured: p.featured,
-        year: p.year,
-        outcome: p.outcome || null,
-        sort_order: i,
-      }))
-    : projects;
+// ✅ Only fall back to static data when Supabase is unreachable
+const displayProjects = supabaseDown
+  ? staticProjects.map((p, i) => ({
+    id: `static-${i}`,
+    title: p.title,
+    description: p.description,
+    image_url: p.image,
+    tags: p.tags,
+    live_url: p.liveUrl || null,
+    github_url: p.githubUrl || null,
+    featured: p.featured,
+    year: p.year,
+    outcome: p.outcome || null,
+    sort_order: i,
+  }))
+  : projects;
 
   const featuredProjects = displayProjects.filter((p) => p.featured);
   const carouselProjects = featuredProjects.length > 0 ? featuredProjects : displayProjects;
