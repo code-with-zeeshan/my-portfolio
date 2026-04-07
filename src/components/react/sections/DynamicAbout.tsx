@@ -113,7 +113,7 @@ export default function DynamicAbout() {
           return;
         }
 
-        console.log("DynamicAbout: fetched row:", row); // ← remove after debugging
+        // console.log("DynamicAbout: fetched row:", row);
 
         setData({
           id:               row.id,

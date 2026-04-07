@@ -5,5 +5,11 @@
         "destination": "/blog/:path*"
       }
     ],
-    "redirects": []
+    "redirects": [],
+    "crons": [
+      {
+        "path": "/api/publish-scheduled",
+        "schedule": "0 * * * *"
+      }
+    ]
   }

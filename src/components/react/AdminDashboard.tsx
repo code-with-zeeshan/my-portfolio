@@ -4,36 +4,23 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import type {
+  TopSkill,
+  Highlight,
+  PersonalInfo,
+  Project,
+  SkillCategory,
+  Experience,
+  BlogPost,
+  Testimonial,
+  Message,
+  Resume,
+} from "@/lib/types";
 import CloudinaryUpload from "@/components/react/CloudinaryUpload";
-
-// ─── Types ───
-interface TopSkill {
-  name: string;
-  level: number;
-}
-
-interface Highlight {
-  icon: string;
-  label: string;
-  value: string;
-}
-
-interface PersonalInfo {
-  id: string;
-  name: string;
-  title: string;
-  tagline: string;
-  bio: string;
-  location: string;
-  email: string;
-  availability: string;
-  github_url: string | null;
-  linkedin_url: string | null;
-  twitter_url: string | null;
-  profile_photo_url: string | null;
-  top_skills: TopSkill[];
-  highlights: Highlight[];
-}
+import MarkdownEditor from "@/components/react/MarkdownEditor";
+import BlogPreviewModal from "@/components/react/BlogPreviewModal";
+import PlausibleAnalytics from "@/components/react/PlausibleAnalytics";
+import { string } from "astro:schema";
 
 // ─── Default values ───
 const DEFAULT_TOP_SKILLS: TopSkill[] = [
@@ -58,75 +45,7 @@ const achievementsToText = (arr: string[]) => arr.join("\n");
 const textToAchievements = (text: string) =>
   text.split("\n").map((a) => a.trim()).filter(Boolean);
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string | null;
-  tags: string[];
-  live_url: string | null;
-  github_url: string | null;
-  featured: boolean;
-  year: string | null;
-  outcome: string | null;
-  sort_order: number;
-}
-
-interface SkillCategory {
-  id: string;
-  title: string;
-  skills: string[];
-  sort_order: number;
-}
-
-interface Experience {
-  id: string;
-  company: string;
-  role: string;
-  period: string;
-  description: string;
-  achievements: string[];
-  sort_order: number;
-}
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  tags: string[];
-  hero_image: string | null;
-  published: boolean;
-  pub_date: string;
-}
-
-interface Testimonial {
-  id: string;
-  name: string;
-  role: string;
-  company: string;
-  content: string;
-  sort_order: number;
-}
-
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-}
-
-interface Resume {
-  id: string;
-  file_url: string;
-  filename: string;
-  uploaded_at: string;
-}
-
-type Tab = "personal" | "projects" | "skills" | "experience" | "blog" | "testimonials" | "messages" | "resume";
+type Tab = "personal" | "projects" | "skills" | "experience" | "blog" | "testimonials" | "messages" | "resume" | "analytics";
 
 function TagInput({
   value,
@@ -227,6 +146,7 @@ export default function AdminDashboard() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isReturningUser,  setIsReturningUser]  = useState(false);
+  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
  
   // Data
   const [personal, setPersonal] = useState<PersonalInfo | null>(null);
@@ -275,7 +195,7 @@ export default function AdminDashboard() {
             .single();
         
           if (!error && data) {
-            console.log("Loaded personal data:", data);
+            // console.log("Loaded personal data:", data);
         
             setPersonal({
               id:               data.id,
@@ -290,6 +210,7 @@ export default function AdminDashboard() {
               linkedin_url:     data.linkedin_url     ?? null,
               twitter_url:      data.twitter_url      ?? null,
               profile_photo_url: data.profile_photo_url ?? null,
+              updated_at:        data.updated_at      ?? string,
               // ✅ Safely parse JSONB — handle null, empty array, invalid data
               top_skills: Array.isArray(data.top_skills) && data.top_skills.length > 0
                 ? data.top_skills
@@ -361,6 +282,7 @@ export default function AdminDashboard() {
     { key: "testimonials", label: "Testimonials", icon: "💬" },
     { key: "messages", label: "Messages", icon: "📧" },
     { key: "resume", label: "Resume", icon: "📄" },
+    { key: "analytics",    label: "Analytics",    icon: "📊" },
   ];
 
   const unreadCount = messages.filter((m) => !m.read).length;  
@@ -929,11 +851,82 @@ export default function AdminDashboard() {
                       }}
                     />
                   </div>
+
+                  {/* ── P6: Image Gallery ── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                        Image Gallery
+                        <span className="ml-1 text-zinc-400">(additional screenshots)</span>
+                      </label>
+                      <span className="text-xs text-zinc-400">
+                        {(project.gallery_images ?? []).length} images
+                      </span>
+                    </div>
+
+                    {/* Existing gallery images */}
+                    {(project.gallery_images ?? []).length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {(project.gallery_images ?? []).map((url: string, imgIdx: number) => (
+                          <div key={imgIdx} className="relative group aspect-video overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <img
+                              src={url}
+                              alt={`Gallery ${imgIdx + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setProjects(projects.map((p) =>
+                                  p.id === project.id
+                                    ? {
+                                        ...p,
+                                        gallery_images: (p.gallery_images ?? []).filter(
+                                          (_: string, i: number) => i !== imgIdx
+                                        ),
+                                      }
+                                    : p
+                                ))
+                              }
+                              className="absolute top-1 right-1 rounded-full bg-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-white"
+                              title="Remove image"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add to gallery */}
+                    <CloudinaryUpload
+                      folder="portfolio/projects/gallery"
+                      currentUrl={null}
+                      aspectRatio="video"
+                      hint="Add screenshots. 16:9 recommended."
+                      onUpload={(result) => {
+                        setProjects(projects.map((p) =>
+                          p.id === project.id
+                            ? {
+                                ...p,
+                                gallery_images: [...(p.gallery_images ?? []), result.url],
+                              }
+                            : p
+                        ));
+                        notify("success", "Gallery image added! Click Save to apply.");
+                      }}
+                    />
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={async () => {
                         setSaving(true);
-                        const { error } = await supabase.from("projects").update(project).eq("id", project.id);
+                        const { error } = await supabase.from("projects").update({
+                          ...project,
+                          gallery_images: project.gallery_images ?? [],
+                        }).eq("id", project.id);
                         setSaving(false);
                         if (error) notify("error", error.message);
                         else notify("success", `"${project.title}" saved!`);
@@ -1283,21 +1276,51 @@ export default function AdminDashboard() {
         )}
 
         {/* ══════════════════════════════════════════════
-            TAB: BLOG — Full CRUD
+            TAB: BLOG — Full CRUD + Phase 3 upgraded
+            P1: Markdown editor
+            P2: Preview before publish
+            P3: SEO metadata
+            P4: Scheduling
         ══════════════════════════════════════════════ */}
         {activeTab === "blog" && (
           <div>
+            {/* Preview modal — rendered outside tab content */}
+            {previewPost && (
+              <BlogPreviewModal
+                post={previewPost}
+                onClose={() => setPreviewPost(null)}
+              />
+            )}
+
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Blog Posts ({blogPosts.length})</h1>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                Blog Posts ({blogPosts.length})
+              </h1>
               <button
+                type="button"
                 onClick={async () => {
                   const slug = `post-${Date.now()}`;
                   const { data, error } = await supabase
                     .from("blog_posts")
-                    .insert({ title: "New Post", slug, description: "Post description", content: "# New Post\n\nWrite your content here.", published: false, tags: [] })
-                    .select().single();
+                    .insert({
+                      title: "New Post",
+                      slug,
+                      description: "Post description",
+                      content: "# New Post\n\nWrite your content here.",
+                      published: false,
+                      tags: [],
+                      meta_title: null,
+                      meta_description: null,
+                      og_image: null,
+                      scheduled_for: null,
+                    })
+                    .select()
+                    .single();
                   if (error) notify("error", error.message);
-                  else { setBlogPosts((p) => [data, ...p]); notify("success", "Post created! Edit below."); }
+                  else {
+                    setBlogPosts((p) => [data, ...p]);
+                    notify("success", "Post created! Edit below.");
+                  }
                 }}
                 className={btnAdd}
               >
@@ -1305,96 +1328,383 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {blogPosts.map((post) => (
-                <div key={post.id} className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.published ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"}`}>
-                      {post.published ? "● Published" : "○ Draft"}
-                    </span>
-                    <span className="text-xs text-zinc-400">{new Date(post.pub_date).toLocaleDateString()}</span>
-                  </div>
-
-                  <div className="grid gap-3 md:grid-cols-2 mb-3">
-                    <Field label="Title">
-                      <input type="text" value={post.title} onChange={(e) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, title: e.target.value } : p))} className={inputCls} />
-                    </Field>
-                    <Field label="Slug (URL path)">
-                      <input type="text" value={post.slug} onChange={(e) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, slug: e.target.value } : p))} className={inputCls} />
-                    </Field>
-                  </div>
-                  <div className="mb-3">
-                    <Field label="Description (SEO summary)">
-                      <input type="text" value={post.description} onChange={(e) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, description: e.target.value } : p))} className={inputCls} />
-                    </Field>
-                    <CloudinaryUpload
-                      label="Hero Image"
-                      folder="portfolio/blog"
-                      currentUrl={post.hero_image}
-                      aspectRatio="video"
-                      hint="Recommended: 1200×630px. Auto-optimized for web."
-                      onUpload={(result) => {
-                        setBlogPosts(blogPosts.map((p) =>
-                          p.id === post.id ? { ...p, hero_image: result.url } : p
-                        ));
-                      }}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <Field label="Tags (comma-separated)">
-                      <TagInput
-                        value={post.tags}
-                        onChange={(newTags) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, tags: newTags } : p))}
-                        placeholder="e.g. Web Dev, TypeScript"
-                      />
-                    </Field>
-                  </div>
-                  <div className="mb-4">
-                    <Field label="Content (Markdown)">
-                      <textarea
-                        rows={10}
-                        value={post.content}
-                        onChange={(e) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, content: e.target.value } : p))}
-                        className={inputCls + " font-mono text-xs"}
-                        placeholder={`# Post Title\n\nWrite your content in Markdown...`}
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={post.published}
-                        onChange={(e) => setBlogPosts(blogPosts.map((p) => p.id === post.id ? { ...p, published: e.target.checked } : p))}
-                        className="rounded"
-                      />
-                      <span className="text-zinc-700 dark:text-zinc-300 font-medium">Published (visible on site)</span>
-                    </label>
-
-                    <div className="ml-auto flex gap-2">
-                      <button
-                        onClick={async () => {
-                          const { error } = await supabase.from("blog_posts").update(post).eq("id", post.id);
-                          if (error) notify("error", error.message);
-                          else notify("success", `"${post.title}" saved!`);
-                        }}
-                        className={btnPrimary}
+                <div
+                  key={post.id}
+                  className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden"
+                >
+                  {/* ── Post Header Bar ── */}
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          post.published
+                            ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+                            : post.scheduled_for
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                            : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                        }`}
                       >
-                        Save
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
-                          const { error } = await supabase.from("blog_posts").delete().eq("id", post.id);
-                          if (error) notify("error", error.message);
-                          else { setBlogPosts(blogPosts.filter((p) => p.id !== post.id)); notify("success", "Post deleted"); }
-                        }}
-                        className={btnDanger}
-                      >
-                        Delete
-                      </button>
+                        {post.published
+                          ? "● Published"
+                          : post.scheduled_for
+                          ? "🕐 Scheduled"
+                          : "○ Draft"}
+                      </span>
+                      <span className="text-xs text-zinc-400 font-mono">/{post.slug}</span>
+                      {post.pub_date && (
+                        <span className="text-xs text-zinc-400">
+                          {new Date(post.pub_date).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
+
+                    {/* ── Preview Button ── */}
+                    <button
+                      type="button"
+                      onClick={() => setPreviewPost(post)}
+                      className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      Preview
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-5">
+
+                    {/* ── Basic Fields ── */}
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Field label="Title">
+                        <input
+                          type="text"
+                          value={post.title}
+                          onChange={(e) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, title: e.target.value } : p
+                            ))
+                          }
+                          className={inputCls}
+                        />
+                      </Field>
+                      <Field label="Slug (URL path — no spaces)">
+                        <input
+                          type="text"
+                          value={post.slug}
+                          onChange={(e) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id
+                                ? {
+                                    ...p,
+                                    slug: e.target.value
+                                      .toLowerCase()
+                                      .replace(/\s+/g, "-")
+                                      .replace(/[^a-z0-9-]/g, ""),
+                                  }
+                                : p
+                            ))
+                          }
+                          className={inputCls + " font-mono text-sm"}
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Description (shown in previews and SEO)">
+                      <textarea
+                        rows={2}
+                        value={post.description}
+                        onChange={(e) =>
+                          setBlogPosts(blogPosts.map((p) =>
+                            p.id === post.id ? { ...p, description: e.target.value } : p
+                          ))
+                        }
+                        className={inputCls}
+                      />
+                    </Field>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Field label="Tags">
+                        <TagInput
+                          value={post.tags}
+                          onChange={(newTags) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, tags: newTags } : p
+                            ))
+                          }
+                          placeholder="e.g. Web Dev, TypeScript"
+                        />
+                      </Field>
+                      <Field label="Hero Image">
+                        <CloudinaryUpload
+                          folder="portfolio/blog"
+                          currentUrl={post.hero_image}
+                          aspectRatio="video"
+                          hint="Recommended: 1200×630px"
+                          onUpload={(result) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, hero_image: result.url } : p
+                            ))
+                          }
+                          onRemove={() =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, hero_image: null } : p
+                            ))
+                          }
+                        />
+                      </Field>
+                    </div>
+
+                    {/* ── P1: Markdown Editor ── */}
+                    <Field label="Content (Markdown)">
+                      <MarkdownEditor
+                        value={post.content}
+                        onChange={(val) =>
+                          setBlogPosts(blogPosts.map((p) =>
+                            p.id === post.id ? { ...p, content: val } : p
+                          ))
+                        }
+                        height={450}
+                        placeholder="# Post Title&#10;&#10;Write your content in Markdown..."
+                      />
+                    </Field>
+
+                    {/* ── P3: SEO Metadata ── */}
+                    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 space-y-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-500">
+                          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                        </svg>
+                        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          SEO Metadata
+                        </h3>
+                        <span className="text-xs text-zinc-400">
+                          (overrides title/description for search engines)
+                        </span>
+                      </div>
+
+                      <Field label="Meta Title (60 chars recommended)">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={post.meta_title || ""}
+                            onChange={(e) =>
+                              setBlogPosts(blogPosts.map((p) =>
+                                p.id === post.id
+                                  ? { ...p, meta_title: e.target.value || null }
+                                  : p
+                              ))
+                            }
+                            placeholder={`${post.title} | Your Name`}
+                            maxLength={70}
+                            className={inputCls + " pr-12"}
+                          />
+                          <span
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${
+                              (post.meta_title?.length ?? 0) > 60
+                                ? "text-red-500"
+                                : "text-zinc-400"
+                            }`}
+                          >
+                            {post.meta_title?.length ?? 0}/60
+                          </span>
+                        </div>
+                      </Field>
+
+                      <Field label="Meta Description (155 chars recommended)">
+                        <div className="relative">
+                          <textarea
+                            rows={2}
+                            value={post.meta_description || ""}
+                            onChange={(e) =>
+                              setBlogPosts(blogPosts.map((p) =>
+                                p.id === post.id
+                                  ? { ...p, meta_description: e.target.value || null }
+                                  : p
+                              ))
+                            }
+                            placeholder={post.description}
+                            maxLength={170}
+                            className={inputCls + " pr-16 resize-none"}
+                          />
+                          <span
+                            className={`absolute right-3 top-3 text-xs ${
+                              (post.meta_description?.length ?? 0) > 155
+                                ? "text-red-500"
+                                : "text-zinc-400"
+                            }`}
+                          >
+                            {post.meta_description?.length ?? 0}/155
+                          </span>
+                        </div>
+                      </Field>
+
+                      <Field label="OG Image URL (1200×630px — for social sharing)">
+                        <CloudinaryUpload
+                          folder="portfolio/blog/og"
+                          currentUrl={post.og_image}
+                          aspectRatio="wide"
+                          hint="1200×630px — shown when shared on Twitter, LinkedIn, WhatsApp"
+                          onUpload={(result) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, og_image: result.url } : p
+                            ))
+                          }
+                          onRemove={() =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id ? { ...p, og_image: null } : p
+                            ))
+                          }
+                        />
+                      </Field>
+
+                      {/* ── Live SEO Preview ── */}
+                      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
+                        <p className="text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">
+                          Google Preview
+                        </p>
+                        <p className="text-base font-medium text-blue-600 dark:text-blue-400 truncate">
+                          {post.meta_title || post.title || "Post Title"}
+                        </p>
+                        <p className="text-xs text-green-700 dark:text-green-500 mt-0.5">
+                          {`${typeof window !== "undefined" ? window.location.origin : "https://yoursite.com"}/blog/${post.slug}`}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-1 line-clamp-2">
+                          {post.meta_description || post.description || "Post description will appear here..."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ── P4: Scheduling + Publish Controls ── */}
+                    <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      {/* Published toggle */}
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={post.published}
+                          onChange={(e) =>
+                            setBlogPosts(blogPosts.map((p) =>
+                              p.id === post.id
+                                ? {
+                                    ...p,
+                                    published: e.target.checked,
+                                    // ✅ Clear scheduled_for when manually published
+                                    scheduled_for: e.target.checked
+                                      ? null
+                                      : p.scheduled_for,
+                                  }
+                                : p
+                            ))
+                          }
+                          className="rounded accent-brand-500"
+                        />
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                          Published
+                        </span>
+                      </label>
+
+                      {/* Schedule picker — only shown for drafts */}
+                      {!post.published && (
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                            Schedule for:
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={
+                              post.scheduled_for
+                                ? new Date(post.scheduled_for)
+                                    .toISOString()
+                                    .slice(0, 16)
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setBlogPosts(blogPosts.map((p) =>
+                                p.id === post.id
+                                  ? {
+                                      ...p,
+                                      scheduled_for: e.target.value
+                                        ? new Date(e.target.value).toISOString()
+                                        : null,
+                                    }
+                                  : p
+                              ))
+                            }
+                            className={inputCls + " text-xs w-auto"}
+                          />
+                          {post.scheduled_for && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBlogPosts(blogPosts.map((p) =>
+                                  p.id === post.id ? { ...p, scheduled_for: null } : p
+                                ))
+                              }
+                              className="text-xs text-zinc-400 hover:text-red-500"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="ml-auto flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewPost(post)}
+                          className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const { error } = await supabase
+                              .from("blog_posts")
+                              .update({
+                                title:            post.title,
+                                slug:             post.slug,
+                                description:      post.description,
+                                content:          post.content,
+                                tags:             post.tags,
+                                hero_image:       post.hero_image,
+                                published:        post.published,
+                                meta_title:       post.meta_title,
+                                meta_description: post.meta_description,
+                                og_image:         post.og_image,
+                                scheduled_for:    post.scheduled_for,
+                              })
+                              .eq("id", post.id);
+                            if (error) notify("error", error.message);
+                            else notify("success", `"${post.title}" saved!`);
+                          }}
+                          className={btnPrimary}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
+                            const { error } = await supabase
+                              .from("blog_posts")
+                              .delete()
+                              .eq("id", post.id);
+                            if (error) notify("error", error.message);
+                            else {
+                              setBlogPosts(blogPosts.filter((p) => p.id !== post.id));
+                              notify("success", "Post deleted");
+                            }
+                          }}
+                          className={btnDanger}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               ))}
@@ -1404,8 +1714,7 @@ export default function AdminDashboard() {
                   <p className="text-zinc-500 mb-3">No blog posts yet.</p>
                   <p className="text-xs text-zinc-400">
                     Click <strong>⬆ Sync Static Data</strong> in the sidebar to import
-                    your MDX blog posts, or click <strong>+ New Post</strong> above to
-                    create one from scratch.
+                    your MDX blog posts, or click <strong>+ New Post</strong> above.
                   </p>
                 </div>
               )}
@@ -1581,6 +1890,13 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ══════════════════════════════════════════════
+            TAB: ANALYTICS — Phase 3 P5
+        ══════════════════════════════════════════════ */}
+        {activeTab === "analytics" && (
+          <PlausibleAnalytics />
         )}
       </main>
     </div>

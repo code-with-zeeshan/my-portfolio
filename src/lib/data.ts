@@ -88,6 +88,7 @@ export async function getProjects(featuredOnly = false): Promise<Project[]> {
         sort_order: i,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        gallery_images: p.gallery_images,
       }));
   }
 }

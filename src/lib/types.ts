@@ -36,6 +36,7 @@ export interface Project {
   description: string;
   long_description: string | null;
   image_url: string | null;
+  gallery_images: string[];
   tags: string[];
   live_url: string | null;
   github_url: string | null;
@@ -75,6 +76,10 @@ export interface BlogPost {
   published: boolean;
   pub_date: string;
   updated_at: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image: string | null | undefined;
+  scheduled_for: string | null | any;
 }
 
 export interface Testimonial {

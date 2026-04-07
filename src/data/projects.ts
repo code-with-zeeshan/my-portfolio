@@ -1,5 +1,6 @@
 // src/data/projects.ts
 export interface Project {
+    gallery_images: any;
     title: string;
     description: string;
     longDescription: string;
