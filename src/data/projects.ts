@@ -25,6 +25,7 @@ export interface Project {
       featured: true,
       year: "2025",
       outcome: "Increased conversion by 34%",
+      gallery_images: undefined
     },
     {
       title: "AI Dashboard",
@@ -36,6 +37,7 @@ export interface Project {
       featured: true,
       year: "2025",
       outcome: "Reduced analysis time by 60%",
+      gallery_images: undefined
     },
     {
       title: "Developer Toolkit",
@@ -47,5 +49,6 @@ export interface Project {
       featured: true,
       year: "2024",
       outcome: "2K+ GitHub stars",
+      gallery_images: undefined
     },
   ];
