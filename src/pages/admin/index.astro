@@ -3,9 +3,23 @@
 export const prerender = false; // Must be SSR
 
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import AdminDashboard from "@/components/react/AdminDashboard.tsx";
 ---
 
 <AdminLayout title="Dashboard">
-  <AdminDashboard client:load />
+  <div id="admin-root"></div>
 </AdminLayout>
+
+<script>
+  // Dynamically import AdminDashboard to reduce initial bundle size
+  import('@/components/react/AdminDashboard.tsx').then(async (module) => {
+    const AdminDashboard = module.default;
+    const React = await import('react');
+    const { createRoot } = await import('react-dom/client');
+
+    const container = document.getElementById('admin-root');
+    if (container) {
+      const root = createRoot(container);
+      root.render(React.createElement(AdminDashboard));
+    }
+  });
+</script>

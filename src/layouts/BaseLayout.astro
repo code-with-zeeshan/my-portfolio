@@ -44,6 +44,14 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//vitals.vercel-analytics.com" />
+    <link rel="dns-prefetch" href="//plausible.io" />
+    <link rel="dns-prefetch" href="//umami.is" />
+    <link rel="dns-prefetch" href="//posthog.com" />
+
     <!-- Primary Meta Tags -->
     <title>{title} | Mohammad Zeeshan</title>
     <meta name="title"       content={`${title} | Mohammad Zeeshan`} />

@@ -71,6 +71,8 @@ export default function CloudinaryImage({
         src={optimizedSrc}
         alt={alt}
         loading={loading}
+        width={width}
+        height={height}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         className={`h-full w-full object-cover transition-opacity duration-500 ${
