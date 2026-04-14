@@ -4,6 +4,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useDarkMode from "@/hooks/useDarkMode";
 
 interface Props {
   value: string;
@@ -22,29 +23,17 @@ export default function MarkdownEditor({
   // MDEditor is imported dynamically to avoid SSR crash
   // (it accesses window/document during module evaluation)
   const [MDEditor, setMDEditor] = useState<any>(null);
-  const [isDark, setIsDark] = useState(false);
+
+  // Use shared dark mode hook
+  const { isDark } = useDarkMode();
 
   useEffect(() => {
     setMounted(true);
-
-    // Detect dark mode
-    setIsDark(document.documentElement.classList.contains("dark"));
-
-    // Watch for theme changes
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
 
     // Dynamically import to avoid SSR issues
     import("@uiw/react-md-editor").then((mod) => {
       setMDEditor(() => mod.default);
     });
-
-    return () => observer.disconnect();
   }, []);
 
   // SSR / pre-mount fallback — plain textarea
@@ -67,18 +56,21 @@ export default function MarkdownEditor({
       data-color-mode={isDark ? "dark" : "light"}
       className="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700"
     >
-      <MDEditor
-        value={value}
-        onChange={(val: string | undefined) => onChange(val ?? "")}
-        height={height}
-        preview="live"
-        visibleDragbar={false}
-        textareaProps={{ placeholder }}
-        style={{
-          // Override MDEditor background to match portfolio theme
-          backgroundColor: isDark ? "#18181b" : "#ffffff",
-        }}
-      />
+      {/* Wrapper to constrain overflow */}
+      <div className="overflow-auto max-h-[450px]">
+        <MDEditor
+          value={value}
+          onChange={(val: string | undefined) => onChange(val ?? "")}
+          height={height}
+          preview="live"
+          visibleDragbar={false}
+          textareaProps={{ placeholder }}
+          style={{
+            // Override MDEditor background to match portfolio theme
+            backgroundColor: isDark ? "#18181b" : "#ffffff",
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -23,6 +23,7 @@ A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **T
 - **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
 - **Contact Form** — Messages saved to Supabase inbox, readable in admin panel
 - **Resume Management** — Upload and update resume PDF via admin; auto-downloads for visitors
+- **Analytics** — Plausible, Vercel, PostHog, or Umami Analytics integration with admin dashboard
 - **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data, sitemap
 - **Accessible** — Semantic HTML, ARIA labels, keyboard navigation, color contrast
 
@@ -77,12 +78,20 @@ my-portfolio/
 │   │   │   │   └── DynamicContact.tsx
 │   │   │   ├── AdminDashboard.tsx # Full CMS dashboard
 │   │   │   ├── AdminGate.tsx      # Hidden login modal (Ctrl+Shift+A)
+│   │   │   ├── AnalyticsProvider.tsx # Client-side analytics wrapper
+│   │   │   ├── BlogPreviewModal.tsx # Post preview for admin
 │   │   │   ├── CloudinaryImage.tsx # Optimized image component
+│   │   │   ├── CloudinaryMultiUpload.tsx # Multiple image upload support
 │   │   │   ├── CloudinaryUpload.tsx # Drag & drop upload widget
 │   │   │   ├── ContactForm.tsx    # Contact form → Supabase messages
+│   │   │   ├── DynamicFooter.tsx  # Dynamic footer components
 │   │   │   ├── FadeIn.tsx         # Scroll-triggered fade animation
+│   │   │   ├── ImageCropUpload.tsx # Image cropping utility
 │   │   │   ├── MagneticHover.tsx  # Cursor-following hover effect
+│   │   │   ├── MarkdownEditor.tsx # Rich text editor for admin
 │   │   │   ├── PageTransition.tsx # Page load fade-in (used in BlogLayout)
+│   │   │   ├── PlausibleAnalytics.tsx # Plausible analytics integration
+│   │   │   ├── ProjectPreviewModal.tsx # Project preview for admin
 │   │   │   ├── ReactIcon.tsx      # SVG icon system for .tsx files
 │   │   │   ├── ResumeButton.tsx   # Resume link (fetches URL from Supabase)
 │   │   │   ├── ScrollProgress.tsx # Page scroll progress bar
@@ -114,6 +123,7 @@ my-portfolio/
 │   │   ├── cloudinary.ts          # Upload, delete, URL optimization helpers
 │   │   ├── config.ts              # Site URL config
 │   │   ├── data.ts                # Supabase fetch helpers with fallbacks
+│   │   ├── datetime.ts            # Date and time formatting utilities
 │   │   ├── supabase.ts            # Supabase clients (public + admin)
 │   │   ├── syncFallbackData.ts    # One-time static → Supabase sync
 │   │   ├── types.ts               # Shared TypeScript interfaces
@@ -126,9 +136,12 @@ my-portfolio/
 │   │   ├── admin/
 │   │   │   └── index.astro        # Admin dashboard (SSR, auth-gated)
 │   │   ├── api/
-│   │   │   └── sync.ts            # POST /api/sync — seed Supabase from static data
+│   │   │   ├── sync.ts            # POST /api/sync — seed Supabase from static data
+│   │   │   ├── generate-secret.ts # API key generation for webhooks
+│   │   │   └── publish-scheduled.ts # Webhook for scheduled publishing
 │   │   ├── blog/
 │   │   │   ├── index.astro        # Blog listing (DynamicBlogIndex)
+│   │   │   ├── [slug].astro       # SSR blog posts from Supabase
 │   │   │   └── [...slug].astro    # Static MDX blog posts
 │   │   └── projects/
 │   │       ├── index.astro        # Projects listing (DynamicProjectsIndex)
@@ -159,7 +172,7 @@ my-portfolio/
 
 | Tool | Minimum Version |
 |---|---|
-| Node.js | 22.0.0+ |
+| Node.js | 22.12.0+ |
 | npm | 10.0.0+ |
 | Git | 2.0+ |
 
@@ -204,9 +217,16 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
+# Cron job security
+CRON_SECRET=your_random_secret_string
+# Analytics provider (vercel | plausible | posthog | umami | none)
+PUBLIC_ANALYTICS_PROVIDER=plausible
+PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com
+PUBLIC_PLAUSIBLE_API_KEY=your_plausible_api_key
 ```
 
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY` has no `PUBLIC_` prefix — it is server-only and never exposed to the browser.
+> ⚠️ `CRON_SECRET` secures scheduled post publishing — generate a random string.
 
 See [`docs/SETUP.md`](docs/SETUP.md) for the full setup walkthrough.
 
@@ -275,15 +295,20 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including c
 
 [MIT License](LICENSE) — feel free to use this as a template for your own portfolio.
 
-## 🔜 PHASE 3 Roadmap
+## ✅ Phase 3 Complete (All Implemented)
 ```
-├── Rich text / Markdown editor for blog posts
-├── Drag-and-drop mutiple image uploads
-├── Preview before publish
-├── Analytics dashboard in admin
-├── Blog post scheduling (future publish dates)
-└── SEO metadata editor per page 
+├── Rich text / Markdown editor for blog posts     ✅ MarkdownEditor.tsx
+├── Drag-and-drop mutiple image uploads       ✅ CloudinaryMultiUpload.tsx
+├── Preview before publish                  ✅ BlogPreviewModal + ProjectPreviewModal
+├── Blog post scheduling                  ✅ scheduled_for field + /api/publish-scheduled
+└── SEO metadata editor per page           ✅ meta_title, meta_description, og_image
 ```
+
+## 🔜 Future Ideas
+- Analytics dashboard in admin (connect to Plausible API)
+- Custom OG images per project
+- Newsletter signup integration
+- More animation effects
 ---
 
 Built with ❤️ using [Astro](https://astro.build) + [Supabase](https://supabase.com) + [Cloudinary](https://cloudinary.com)

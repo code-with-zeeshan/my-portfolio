@@ -45,9 +45,10 @@ Via Admin → Profile → **Top Skills**:
 
 ### 4. Highlights (Stat Cards)
 
+
 Via Admin → Profile → **Highlights**:
 - Edit icon name, label, value
-- Available icons: `briefcase`, `calendar`, `coffee`, `heart`, `star`, `user`
+- Available icons: `briefcase`, `calendar`, `coffee`, `heart`, `star`, `user`, `mail`, `github`, `linkedin`, `twitter`, `map-pin`, `quote`, `download`, `check-circle`
 - Click **Save Highlights**
 
 ### 5. Colors
@@ -77,7 +78,46 @@ site: "https://yourdomain.com"
 
 Also update `PUBLIC_SITE_URL` in your `.env` and Vercel environment variables.
 
-### 7. Images
+### 7. Scheduled Post Publishing
+
+Generate a secure cron secret:
+
+```bash
+# Generate a random 64-character hex string
+openssl rand -hex 32
+```
+
+Set in your `.env` and Vercel environment variables:
+
+```env
+CRON_SECRET=your_generated_secret
+```
+
+### 8. Analytics
+
+Edit in `.env`:
+
+```env
+# Options: vercel | plausible | posthog | umami | none
+PUBLIC_ANALYTICS_PROVIDER=vercel
+# ── Plausible config (cloud) ──
+PUBLIC_PLAUSIBLE_DOMAIN=your-domain.com
+PUBLIC_PLAUSIBLE_API_KEY=your-api-key
+# ── PostHog config ──
+# No additional config needed for PostHog
+# ── Umami config ──
+# Get your website ID from umami.is dashboard
+PUBLIC_UMAMI_WEBSITE_ID=your_website_id_here
+PUBLIC_UMAMI_URL=https://umami.example.com
+```
+
+For self-hosted Plausible, also set:
+```env
+PUBLIC_PLAUSIBLE_API_HOST=https://mydomain.com/stats
+PUBLIC_PLAUSIBLE_SCRIPT_URL=https://mydomain.com/stats/js/script.js
+```
+
+### 9. Images
 
 | Image | Location | Recommended Size |
 |---|---|---|
@@ -87,11 +127,11 @@ Also update `PUBLIC_SITE_URL` in your `.env` and Vercel environment variables.
 | Favicon | `public/favicon.svg` | SVG format |
 | Resume | Upload via Admin → Resume tab | PDF only |
 
-### 8. Blog Posts
+### 10. Blog Posts
 
 Add `.mdx` files to `src/data/blog/` or create via Admin → Blog → **+ New Post**.
 
-### 9. Projects
+### 11. Projects
 
 Edit `src/data/projects.ts` or use Admin → Projects → **+ Add Project**.
 

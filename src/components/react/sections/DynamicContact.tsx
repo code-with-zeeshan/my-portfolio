@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import ContactForm from "@/components/react/ContactForm";
+import { Card } from "@/components/ui/card";
 
 interface PersonalInfo {
   email: string;
@@ -42,10 +43,10 @@ export default function DynamicContact() {
     : "yourusername";
 
   return (
-    <section id="contact" className="py-24 bg-zinc-100 dark:bg-zinc-900/50">
+    <section id="contact" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-16 text-center">
+          <div className="mb-10 md:mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
               Get in Touch
             </p>
@@ -59,10 +60,10 @@ export default function DynamicContact() {
           </div>
         </FadeIn>
 
-        <div className="grid gap-12 lg:grid-cols-12">
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-12 overflow-hidden">
 
           {/* ── LEFT: Contact Info ── */}
-          <FadeIn direction="left" className="lg:col-span-4">
+          <FadeIn direction="left" className="lg:col-span-4 min-w-0">
             <div className="space-y-6">
 
               {/* Email */}
@@ -76,7 +77,7 @@ export default function DynamicContact() {
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">Email</p>
                   <a
                     href={`mailto:${data.email}`}
-                    className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:text-brand-500 transition-colors"
+                    className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:text-brand-500 transition-colors break-all"
                   >
                     {data.email}
                   </a>
@@ -142,9 +143,9 @@ export default function DynamicContact() {
 
           {/* ── RIGHT: Contact Form ── */}
           <FadeIn direction="right" className="lg:col-span-8">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900">
+            <Card variant="bordered" className="bg-white dark:bg-zinc-900 p-8 rounded-2xl">
               <ContactForm />
-            </div>
+            </Card>
           </FadeIn>
 
         </div>

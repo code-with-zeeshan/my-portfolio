@@ -1,15 +1,20 @@
 {
-    "rewrites": [
-      {
-        "source": "/blog/:path*",
-        "destination": "/blog/:path*"
-      }
-    ],
-    "redirects": [],
-    "crons": [
-      {
-        "path": "/api/publish-scheduled",
-        "schedule": "0 10 * * *"
-      }
-    ]
-  }
+  "rewrites": [
+    { "source": "/blog/:path*", "destination": "/blog/:path*" },
+    {
+      "source": "/stats/js/script.js",
+      "destination": "https://plausible.io/js/script.js"
+    },
+    {
+      "source": "/stats/api/event",
+      "destination": "https://plausible.io/api/event"
+    }
+  ],
+  "redirects": [],
+  "crons": [
+    {
+      "path": "/api/publish-scheduled",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

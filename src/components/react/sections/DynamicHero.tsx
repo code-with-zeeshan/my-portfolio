@@ -46,8 +46,8 @@ export default function DynamicHero() {
   }, []);
 
   return (
-    <section id="hero" className="relative flex min-h-[90vh] items-center pt-16">
-      <div className="mx-auto max-w-5xl px-6 py-24">
+    <section id="hero" className="relative flex min-h-[70vh] md:min-h-[90vh] items-center pt-16">
+      <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
         <FadeIn delay={0}>
           <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 mb-6">
             <span className="relative flex h-2.5 w-2.5">

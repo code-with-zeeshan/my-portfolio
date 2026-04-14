@@ -34,15 +34,16 @@
   /* ── LIGHT MODE (default) ── */
   body {
     font-family: var(--font-sans);
-    background-color: #fafafa;        /* Very light gray — NOT pure white */
-    color: #18181b;                    /* zinc-900 — high contrast dark text */
+    background-color: #fafafa;
+    color: #18181b;
     transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
   }
 
   /* ── DARK MODE ── */
   .dark body {
-    background-color: #09090b;        /* zinc-950 — true dark background */
-    color: #f4f4f5;                    /* zinc-100 — high contrast light text */
+    background-color: #09090b;
+    color: #f4f4f5;
   }
 
   /* Selection highlight */
@@ -72,6 +73,69 @@
   .dark ::-webkit-scrollbar-thumb {
     background: #3f3f46;
   }
+
+  /* ── Fix @uiw/react-md-editor toolbar layout ── */
+  .w-md-editor-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+  }
+
+  .w-md-editor-toolbar li {
+    display: inline-flex !important;
+  }
+
+  .w-md-editor-text-pre {
+    overflow: auto !important;
+  }
+
+  .w-md-editor {
+    overflow: hidden !important;
+  }
+
+  /* ── Theme toggle ripple animation ── */
+  @keyframes theme-ripple {
+    0%   { transform: scale(0); opacity: 0.95; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Water spread dark mode animation ──
+     Starts as circle from moon icon position
+     Morphs to organic shape as it expands
+     Finally fills entire screen
+  */
+  @keyframes water-spread {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      opacity: 1;
+    }
+    /* Morph to organic blob shape at 40% */
+    40% {
+      transform: translate(-50%, -50%) scale(0.4);
+      border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%;
+      opacity: 1;
+    }
+    /* Continue spreading with different organic shape */
+    70% {
+      transform: translate(-50%, -50%) scale(0.7);
+      border-radius: 45% 55% 40% 60% / 50% 45% 55% 50%;
+      opacity: 1;
+    }
+    /* Almost full - morphing to rectangle */
+    90% {
+      transform: translate(-50%, -50%) scale(0.95);
+      border-radius: 10% 90% 15% 85% / 15% 85% 10% 90%;
+      opacity: 1;
+    }
+    /* Full screen - slightly rounded corners */
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      border-radius: 3%;
+      opacity: 1;
+    }
+  }
+  
 }
 
 /* ===== TYPOGRAPHY PLUGIN ===== */

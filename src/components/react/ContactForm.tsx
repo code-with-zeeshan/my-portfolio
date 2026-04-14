@@ -3,34 +3,64 @@
 
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/components/react/AnalyticsProvider";
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage("");
     setStatus("sending");
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const data = {
-      name: String(formData.get("name") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      message: String(formData.get("message") ?? ""),
+    const rawData = {
+      name: String(formData.get("name") ?? "").trim(),
+      email: String(formData.get("email") ?? "").trim(),
+      message: String(formData.get("message") ?? "").trim(),
     };
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(rawData.email)) {
+      setStatus("idle");
+      setErrorMessage("Please enter a valid email address");
+      return;
+    }
+
+    // Validate message length
+    if (rawData.message.length < 10) {
+      setStatus("idle");
+      setErrorMessage("Message must be at least 10 characters");
+      return;
+    }
+    if (rawData.message.length > 2000) {
+      setStatus("idle");
+      setErrorMessage("Message must be less than 2000 characters");
+      return;
+    }
+
+    const data = rawData;
 
     try {
       const { error } = await supabase.from("messages").insert(data);
 
       if (error) {
         console.error("Supabase error:", error);
+        setErrorMessage("Failed to send message. Please try again.");
         setStatus("error");
       } else {
+        // Track successful contact form submission
+        trackEvent("contact_form_submission", { email: data.email });
         setStatus("sent");
         form.reset();
       }
     } catch {
+      setErrorMessage("Something went wrong. Please try again.");
       setStatus("error");
     }
   };
@@ -55,16 +85,16 @@ export default function ContactForm() {
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <label htmlFor="name" className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">Name</label>
-          <input type="text" id="name" name="name" required className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-all focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50" placeholder="John Doe"/>
+          <input type="text" id="name" name="name" autoComplete="name" required className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-all focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50" placeholder="John Doe"/>
         </div>
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">Email</label>
-          <input type="email" id="email" name="email" required className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-all focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50" placeholder="john@example.com"/>
-        </div>
+           <label htmlFor="email" className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">Email</label>
+           <Input type="email" id="email" name="email" autoComplete="email" required className="transition-all focus:ring-2 focus:ring-brand-500/20 dark:bg-zinc-900 dark:text-zinc-50" placeholder="john@example.com"/>
+         </div>
       </div>
       <div>
         <label htmlFor="message" className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">Message</label>
-        <textarea id="message" name="message" required rows={5} className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-all focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50" placeholder="Tell me about your project..."/>
+        <textarea id="message" name="message" autoComplete="off" required rows={5} className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-all focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50" placeholder="Tell me about your project..."/>
       </div>
       <button type="submit" disabled={status === "sending"} className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-medium text-white transition-all hover:bg-brand-600 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-brand-500 dark:hover:text-white">
         {status === "sending" ? (
@@ -83,7 +113,7 @@ export default function ContactForm() {
           </>
         )}
       </button>
-      {status === "error" && <p className="text-sm text-red-500">Something went wrong. Please try again.</p>}
+      {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
     </form>
   );
 }

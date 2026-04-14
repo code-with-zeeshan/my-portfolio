@@ -9,6 +9,8 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
+const supabaseRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : "";
 ---
 
 <!doctype html>
@@ -22,21 +24,52 @@ const { title } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script is:inline>
-      const theme = localStorage.getItem("theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      document.documentElement.classList.toggle("dark", theme === "dark");
-    </script>
-    <script is:inline>
-        // Redirect to home if not authenticated
-        const sessionKey = `sb-${new URL(import.meta.env.PUBLIC_SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
-        const session = localStorage.getItem(sessionKey);
-        if (!session) {
-            window.location.href = '/';
-        }
+     <!-- Theme: prevent flash -->
+     <script is:inline>
+      (function () {
+        var theme =
+          localStorage.getItem("theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.classList.toggle("dark", theme === "dark");
+      })();
     </script>
   </head>
   <body class="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased">
+    <!--
+      ✅ Astro server value injected into a data attribute on a real DOM element.
+      is:inline scripts cannot access Astro variables directly —
+      this is the correct pattern for passing SSR values to inline scripts.
+    -->
+    <div id="__admin_meta" data-supabase-ref={supabaseRef} style="display:none" aria-hidden="true" />
+
+    <!-- Auth guard: redirect to home if no Supabase session found -->
+    <script is:inline>
+      (function () {
+        // Wait for DOM to be ready before checking auth
+        function checkAuth() {
+          try {
+            var meta = document.getElementById("__admin_meta");
+            if (!meta) return; // no Supabase configured — skip guard
+            var ref = meta.getAttribute("data-supabase-ref");
+            if (!ref) return; // no ref found — skip guard
+            var sessionKey = "sb-" + ref + "-auth-token";
+            var session = localStorage.getItem(sessionKey);
+            if (!session) {
+              window.location.replace("/");
+            }
+          } catch (_) {}
+        }
+
+        // Run immediately if DOM is ready, otherwise wait
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", checkAuth);
+        } else {
+          checkAuth();
+        }
+      })();
+    </script>
     <slot />
   </body>
 </html>

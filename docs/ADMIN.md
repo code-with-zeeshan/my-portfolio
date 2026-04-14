@@ -31,10 +31,11 @@ Closing the browser tab does **not** sign you out. Your session persists in `loc
 | **Projects** | Add, edit, delete projects; upload images via Cloudinary; toggle featured |
 | **Skills** | Edit skill category names and tag lists |
 | **Experience** | Edit work history, roles, achievements |
-| **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; upload hero images |
+| **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images |
 | **Testimonials** | Add, edit, remove testimonials |
 | **Messages** | Read contact form submissions; mark as read/unread; delete |
 | **Resume** | Upload new PDF resume (auto-updates Download Resume button site-wide) |
+| **Analytics** | View Plausible analytics dashboard; generate cron secrets for scheduled posts |
 
 ## Syncing Static Data
 
@@ -71,10 +72,15 @@ When editing highlight icons, use these names:
 | `coffee` | Coffee cup |
 | `heart` | Heart |
 | `star` | Star |
-| `user` | Person |
+| `user` | Person icon |
 | `mail` | Envelope |
 | `github` | GitHub logo |
 | `linkedin` | LinkedIn logo |
+| `twitter` | X/Twitter logo |
+| `map-pin` | Location pin |
+| `quote` | Quote marks |
+| `download` | Download arrow |
+| `check-circle` | Success checkmark |
 
 ## Image Uploads
 
@@ -89,3 +95,20 @@ All images upload directly to **Cloudinary CDN**. After uploading:
 - **Database:** PostgreSQL (8 tables for all content)
 - **Auth:** Email/password (single admin user)
 - **Free tier:** 500MB database, unlimited API calls
+
+## Generating Cron Secrets
+
+To set up scheduled post publishing, generate a secure cron secret:
+
+1. In the admin panel, go to **Analytics** tab
+2. Click **Generate Secret** button
+3. The API generates a cryptographically secure 64-character hex string
+4. Copy this value to your `.env` as `CRON_SECRET`
+5. Also add to Vercel environment variables
+
+Alternatively, generate manually:
+```bash
+openssl rand -hex 32
+```
+
+The cron job runs daily at midnight (Vercel free tier) to publish scheduled posts.

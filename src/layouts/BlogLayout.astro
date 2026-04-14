@@ -33,7 +33,7 @@ const updatedDateFormatted = updatedDate instanceof Date && !isNaN(updatedDate.g
 
 <BaseLayout title={title} description={description} ogImage={heroImage}>
   <PageTransition client:load>
-    <article class="mx-auto max-w-3xl px-6 py-24 pt-32">
+    <article class="mx-auto max-w-3xl px-6 py-16 md:py-24 pt-24 md:pt-32">
       <a
         href="/blog"
         class="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-brand-500 transition-colors"
@@ -42,7 +42,7 @@ const updatedDateFormatted = updatedDate instanceof Date && !isNaN(updatedDate.g
         Back to Blog
       </a>
 
-      <header class="mb-12">
+      <header class="mb-8 md:mb-12">
         <div class="flex flex-wrap gap-2 mb-4">
           {tags.map((tag) => (
             <span class="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-500">
@@ -71,7 +71,7 @@ const updatedDateFormatted = updatedDate instanceof Date && !isNaN(updatedDate.g
         <img
           src={heroImage}
           alt={title}
-          class="mb-12 w-full rounded-2xl object-cover"
+          class="mb-8 md:mb-12 w-full rounded-2xl object-cover"
         />
       )}
 

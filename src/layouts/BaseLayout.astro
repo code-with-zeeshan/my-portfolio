@@ -5,24 +5,36 @@ import Header from "@/components/layout/Header.astro";
 import DynamicFooter from "@/components/react/DynamicFooter.tsx";
 import ScrollProgress from "@/components/react/ScrollProgress.tsx";
 import AdminGate from "@/components/react/AdminGate.tsx";
+import AnalyticsProvider from "@/components/react/AnalyticsProvider.tsx";
+import PostHog from "@/components/posthog.astro";
+// PostHog and Umami loaded via inline scripts when needed
+
+// ── Analytics config from env ──
+// Set PUBLIC_ANALYTICS_PROVIDER=vercel|plausible|posthog|umami|none in .env
+const analyticsProvider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER ?? "vercel";
+
+// Plausible config
+const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN ?? "";
+
+// Umami config
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID ?? "";
+const umamiUrl = import.meta.env.PUBLIC_UMAMI_URL ?? "";
 
 interface Props {
-  title: string;
+  title:        string;
   description?: string;
-  ogImage?: string;
+  ogImage?:     string;
 }
 
 const {
   title,
   description = "Full-Stack Developer — Building modern web experiences",
-  ogImage = "/og-image.png",
+  ogImage     = "/og-image.png",
 } = Astro.props;
 
-// ─── Safe URL construction ───
-// Astro.site can be undefined if not configured or invalid
-const siteUrl = Astro.site?.toString() ?? "https://localhost:4321";
+const siteUrl      = Astro.site?.toString() ?? "https://localhost:4321";
 const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
-const ogImageURL = new URL(ogImage, siteUrl).toString();
+const ogImageURL   = new URL(ogImage, siteUrl).toString();
 ---
 
 <!doctype html>
@@ -34,32 +46,32 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
 
     <!-- Primary Meta Tags -->
     <title>{title} | Mohammad Zeeshan</title>
-    <meta name="title" content={`${title} | Mohammad Zeeshan`} />
+    <meta name="title"       content={`${title} | Mohammad Zeeshan`} />
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+    <link rel="canonical"    href={canonicalURL} />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content={canonicalURL} />
+    <meta property="og:title"       content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image"       content={ogImageURL} />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={canonicalURL} />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:url"         content={canonicalURL} />
+    <meta name="twitter:title"       content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImageURL} />
+    <meta name="twitter:image"      content={ogImageURL} />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-    <link rel="manifest" href="site.webmanifest" />
+    <!-- Favicons -->
+    <link rel="icon"             type="image/png"  href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon"             type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon"    href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180"   href="/apple-touch-icon.png" />
+    <link rel="manifest"         href="/site.webmanifest" crossorigin="use-credentials" />
 
-    <!-- Fonts: Inter -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -67,13 +79,13 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
       rel="stylesheet"
     />
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- JSON-LD -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Mohammad Zeeshan",
-      "url": canonicalURL,
-      "jobTitle": "Full-Stack Developer",
+      "@context":  "https://schema.org",
+      "@type":     "Person",
+      "name":      "Mohammad Zeeshan",
+      "url":       canonicalURL,
+      "jobTitle":  "Full-Stack Developer",
       "sameAs": [
         "https://github.com/code-with-zeeshan",
         "https://linkedin.com/in/mohammad-zeeshan-37637a1a5",
@@ -81,29 +93,73 @@ const ogImageURL = new URL(ogImage, siteUrl).toString();
       ]
     })} />
 
-    <!-- Theme Script (prevent flash) -->
+    <!-- ── Vercel Analytics — injected only when provider=vercel ── -->
+    {analyticsProvider === "vercel" && (
+      <script is:inline>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+      </script>
+    )}
+
+
+    <!-- ── Plausible Analytics — injected only when provider=plausible AND domain is configured ── -->
+    {analyticsProvider === "plausible" && plausibleDomain && (
+      <script is:inline>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      </script>
+    )}
+
+    <!-- Theme: prevent flash -->
     <script is:inline>
-      const theme = (() => {
-        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
-          return localStorage.getItem("theme");
-        }
-        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      (function () {
+        var theme =
+          typeof localStorage !== "undefined" && localStorage.getItem("theme")
+            ? localStorage.getItem("theme")
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        document.documentElement.classList.toggle("dark", theme === "dark");
       })();
-      document.documentElement.classList.toggle("dark", theme === "dark");
     </script>
   </head>
 
   <body class="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased transition-colors duration-300">
     <ScrollProgress client:load />
-    <AdminGate client:idle />
+    <AdminGate     client:idle />
     <Header />
     <main>
       <slot />
     </main>
     <DynamicFooter client:visible />
-    <script>
-      import { inject } from "@vercel/analytics";
-      inject();
-    </script>
+
+    <!--
+      Plug-and-play analytics provider
+      Switch provider by setting PUBLIC_ANALYTICS_PROVIDER in .env:
+        vercel   → Vercel Analytics (default)
+        plausible → Plausible (cloud or self-hosted via env vars)
+        posthog  → PostHog Analytics
+        umami    → Umami Analytics
+        none     → No analytics
+    -->
+    <AnalyticsProvider client:idle />
+
+    {/* Analytics scripts based on provider */}
+    {analyticsProvider === "vercel" && (
+      <script is:inline src="https://va.vercel-scripts.com/v1/script.js" defer />
+    )}
+    {analyticsProvider === "plausible" && (
+      <!-- Privacy-friendly analytics by Plausible -->
+      <script async src="https://plausible.io/js/pa-UBkQJ0o4gGEULdawmWnIw.js"></script>
+      <script is:inline>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      </script>
+    )}
+    {analyticsProvider === "posthog" && (
+      <PostHog />
+    )}
+    {analyticsProvider === "umami" && umamiWebsiteId && (
+      <script is:inline defer src={`${umamiUrl || 'https://cloud.umami.is'}/script.js`} data-website-id={umamiWebsiteId}></script>
+    )}
   </body>
 </html>

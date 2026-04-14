@@ -147,19 +147,19 @@ export default function DynamicAbout() {
   const profileImageUrl = getProfileImageUrl(data.profile_photo_url);
 
   return (
-    <section id="about" className="py-24 bg-zinc-100 dark:bg-zinc-900/50">
+    <section id="about" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-16">
+          <div className="mb-10 md:mb-16">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">About Me</p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Who I Am</h2>
           </div>
         </FadeIn>
 
-        <div className="grid gap-12 lg:grid-cols-12">
+        <div className="grid gap-8 md:grid-cols-12 lg:grid-cols-12">
 
           {/* ── LEFT: Photo + Skill Bars ── */}
-          <FadeIn direction="left" className="lg:col-span-5">
+          <FadeIn direction="left" className="md:col-span-5 lg:col-span-5">
             <div>
               <div className="relative aspect-4/5 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
                 <img
@@ -188,7 +188,7 @@ export default function DynamicAbout() {
           </FadeIn>
 
           {/* ── RIGHT: Bio + Highlights + CTA ── */}
-          <FadeIn direction="right" className="lg:col-span-7">
+          <FadeIn direction="right" className="md:col-span-7 lg:col-span-7">
             <div className="flex h-full flex-col justify-center">
 
               <BioText text={data.bio} />

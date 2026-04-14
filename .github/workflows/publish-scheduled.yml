@@ -1,0 +1,99 @@
+# .github/workflows/publish-scheduled.yml
+# Option A: GitHub Actions → Astro API endpoint → Supabase
+# Runs every hour on the hour — free on GitHub Actions
+# Complements the Vercel daily cron (which only runs once/day on free tier)
+
+name: Publish Scheduled Blog Posts
+
+on:
+  schedule:
+    # Every hour at :00 — runs in UTC
+    # e.g. 10:00 UTC = 3:30 PM IST
+    - cron: "0 * * * *"
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (check without publishing)"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  publish:
+    name: Publish Due Posts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check scheduled posts
+        id: publish
+        run: |
+          echo "🕐 Checking for scheduled posts at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          # Build the URL
+          ENDPOINT="${{ secrets.SITE_URL }}/api/publish-scheduled"
+          echo "📡 Endpoint: $ENDPOINT"
+
+          # Make the request
+          # -s  = silent (no progress meter)
+          # -w  = write-out format (capture HTTP status code)
+          # -o  = output file (capture response body)
+          # -X  = HTTP method
+          # -H  = headers
+          # --max-time = timeout in seconds
+
+          HTTP_STATUS=$(curl -s \
+            -w "%{http_code}" \
+            -o /tmp/response.json \
+            -X GET \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 30 \
+            "$ENDPOINT"
+          )
+
+          RESPONSE=$(cat /tmp/response.json)
+
+          echo "📊 HTTP Status: $HTTP_STATUS"
+          echo "📋 Response: $RESPONSE"
+
+          # Set outputs for next steps
+          echo "http_status=$HTTP_STATUS" >> $GITHUB_OUTPUT
+          echo "response=$RESPONSE"       >> $GITHUB_OUTPUT
+
+          # Fail the job if status is not 200
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Request failed with status $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Request successful"
+
+      - name: Parse and log result
+        if: success()
+        run: |
+          RESPONSE='${{ steps.publish.outputs.response }}'
+
+          # Extract count using grep (no jq dependency needed)
+          COUNT=$(echo "$RESPONSE" | grep -o '"count":[0-9]*' | grep -o '[0-9]*' || echo "0")
+
+          if [ -z "$COUNT" ] || [ "$COUNT" = "0" ]; then
+            echo "ℹ️ No posts were due for publishing"
+          else
+            echo "🎉 Published $COUNT post(s)!"
+            # Extract titles
+            echo "📝 Published titles: $(echo "$RESPONSE" | grep -o '"published":\[[^]]*\]')"
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "⚠️ Publish scheduled posts workflow FAILED"
+          echo "Check the logs above for details"
+          echo "HTTP Status: ${{ steps.publish.outputs.http_status }}"
+          # Add Slack/Discord webhook here if needed
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"⚠️ Scheduled post publish failed!"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -13,6 +13,8 @@ This project has **two separate icon systems** for a specific architectural reas
 | `Icons.astro` | `src/components/ui/Icons.astro` | `.astro` files only | Runs server-side, pure SVG output |
 | `ReactIcon.tsx` | `src/components/react/ReactIcon.tsx` | `.tsx` files only | React component for client rendering |
 
+> **Note:** `Icons.astro` has a subset of icons (social, navigation, content). Use `ReactIcon.tsx` in `.tsx` files for the full icon set including UI controls.
+
 **Never import `Icons.astro` into a `.tsx` file.** Astro components are server-only and cannot cross into React's client-side rendering boundary. Doing so will either silently fail (no icon renders) or throw a build error.
 
 ## Animation Components
@@ -45,17 +47,22 @@ Reveals text word-by-word with blur effect. Used in Hero section.
 Animates child elements one-by-one in sequence.
 
 ```tsx
+import { StaggerContainer, StaggerItem } from "@/components/react/StaggerChildren";
+
 <StaggerContainer client:visible staggerDelay={0.08}>
-  {skills.map((skill, i) => (
-    <StaggerItem key={skill} index={i} staggerDelay={0.08}>
-      <span>{skill}</span>
+  {items.map((item, i) => (
+    <StaggerItem key={item.id} index={i} staggerDelay={0.08}>
+      <span>{item.label}</span>
     </StaggerItem>
   ))}
 </StaggerContainer>
 ```
 
+- `StaggerContainer` wraps all items and controls the timing
+- `StaggerItem` wraps each individual child, receives `index` and optional `staggerDelay`
+
 ### SkillBar
-Animated horizontal progress bars. Data now comes from Supabase `personal.top_skills`.
+Animated horizontal progress bars. Data comes from Supabase `personal.top_skills` or falls back to static data.
 
 ```tsx
 <SkillBar skills={[
@@ -68,10 +75,14 @@ Animated horizontal progress bars. Data now comes from Supabase `personal.top_sk
 Element subtly follows the cursor on hover. Used on social icons in Footer.
 
 ```tsx
-<MagneticHover client:visible strength={0.4}>
+<MagneticHover client:visible strength={0.3}>
   <button>Hover me</button>
 </MagneticHover>
 ```
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `strength` | `number` | `0.3` | Magnetic pull strength (0-1)
 
 ### ScrollProgress
 Thin brand-colored bar at the top of the page showing scroll position.

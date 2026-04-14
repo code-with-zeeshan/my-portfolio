@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
-import { experiences as staticExperiences } from "@/data/experience";
+import { Skeleton } from "@/components/ui/Skeleton";
+// import { experiences as staticExperiences } from "@/data/experience";
 
 interface Experience {
   id: string;
@@ -19,7 +20,7 @@ interface Experience {
 export default function DynamicExperience() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
-  const [supabaseDown,  setSupabaseDown]  = useState(false);
+  const [supabaseDown, setSupabaseDown] = useState(false);
 
   useEffect(() => {
     async function fetchExperiences() {
@@ -49,10 +50,10 @@ export default function DynamicExperience() {
   }, []);
 
   return (
-    <section id="experience" className="py-24">
+    <section id="experience" className="py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-16">
+          <div className="mb-10 md:mb-16">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Career</p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Work Experience</h2>
           </div>
@@ -61,10 +62,10 @@ export default function DynamicExperience() {
         {loading ? (
           <div className="space-y-8">
             {[1, 2].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
+              <Skeleton key={i} variant="card" className="h-32" />
             ))}
           </div>
-        ) : (
+        ) : experiences.length > 0 ? (
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-px bg-zinc-200 dark:bg-zinc-800 md:left-1/2 md:-translate-x-px" />
             <div className="space-y-12">
@@ -110,6 +111,24 @@ export default function DynamicExperience() {
               ))}
             </div>
           </div>
+        ) : (
+          // ✅ B9: Meaningful empty state
+          <FadeIn>
+            <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-700">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400">
+                  <rect width="20" height="14" x="2" y="6" rx="2"/>
+                  <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+              </div>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                No work experience listed yet
+              </p>
+              <p className="text-sm text-zinc-500 max-w-xs mx-auto">
+                Career history and achievements will appear here once added from the admin dashboard.
+              </p>
+            </div>
+          </FadeIn>
         )}
       </div>
     </section>

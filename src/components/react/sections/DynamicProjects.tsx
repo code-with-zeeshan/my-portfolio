@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import { cloudinaryPresets } from "@/lib/cloudinary";
 import { projects as staticProjects } from "@/data/projects";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface Project {
   id: string;
@@ -44,7 +46,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
   const imgSrc = project.image_url?.includes("cloudinary")
     ? cloudinaryPresets.projectThumbnail(project.image_url)
-    : project.image_url || "/images/projects/project-1.webp";
+    : project.image_url || "/images/projects/sample_project.webp";
 
   return (
     <article
@@ -69,7 +71,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               // Guard: only fire once — prevents infinite loop if fallback also missing
               if (img.dataset.errored) return;
               img.dataset.errored = "true";
-              img.src = "/images/projects/project-1.webp";
+              img.src = "/images/projects/sample_project.webp";
             }}
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -134,10 +136,10 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
   const project = projects[currentIndex];
   const imgSrc = project.image_url?.includes("cloudinary")
     ? cloudinaryPresets.projectThumbnail(project.image_url)
-    : project.image_url || "/images/projects/project-1.webp";
+    : project.image_url || "/images/projects/sample_project.webp";
 
   return (
-    <div className="mb-12 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="mb-8 md:mb-12 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="grid lg:grid-cols-2">
         {/* Image */}
         <div className="relative aspect-video lg:aspect-auto overflow-hidden">
@@ -151,7 +153,7 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
               // Guard: only fire once — prevents infinite loop if fallback also missing
               if (img.dataset.errored) return;
               img.dataset.errored = "true";
-              img.src = "/images/projects/project-1.webp";
+              img.src = "/images/projects/sample_project.webp";
             }}
           />
           {/* Arrows */}
@@ -251,10 +253,10 @@ const displayProjects = supabaseDown
   const cardProjects = featuredProjects.length > 0 ? featuredProjects : displayProjects;
 
   return (
-    <section id="projects" className="py-24">
+    <section id="projects" className="py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-12">
+          <div className="mb-8 md:mb-12">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Portfolio</p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Selected Work</h2>
             <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">A curated collection of projects showcasing my skills.</p>
@@ -263,9 +265,9 @@ const displayProjects = supabaseDown
 
         {loading ? (
           <div className="space-y-8">
-            <div className="h-64 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
+            <Skeleton variant="card" className="h-64" />
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => <div key={i} className="h-72 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />)}
+              {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" className="h-72" />)}
             </div>
           </div>
         ) : displayProjects.length > 0 ? (
@@ -287,9 +289,7 @@ const displayProjects = supabaseDown
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-700">
-            <p className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-50">Projects coming soon! 🚧</p>
-          </div>
+          <EmptyState title="Projects coming soon" description="Portfolio projects will be showcased here." />
         )}
 
         <FadeIn delay={0.3}>

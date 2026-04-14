@@ -3,13 +3,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/components/react/AnalyticsProvider";
 
 interface Props {
   className?: string;
   label?: string;
+  onClick?: () => void;
 }
 
-export default function ResumeButton({ className = "", label = "Resume" }: Props) {
+export default function ResumeButton({ className = "", label = "Resume", onClick }: Props) {
   const [resumeUrl, setResumeUrl] = useState("/resume.pdf");
 
   useEffect(() => {
@@ -24,12 +26,22 @@ export default function ResumeButton({ className = "", label = "Resume" }: Props
       });
   }, []);
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Track resume download event
+    trackEvent("resume_download", { filename: resumeUrl });
+    // Call custom onClick handler if provided
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <a
       href={resumeUrl}
       target="_blank"
       rel="noopener noreferrer"
       className={className}
+      onClick={handleClick}
     >
       {label}
     </a>

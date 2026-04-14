@@ -57,7 +57,7 @@ export default function DynamicFooter() {
 
   return (
     <footer className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row">
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 py-10 md:flex-row md:gap-8 lg:gap-6">
 
         {/* Brand */}
         <div className="flex flex-col items-center md:items-start gap-2">
@@ -87,7 +87,7 @@ export default function DynamicFooter() {
         </div>
 
         {/* Copyright */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center md:text-right shrink-0">
           &copy; {currentYear} {firstName} {lastName}. All rights reserved.
         </p>
 

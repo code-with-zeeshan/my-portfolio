@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import { cloudinaryPresets } from "@/lib/cloudinary";
+import { Skeleton } from "@/components/ui/Skeleton";
 //import { getCollection } from "astro:content";
 
 interface BlogPost {
@@ -54,10 +55,10 @@ export default function DynamicBlogPreview() {
   }, []);
 
   return (
-    <section id="blog" className="py-24">
+    <section id="blog" className="py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-16 flex items-end justify-between">
+          <div className="mb-10 md:mb-16 flex items-end justify-between">
             <div>
               <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Latest Articles</h2>
@@ -71,7 +72,7 @@ export default function DynamicBlogPreview() {
 
         {loading ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />)}
+            {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" className="h-64" />)}
           </div>
         ) : posts.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

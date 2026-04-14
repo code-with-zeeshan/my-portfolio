@@ -1,0 +1,141 @@
+# .github/workflows/publish-scheduled-supabase.yml
+# Option B: GitHub Actions → Supabase REST API directly
+# More reliable — doesn't depend on your Vercel deployment being up
+# Use this if Option A fails due to cold starts or deployment issues
+
+name: Publish Scheduled Posts (Supabase Direct)
+
+on:
+  schedule:
+    # Every hour at :30 — offset from Option A to avoid overlap
+    # Run Option A at :00 and this at :30 as double-safety
+    - cron: "30 * * * *"
+
+  workflow_dispatch:
+
+jobs:
+  publish-direct:
+    name: Publish via Supabase REST
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Get due posts
+        id: get_posts
+        run: |
+          echo "🕐 Checking Supabase directly at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+          echo "⏰ Current UTC time: $NOW"
+
+          # ── Step 1: Fetch posts that are due ──
+          # Uses Supabase REST API with PostgREST query syntax
+          # ?published=eq.false  → only drafts
+          # &scheduled_for=lte.NOW → due now or earlier
+          # &scheduled_for=not.is.null → has a schedule set
+
+          SUPABASE_URL="${{ secrets.PUBLIC_SUPABASE_URL }}"
+          SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+         
+          # Validate secrets are set
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SERVICE_KEY" ]; then
+            echo "❌ Missing required secrets: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+            exit 1
+          fi
+
+          echo "📡 Fetching due posts from Supabase..."
+
+          HTTP_STATUS=$(curl -s \
+            -w "%{http_code}" \
+            -o /tmp/due_posts.json \
+            -X GET \
+            "${SUPABASE_URL}/rest/v1/blog_posts" \
+            -H "apikey: ${SERVICE_KEY}" \
+            -H "Authorization: Bearer ${SERVICE_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            --data-urlencode "select=id,title,scheduled_for" \
+            -G \
+            --data-urlencode "published=eq.false" \
+            --data-urlencode "scheduled_for=lte.${NOW}" \
+            --data-urlencode "scheduled_for=not.is.null" \
+            --max-time 30
+          )
+
+          DUE_POSTS=$(cat /tmp/due_posts.json)
+          echo "📊 Fetch HTTP Status: $HTTP_STATUS"
+          echo "📋 Due posts: $DUE_POSTS"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Failed to fetch posts: $HTTP_STATUS"
+            exit 1
+          fi
+
+          # Count posts
+          # Simple count using grep — no jq needed
+          POST_COUNT=$(echo "$DUE_POSTS" | grep -o '"id"' | wc -l | tr -d ' ')
+          echo "📊 Posts due: $POST_COUNT"
+          echo "post_count=$POST_COUNT"   >> $GITHUB_OUTPUT
+          echo "due_posts=$DUE_POSTS"     >> $GITHUB_OUTPUT
+          echo "now=$NOW"                 >> $GITHUB_OUTPUT
+
+      - name: Publish due posts
+        id: publish
+        if: steps.get_posts.outputs.post_count != '0'
+        run: |
+          NOW="${{ steps.get_posts.outputs.now }}"
+          SUPABASE_URL="${{ secrets.PUBLIC_SUPABASE_URL }}"
+          SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+
+          echo "🚀 Publishing ${{ steps.get_posts.outputs.post_count }} post(s)..."
+
+          # ── Step 2: Update all due posts in one PATCH request ──
+          # PostgREST: PATCH with filter = UPDATE WHERE
+          HTTP_STATUS=$(curl -s \
+            -w "%{http_code}" \
+            -o /tmp/update_result.json \
+            -X PATCH \
+            "${SUPABASE_URL}/rest/v1/blog_posts" \
+            -H "apikey: ${SERVICE_KEY}" \
+            -H "Authorization: Bearer ${SERVICE_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            --data-urlencode "published=eq.false" \
+            --data-urlencode "scheduled_for=lte.${NOW}" \
+            --data-urlencode "scheduled_for=not.is.null" \
+            -G \
+            -d "{\"published\": true, \"scheduled_for\": null, \"pub_date\": \"${NOW}\"}" \
+            --max-time 30
+          )
+
+          UPDATE_RESULT=$(cat /tmp/update_result.json)
+          echo "📊 Update HTTP Status: $HTTP_STATUS"
+          echo "📋 Updated posts: $UPDATE_RESULT"
+
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "204" ]; then
+            echo "❌ Failed to update posts: $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Successfully published posts!"
+          echo "update_result=$UPDATE_RESULT" >> $GITHUB_OUTPUT
+
+      - name: Log result — no posts due
+        if: steps.get_posts.outputs.post_count == '0'
+        run: |
+          echo "ℹ️ No posts scheduled for publishing at this time"
+          echo "✅ All good — will check again next hour"
+
+      - name: Log result — posts published
+        if: steps.get_posts.outputs.post_count != '0' && success()
+        run: |
+          echo "🎉 Published ${{ steps.get_posts.outputs.post_count }} post(s) successfully!"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "⚠️ Direct Supabase publish workflow FAILED"
+          # Uncomment to add webhook notification:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"⚠️ Supabase scheduled publish failed!"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

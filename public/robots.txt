@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
-Sitemap: https://yourname.dev/sitemap-index.xml
+Sitemap: https://my-portfolio-gamma-six-70.vercel.app/sitemap-index.xml

@@ -28,6 +28,10 @@ In Vercel: **Project → Settings → Environment Variables**
 | `PUBLIC_CLOUDINARY_CLOUD_NAME` | `your_cloud_name` | ✅ Yes |
 | `PUBLIC_CLOUDINARY_UPLOAD_PRESET` | `portfolio_unsigned` | ✅ Yes |
 | `PUBLIC_CLOUDINARY_API_KEY` | `your_api_key` | ✅ Yes |
+| `CRON_SECRET` | `your_random_secret_string` | For scheduled posts |
+| `PUBLIC_ANALYTICS_PROVIDER` | `plausible` | Optional |
+| `PUBLIC_PLAUSIBLE_DOMAIN` | `yourdomain.com` | If using Plausible |
+| `PUBLIC_PLAUSIBLE_API_KEY` | `your_plausible_api_key` | If using Plausible |
 
 > ⚠️ Set all variables for **Production**, **Preview**, and **Development** environments.
 

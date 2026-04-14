@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import { cloudinaryPresets } from "@/lib/cloudinary";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface BlogPost {
   id: string;
@@ -37,9 +38,9 @@ export default function DynamicBlogIndex() {
   }, []);
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-24 pt-32">
+    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32">
       <FadeIn>
-        <div className="mb-16">
+        <div className="mb-10 md:mb-16">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Latest Articles</h1>
           <p className="mt-4 text-zinc-600 dark:text-zinc-400">Thoughts on web development, design, and technology.</p>
@@ -48,7 +49,7 @@ export default function DynamicBlogIndex() {
 
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" className="h-28" />)}
         </div>
       ) : posts.length > 0 ? (
         <div className="space-y-6">

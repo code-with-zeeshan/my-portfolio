@@ -4,7 +4,7 @@
 
 | Tool | Minimum Version | Check Command |
 |---|---|---|
-| Node.js | 22.0.0+ | `node -v` |
+| Node.js | 22.12.0+ | `node -v` |
 | npm | 10.0.0+ | `npm -v` |
 | Git | 2.0+ | `git -v` |
 
@@ -59,6 +59,19 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
+# Cron job security (for scheduled post publishing)
+CRON_SECRET=your_random_secret_string
+# Analytics provider: vercel | plausible | posthog | umami | none
+PUBLIC_ANALYTICS_PROVIDER=vercel
+# ── Plausible config (cloud) ──
+PUBLIC_PLAUSIBLE_DOMAIN=your-domain.com
+PUBLIC_PLAUSIBLE_API_KEY=your-api-key
+# ── PostHog config ──
+# No additional config needed for PostHog
+# ── Umami config ──
+# Get your website ID from umami.is dashboard
+PUBLIC_UMAMI_WEBSITE_ID=your_website_id_here
+PUBLIC_UMAMI_URL=https://umami.example.com
 ```
 
 ## Step 5 — Seed Your Data
@@ -78,3 +91,5 @@ PUBLIC_CLOUDINARY_API_KEY=your_api_key
 | Sync fails with RLS error | Verify `SUPABASE_SERVICE_ROLE_KEY` is set correctly (no `PUBLIC_` prefix) |
 | Images not loading | Check `PUBLIC_CLOUDINARY_CLOUD_NAME` in `.env` |
 | Admin redirects to home | Session expired — press `Ctrl+Shift+A` and log in again |
+| Scheduled posts not publishing | Verify `CRON_SECRET` matches in `.env` and Vercel crons |
+| Analytics not tracking | Check `PUBLIC_ANALYTICS_PROVIDER` is set correctly (vercel/plausible/posthog/umami/none) |
