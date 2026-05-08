@@ -31,11 +31,23 @@ Closing the browser tab does **not** sign you out. Your session persists in `loc
 | **Projects** | Add, edit, delete projects; upload images via Cloudinary; toggle featured |
 | **Skills** | Edit skill category names and tag lists |
 | **Experience** | Edit work history, roles, achievements |
-| **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images |
+| **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images; **search posts** |
 | **Testimonials** | Add, edit, remove testimonials |
-| **Messages** | Read contact form submissions; mark as read/unread; delete |
+| **Messages** | Read contact form submissions; mark as read/unread; delete (with **undo support** via ConfirmDialog + UndoToast) |
 | **Resume** | Upload new PDF resume (auto-updates Download Resume button site-wide) |
 | **Analytics** | View Plausible analytics dashboard; generate cron secrets for scheduled posts |
+
+### New Features
+
+- **Undo Support** — Delete operations now show an undo toast notification (5 seconds to undo) via `UndoToast.tsx`
+- **Confirm Dialogs** — Destructive actions (delete) now show a confirmation dialog via `ConfirmDialog.tsx`
+- **Error Boundary** — Admin panel is wrapped in `AdminErrorBoundary.tsx` to prevent crashes from propagating
+- **Blog Search** — Search posts by title, description, or tags in the Blog tab via `BlogSearch.tsx`
+- **Rate Limiting** — API endpoints (`/api/sync`, `/api/contact`) now have Supabase-backed rate limiting
+- **CSRF Protection** — POST API endpoints now require a valid CSRF token (`/api/publish-scheduled`)
+- **CSP Security** — Content Security Policy now uses nonce-based approach for better security
+- **Input Sanitization** — Blog post HTML is now sanitized using `sanitize-html` library
+- **Server-Side Contact Form** — Contact form now submits via `/api/contact` with server-side validation and rate limiting
 
 ## Syncing Static Data
 

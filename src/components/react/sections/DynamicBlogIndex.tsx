@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import { cloudinaryPresets } from "@/lib/cloudinary";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { BlogSearch } from "@/components/react/BlogSearch";
 
 interface BlogPost {
   id: string;
@@ -23,6 +24,7 @@ function formatDate(d: string) {
 
 export default function DynamicBlogIndex() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,23 +39,32 @@ export default function DynamicBlogIndex() {
       });
   }, []);
 
-  return (
-    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32">
-      <FadeIn>
-        <div className="mb-10 md:mb-16">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Latest Articles</h1>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">Thoughts on web development, design, and technology.</p>
-        </div>
-      </FadeIn>
-
-      {loading ? (
+  const renderContent = () => {
+    if (loading) {
+      return (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" className="h-28" />)}
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="card" className="h-28" />
+          ))}
         </div>
-      ) : posts.length > 0 ? (
+      );
+    }
+
+    if (posts.length === 0) {
+      return (
+        <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-700">
+          <p className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-50">No posts yet 📝</p>
+          <p className="text-zinc-500">Blog posts coming soon!</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <BlogSearch posts={posts} onFilteredPosts={setFilteredPosts} />
+
         <div className="space-y-6">
-          {posts.map((post, idx) => (
+          {(filteredPosts.length > 0 ? filteredPosts : posts).map((post, idx) => (
             <FadeIn key={post.id} delay={idx * 0.08}>
               <a
                 href={`/blog/${post.slug}`}
@@ -72,23 +83,44 @@ export default function DynamicBlogIndex() {
                 <div className="flex-1">
                   <div className="flex flex-wrap gap-2 mb-2">
                     {post.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full px-2 py-0.5">{tag}</span>
+                      <span key={tag} className="text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full px-2 py-0.5">
+                        {tag}
+                      </span>
                     ))}
                   </div>
-                  <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">{post.title}</h2>
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{post.description}</p>
-                  <time className="mt-3 block text-xs text-zinc-500">{formatDate(post.pub_date)}</time>
+                  <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">
+                    {post.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                    {post.description}
+                  </p>
+                  <time className="mt-3 block text-xs text-zinc-500">
+                    {formatDate(post.pub_date)}
+                  </time>
                 </div>
               </a>
             </FadeIn>
           ))}
         </div>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-700">
-          <p className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-50">No posts yet 📝</p>
-          <p className="text-zinc-500">Blog posts coming soon!</p>
+      </>
+    );
+  };
+
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32">
+      <FadeIn>
+        <div className="mb-10 md:mb-16">
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
+            Latest Articles
+          </h1>
+          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+            Thoughts on web development, design, and technology.
+          </p>
         </div>
-      )}
+      </FadeIn>
+
+      {renderContent()}
     </section>
   );
 }

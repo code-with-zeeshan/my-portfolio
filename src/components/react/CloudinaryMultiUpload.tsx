@@ -12,6 +12,7 @@ interface UploadingFile {
   previewUrl: string; // local object URL for preview
   progress: number;   // 0-100
   done: boolean;
+  errorMessage?: string;
   error: boolean;
 }
 
@@ -89,9 +90,9 @@ export default function CloudinaryMultiUpload({
               updateFile(entry.id, { progress: 0, error: true });
               return null;
             }
-          } catch {
+          } catch (error) {
             clearInterval(ticker);
-            updateFile(entry.id, { progress: 0, error: true });
+            updateFile(entry.id, { progress: 0, error: true, errorMessage: (error as Error).message });
             return null;
           }
         })

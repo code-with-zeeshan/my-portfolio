@@ -2,9 +2,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { Input } from "@/components/ui/input";
 import { trackEvent } from "@/components/react/AnalyticsProvider";
+import validator from "validator";
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -24,11 +24,23 @@ export default function ContactForm() {
       message: String(formData.get("message") ?? "").trim(),
     };
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(rawData.email)) {
+    // Client-side validation
+    // Validate email format using validator.js (RFC compliant)
+    if (!validator.isEmail(rawData.email)) {
       setStatus("idle");
       setErrorMessage("Please enter a valid email address");
+      return;
+    }
+
+    // Validate name
+    if (rawData.name.length < 2) {
+      setStatus("idle");
+      setErrorMessage("Name must be at least 2 characters");
+      return;
+    }
+    if (rawData.name.length > 100) {
+      setStatus("idle");
+      setErrorMessage("Name must be less than 100 characters");
       return;
     }
 
@@ -44,23 +56,37 @@ export default function ContactForm() {
       return;
     }
 
-    const data = rawData;
+    // Basic sanitization - remove script tags and trim
+    const data = {
+      name: rawData.name.replace(/<script[^>]*>.*?<\/script>/gi, '').trim(),
+      email: rawData.email.trim().toLowerCase(),
+      message: rawData.message.replace(/<script[^>]*>.*?<\/script>/gi, '').trim(),
+    };
 
     try {
-      const { error } = await supabase.from("messages").insert(data);
+      // Submit to API endpoint (server-side rate limiting is handled there)
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-      if (error) {
-        console.error("Supabase error:", error);
-        setErrorMessage("Failed to send message. Please try again.");
-        setStatus("error");
-      } else {
-        // Track successful contact form submission
-        trackEvent("contact_form_submission", { email: data.email });
-        setStatus("sent");
-        form.reset();
+      const result = await response.json();
+
+      if (!response.ok) {
+        setStatus("idle");
+        setErrorMessage(result.error || "Failed to send message. Please try again.");
+        return;
       }
-    } catch {
-      setErrorMessage("Something went wrong. Please try again.");
+
+      // Track successful contact form submission
+      trackEvent("contact_form_submission", { email: data.email });
+      setStatus("sent");
+      form.reset();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      console.error("Contact form error:", error);
+      setErrorMessage(message);
       setStatus("error");
     }
   };

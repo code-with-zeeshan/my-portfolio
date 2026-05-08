@@ -79,7 +79,7 @@ export interface BlogPost {
   meta_title: string | null;
   meta_description: string | null;
   og_image: string | null | undefined;
-  scheduled_for: string | null | any;
+  scheduled_for: string | null | undefined;
 }
 
 export interface Testimonial {

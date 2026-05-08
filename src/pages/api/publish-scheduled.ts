@@ -19,6 +19,9 @@ function safeCompare(a: string, b: string): boolean {
 }
 
 // ── Shared handler ──
+// CSRF token for POST requests (generated once, stored in env)
+const CSRF_SECRET = import.meta.env.CSRF_SECRET || "";
+
 async function handlePublishScheduled(request: Request): Promise<Response> {
   // ── Security: verify cron secret ──
   // Vercel sends: Authorization: Bearer <CRON_SECRET>
@@ -37,6 +40,17 @@ async function handlePublishScheduled(request: Request): Promise<Response> {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // ── CSRF protection for POST requests ──
+  if (request.method === "POST" && CSRF_SECRET) {
+    const csrfToken = request.headers.get("x-csrf-token");
+    if (!csrfToken || !safeCompare(csrfToken, CSRF_SECRET)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid CSRF token" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
       );
     }
   }

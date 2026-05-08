@@ -37,8 +37,7 @@ export async function uploadToCloudinary(
 
     if (!response.ok) {
       const err = await response.json();
-      console.error("Cloudinary upload error:", err);
-      return null;
+      throw new Error(`Cloudinary upload error: ${err.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();

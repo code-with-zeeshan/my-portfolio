@@ -13,19 +13,23 @@ A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **T
 ## ✨ Features
 
 - **Blazing Fast** — Astro's island architecture ships zero JavaScript by default
-- **Dark/Light Mode** — Toggle with localStorage persistence and system preference detection
+- **Dark/Light Mode** — Toggle with localStorage persistence and system preference detection (now using View Transitions API)
 - **Responsive Design** — Mobile-first layouts that look great on all devices
 - **Animated Sections** — SSR-safe scroll animations using IntersectionObserver + CSS transitions
 - **Blog with MDX** — Write blog posts in Markdown/MDX with syntax highlighting
 - **Project Showcase** — Featured project carousel and card grid with case studies
 - **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
-- **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A`
+- **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A` with error boundary protection
 - **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
-- **Contact Form** — Messages saved to Supabase inbox, readable in admin panel
+- **Contact Form** — Messages saved to Supabase inbox, readable in admin panel (with rate limiting & validation)
 - **Resume Management** — Upload and update resume PDF via admin; auto-downloads for visitors
 - **Analytics** — Plausible, Vercel, PostHog, or Umami Analytics integration with admin dashboard
 - **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data, sitemap
-- **Accessible** — Semantic HTML, ARIA labels, keyboard navigation, color contrast
+- **Accessible** — Semantic HTML, ARIA labels, keyboard navigation, color contrast, skip-to-content links
+- **Security Hardened** — CSP with nonce-based approach, CSRF protection, input sanitization with `sanitize-html`
+- **Blog Search** — Client-side search functionality for blog posts
+- **Undo Support** — Undo toast notifications for delete operations in admin panel
+- **Confirm Dialogs** — Safe confirmation dialogs for destructive actions
 
 ## 🛠 Tech Stack
 
@@ -136,6 +140,7 @@ my-portfolio/
 │   │   ├── admin/
 │   │   │   └── index.astro        # Admin dashboard (SSR, auth-gated)
 │   │   ├── api/
+│   │   │   ├── contact.ts         # POST /api/contact — form submissions (server-side rate limiting)
 │   │   │   ├── sync.ts            # POST /api/sync — seed Supabase from static data
 │   │   │   ├── generate-secret.ts # API key generation for webhooks
 │   │   │   └── publish-scheduled.ts # Webhook for scheduled publishing
@@ -219,6 +224,10 @@ PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
 # Cron job security
 CRON_SECRET=your_random_secret_string
+# CSRF protection for POST API endpoints
+CSRF_SECRET=your_random_csrf_secret_string
+# Optional: restrict admin access to specific email
+# ADMIN_EMAIL=admin@example.com
 # Analytics provider (vercel | plausible | posthog | umami | none)
 PUBLIC_ANALYTICS_PROVIDER=plausible
 PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com
@@ -301,8 +310,28 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including c
 ├── Drag-and-drop mutiple image uploads       ✅ CloudinaryMultiUpload.tsx
 ├── Preview before publish                  ✅ BlogPreviewModal + ProjectPreviewModal
 ├── Blog post scheduling                  ✅ scheduled_for field + /api/publish-scheduled
-└── SEO metadata editor per page           ✅ meta_title, meta_description, og_image
+├── SEO metadata editor per page           ✅ meta_title, meta_description, og_image
+├── Blog search functionality               ✅ BlogSearch.tsx
+├── Undo support for delete operations     ✅ UndoToast.tsx + ConfirmDialog.tsx
+├── Admin error boundary                   ✅ AdminErrorBoundary.tsx
+├── CSP with nonce-based security          ✅ src/middleware.ts
+├── Input sanitization                     ✅ sanitize-html integration
+├── Rate limiting for API endpoints       ✅ Supabase-backed rate limiting
+├── Server-side contact form endpoint     ✅ /api/contact with rate limiting
+└── CSRF protection for POST endpoints    ✅ CSRF_SECRET + safeCompare
 ```
+
+## 🤖 AI Setup Guide
+
+For AI agents and automated setup, see **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)** - a comprehensive guide that allows AI agents to:
+- Set up the entire portfolio from user-provided configuration
+- Deploy to Vercel automatically
+- Configure all services (Supabase, Cloudinary, Analytics)
+- Customize all content (projects, blog posts, experience, etc.)
+
+**Quick Start for Users:** Fill in the `USER CONFIGURATION SECTION` in [`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md) and provide it to any AI agent for automated setup!
+
+> **Note:** You can also edit all your details through the **Admin Dashboard** (`Ctrl+Shift+A`) after deployment - no coding required!
 
 ## 🔜 Future Ideas
 - Analytics dashboard in admin (connect to Plausible API)

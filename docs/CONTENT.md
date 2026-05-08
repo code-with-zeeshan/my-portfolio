@@ -37,10 +37,34 @@ updatedDate: "2026-04-15"        # Optional
 heroImage: ""                    # Optional — Cloudinary URL or local path
 tags: ["Tag1", "Tag2"]           # Optional, defaults to []
 draft: false                     # Optional — true hides from listings
+# SEO metadata (optional)
+meta_title: "Custom SEO Title"     # Overrides default title
+meta_description: "Custom description" # Overrides default description
+og_image: "https://..."            # Custom OG image URL
+# Scheduling (optional)
+scheduled_for: "2026-05-01T00:00:00Z"  # Schedule post publication
 ---
 
 Your content in Markdown/MDX here.
 ```
+
+### Blog Search
+
+The blog index now has a **search bar** that filters posts by:
+- Title
+- Description
+- Tags
+
+Works with both static MDX files and dynamic Supabase posts. No configuration needed — works automatically.
+
+### Server-Side Contact Form
+
+The contact form now submits via the `/api/contact` endpoint with:
+- Server-side validation (email format, name length, message length)
+- Per-email rate limiting (1 submission per minute) via Supabase
+- Input sanitization (script tag removal)
+
+No client-side `Supabase` dependency required for the form submission.
 
 ## Project MDX Frontmatter
 

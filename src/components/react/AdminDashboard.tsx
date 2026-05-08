@@ -1,7 +1,7 @@
 // src/components/react/AdminDashboard.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import type {
@@ -22,6 +22,8 @@ import MarkdownEditor from "@/components/react/MarkdownEditor";
 import BlogPreviewModal from "@/components/react/BlogPreviewModal";
 import AnalyticsDisplay from "@/components/react/AnalyticsDisplay";
 import { setAnalyticsProvider, type AnalyticsProvider } from "@/components/react/AnalyticsProvider";
+import { showUndoToast } from "@/components/react/UndoToast";
+import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 // import { string } from "astro:schema";
 import {
   isoToDatetimeLocal,
@@ -59,7 +61,7 @@ const achievementsToText = (arr: string[]) => arr.join("\n");
 const textToAchievements = (text: string) =>
   text.split("\n").map((a) => a.trim()).filter(Boolean);
 
-type Tab = "personal" | "projects" | "skills" | "experience" | "blog" | "testimonials" | "messages" | "resume" | "analytics";
+type Tab = "personal" | "projects" | "skills" | "experience" | "blog" | "testimonials" | "messages" | "resume" | "analytics" | "settings";
 
 function TagInput({
   value,
@@ -220,6 +222,85 @@ function CronSecretGenerator() {
   );
 }
 
+function CSRFSecretGenerator() {
+  const [secret,    setSecret]    = useState<string | null>(null);
+  const [loading,   setLoading]   = useState(false);
+  const [copied,    setCopied]    = useState(false);
+  const [error,     setError]     = useState<string | null>(null);
+
+  const generate = async () => {
+    setLoading(true);
+    setError(null);
+    setSecret(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      // Generate a random CSRF secret (32 bytes = 64 hex chars)
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      const csrfSecret = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+
+      setSecret(csrfSecret);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copy = async () => {
+    if (!secret) return;
+    await navigator.clipboard.writeText(secret);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={generate}
+        disabled={loading}
+        className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 transition-colors"
+      >
+        {loading ? "Generating..." : "Generate New Secret"}
+      </button>
+
+      {error && (
+        <p className="text-xs text-red-500">{error}</p>
+      )}
+
+      {secret && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-800">
+            <code className="flex-1 text-xs font-mono text-zinc-900 dark:text-zinc-50 break-all select-all">
+              {secret}
+            </code>
+            <button
+              type="button"
+              onClick={copy}
+              className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium bg-brand-500 text-white hover:bg-brand-600 transition-colors"
+            >
+              {copied ? "✅ Copied!" : "Copy"}
+            </button>
+          </div>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/30">
+            <p className="text-xs text-amber-700 dark:text-amber-300 font-medium mb-1">
+              ⚠️ Add this to:
+            </p>
+            <ol className="text-xs text-amber-600 dark:text-amber-400 space-y-0.5 list-decimal list-inside">
+              <li>Your <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">.env</code> file: <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">CSRF_SECRET={"<secret>"}</code></li>
+              <li>Vercel → Project → Settings → Environment Variables</li>
+            </ol>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; synced: string[]; errors: string[] } | null>(null);
@@ -231,7 +312,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("admin_active_tab");
-      if (saved && ["personal", "projects", "skills", "experience", "blog", "testimonials", "messages", "resume", "analytics"].includes(saved)) {
+      if (saved && ["personal", "projects", "skills", "experience", "blog", "testimonials", "messages", "resume", "analytics", "settings"].includes(saved)) {
         return saved as Tab;
       }
     }
@@ -250,13 +331,21 @@ export default function AdminDashboard() {
   
   // ─── State declarations ───
   type AuthState = "checking" | "returning" | "authenticated" | "unauthenticated";
-  const [authState, setAuthState] = useState<AuthState>(() => {
-    if (typeof window === "undefined") return "checking";
+  const [authState, setAuthState] = useState<AuthState>("checking");
+  
+  // For undo/confirmation system
+  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const [deletedItem, setDeletedItem] = useState<{
+    type: string;
+    data: any;
+    timestamp: number;
+  } | null>(null);
+  useEffect(() => {
     const key = Object.keys(localStorage).find(
       (k) => k.includes("auth") && (k.includes("supabase") || k.startsWith("sb-"))
     );
-    return key ? "returning" : "checking";
-  });
+    setAuthState(key ? "returning" : "checking");
+  }, []);
   const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
   const [previewProject, setPreviewProject] = useState<Project | null>(null);
   // Sidebar collapse/expand
@@ -282,6 +371,12 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [resumeData, setResumeData] = useState<Resume | null>(null);
 
+  // ── Auth state ref for timeout checks ──
+  const authStateRef = useRef<AuthState>("checking");
+  useEffect(() => {
+    authStateRef.current = authState;
+  }, [authState]);
+
   useEffect(() => {
     // ── Detect returning user SYNCHRONOUSLY before any async work ──
     // localStorage is safe here — this runs client-side only
@@ -297,18 +392,22 @@ export default function AdminDashboard() {
       // No session found, start with checking state
       setAuthState("checking");
     }
+
+    let isMounted = true;
   
     // ── Now verify the session is actually valid ──
-    // Add timeout to prevent getting stuck in "returning" state
+    // Add timeout to prevent getting stuck in "returning" or "checking" state
     const timeoutId = setTimeout(() => {
-      // If still in returning after 5s, auth check failed - go to unauthenticated
-      if (authState === "returning") {
+      // If still in returning/checking after 15s, auth check failed - go to unauthenticated
+      if (isMounted && (authStateRef.current === "returning" || authStateRef.current === "checking")) {
+        console.warn("Auth timeout - checking session status");
         setAuthState("unauthenticated");
         window.location.href = "/";
       }
-    }, 5000);
+    }, 15000);
 
     supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!isMounted) return;
       clearTimeout(timeoutId);
       if (error || !session) {
         // No valid session → redirect home
@@ -321,10 +420,15 @@ export default function AdminDashboard() {
       setAuthState("authenticated");
       setLoading(false);
     }).catch(() => {
+      if (!isMounted) return;
       clearTimeout(timeoutId);
       setAuthState("unauthenticated");
       window.location.href = "/";
     });
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // ─── Notification ───
@@ -440,6 +544,7 @@ export default function AdminDashboard() {
     { key: "messages",     label: "Messages",     icon: "inbox"     },
     { key: "resume",       label: "Resume",       icon: "download"  },
     { key: "analytics",    label: "Analytics",    icon: "bar-chart" },
+    { key: "settings",     label: "Settings",     icon: "settings"  },
   ];
 
   const unreadCount = messages.filter((m) => !m.read).length;  
@@ -469,6 +574,7 @@ export default function AdminDashboard() {
   
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
+     {ConfirmDialogComponent}
 
       {/* ── SIDEBAR ── */}
       <aside
@@ -492,7 +598,7 @@ export default function AdminDashboard() {
             <span className="text-xs font-bold text-white dark:text-zinc-900">MZ</span>
           </a>
           {sidebarExpanded && (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden ml-3">
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 whitespace-nowrap">
                 M7Z6<span className="text-brand-500">.</span> Admin
               </p>
@@ -1404,12 +1510,27 @@ export default function AdminDashboard() {
                 <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Projects ({projects.length})</h1>
                 <button
                   onClick={async () => {
+                    // Increment all existing projects' sort_order by 1
+                    for (const p of projects) {
+                      await supabase.from("projects").update({ sort_order: p.sort_order + 1 }).eq("id", p.id);
+                    }
+                    
+                    // Insert new project at the minimum sort_order (will be 1 after increment)
+                    const minSortOrder = projects.length > 0 ? Math.min(...projects.map(p => p.sort_order)) : 0;
                     const { data, error } = await supabase
                       .from("projects")
-                      .insert({ title: "New Project", description: "Description", tags: [], featured: false, sort_order: projects.length + 1 })
+                      .insert({ title: "New Project", description: "Description", tags: [], featured: false, sort_order: minSortOrder })
                       .select().single();
-                    if (error) notify("error", error.message);
-                    else { setProjects((p) => [...p, data]); notify("success", "Project added! Edit below."); }
+                    if (error) {
+                      notify("error", error.message);
+                    } else {
+                      // Update local state: new item at top, increment existing items
+                      setProjects((prev) => [
+                        data,
+                        ...prev.map(p => ({ ...p, sort_order: p.sort_order + 1 }))
+                      ]);
+                      notify("success", "Project added! Edit below.");
+                    }
                   }}
                   className={btnAdd}
                 >
@@ -1418,7 +1539,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-4">
-                {projects.map((project) => (
+                {projects.map((project, idx) => (
                   <Card key={project.id} id={`project-${project.id}`} variant="bordered" className="bg-white dark:bg-zinc-900 rounded-2xl scroll-mt-8 p-6 gap-0">
                     <div className="grid gap-3 md:grid-cols-2 mb-3">
                       <Field label="Title">
@@ -1613,17 +1734,51 @@ export default function AdminDashboard() {
                           {saving ? "Saving..." : "Save"}
                         </button>
                         <button
-                          onClick={async () => {
-                            if (!confirm(`Delete "${project.title}"?`)) return;
+                          onClick={() => {
+                            const deletedIdx = idx; // Capture original index from map
+                            showConfirm(
+                              "Delete Project",
+                              `Are you sure you want to delete "${project.title}"?`,
+                              async () => {
                             const { error } = await supabase
                               .from("projects")
                               .delete()
                               .eq("id", project.id);
-                            if (error) notify("error", error.message);
-                            else {
+                              if (error) {
+                                notify("error", error.message);
+                              } else {
+                                // Store deleted item and original index for undo
+                                const deletedProject = project;
+                                const deletedIndex = deletedIdx;
                               setProjects(projects.filter((p) => p.id !== project.id));
                               notify("success", "Project deleted");
-                            }
+                                    
+                                    // Show undo toast
+                                    showUndoToast({
+                                      message: "Project deleted",
+                                      actionLabel: "Undo",
+                                      duration: 5000,
+                                      onUndo: async () => {
+                                        // Restore the project at original index
+                                        const { error } = await supabase
+                                          .from("projects")
+                                          .insert(deletedProject);
+                                        if (error) {
+                                          notify("error", "Failed to undo: " + error.message);
+                                        } else {
+                                          setProjects((prev) => {
+                                            const newArr = [...prev];
+                                            newArr.splice(deletedIndex, 0, deletedProject); // Insert at original index
+                                            return newArr;
+                                          });
+                                          notify("success", "Project restored");
+                                        }
+                                      }
+                                    });
+                                  }
+                                },
+                                { variant: "danger", confirmLabel: "Delete" }
+                              );
                           }}
                           className={btnDanger}
                         >
@@ -1688,12 +1843,27 @@ export default function AdminDashboard() {
               <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Skills ({skills.length} categories)</h1>
               <button
                 onClick={async () => {
+                  // Increment all existing categories' sort_order by 1
+                  for (const s of skills) {
+                    await supabase.from("skill_categories").update({ sort_order: s.sort_order + 1 }).eq("id", s.id);
+                  }
+                  
+                  // Insert new category at the minimum sort_order (will be 1 after increment)
+                  const minSortOrder = skills.length >0 ? Math.min(...skills.map(s => s.sort_order)) :0;
                   const { data, error } = await supabase
                     .from("skill_categories")
-                    .insert({ title: "New Category", skills: [], sort_order: skills.length + 1 })
+                    .insert({ title: "New Category", skills: [], sort_order: minSortOrder })
                     .select().single();
-                  if (error) notify("error", error.message);
-                  else { setSkills((s) => [...s, data]); notify("success", "Category added!"); }
+                  if (error) {
+                    notify("error", error.message);
+                  } else {
+                    // Update local state: new item at top, increment existing items
+                    setSkills((prev) => [
+                      data,
+                      ...prev.map(s => ({ ...s, sort_order: s.sort_order + 1 }))
+                    ]);
+                    notify("success", "Category added!");
+                  }
                 }}
                 className={btnAdd}
               >
@@ -1702,7 +1872,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="space-y-4">
-              {skills.map((cat) => (
+              {skills.map((cat, idx) => (
                 <Card key={cat.id} variant="bordered" className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0">
                   <div className="grid gap-3 md:grid-cols-3 mb-4">
                     <Field label="Category Name">
@@ -1752,11 +1922,48 @@ export default function AdminDashboard() {
                       Save
                     </button>
                     <button
-                      onClick={async () => {
-                        if (!confirm(`Delete "${cat.title}" category?`)) return;
-                        const { error } = await supabase.from("skill_categories").delete().eq("id", cat.id);
-                        if (error) notify("error", error.message);
-                        else { setSkills(skills.filter((s) => s.id !== cat.id)); notify("success", "Category deleted"); }
+                      onClick={() => {
+                        const deletedIdx = idx;
+                        showConfirm(
+                          "Delete Category",
+                          `Are you sure you want to delete "${cat.title}" category?`,
+                          async () => {
+                            const { error } = await supabase.from("skill_categories").delete().eq("id", cat.id);
+                            if (error) {
+                              notify("error", error.message);
+                            } else {
+                              // Store deleted category and its original index for potential undo
+                              const deletedCategory = cat;
+                              setSkills(skills.filter((s) => s.id !== cat.id));
+                              notify("success", "Category deleted");
+                              
+                              // Show undo toast
+                              showUndoToast({
+                                message: "Category deleted",
+                                actionLabel: "Undo",
+                                duration: 5000,
+                                onUndo: async () => {
+                                  // Restore the category to its original position
+                                  const { data, error } = await supabase
+                                    .from("skill_categories")
+                                    .insert(deletedCategory)
+                                    .select().single();
+                                  if (error) {
+                                    notify("error", "Failed to undo: " + error.message);
+                                  } else {
+                                    setSkills((prev) => {
+                                      const newArr = [...prev];
+                                      newArr.splice(deletedIdx, 0, data);
+                                      return newArr;
+                                    });
+                                    notify("success", "Category restored");
+                                  }
+                                }
+                              });
+                            }
+                          },
+                          { variant: "danger", confirmLabel: "Delete" }
+                        );
                       }}
                       className={btnDanger}
                     >
@@ -1784,12 +1991,27 @@ export default function AdminDashboard() {
               <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Experience ({experiences.length})</h1>
               <button
                 onClick={async () => {
+                  // Increment all existing experiences' sort_order by 1
+                  for (const e of experiences) {
+                    await supabase.from("experiences").update({ sort_order: e.sort_order + 1 }).eq("id", e.id);
+                  }
+                  
+                  // Insert new experience at the minimum sort_order (will be 1 after increment)
+                  const minSortOrder = experiences.length >0 ? Math.min(...experiences.map(e => e.sort_order)) :0;
                   const { data, error } = await supabase
                     .from("experiences")
-                    .insert({ company: "Company Name", role: "Job Title", period: "2024 — Present", description: "Description here.", achievements: [], sort_order: experiences.length + 1 })
+                    .insert({ company: "Company Name", role: "Job Title", period: "2024 — Present", description: "Description here.", achievements: [], sort_order: minSortOrder })
                     .select().single();
-                  if (error) notify("error", error.message);
-                  else { setExperiences((e) => [...e, data]); notify("success", "Experience added!"); }
+                  if (error) {
+                    notify("error", error.message);
+                  } else {
+                    // Update local state: new item at top, increment existing items
+                    setExperiences((prev) => [
+                      data,
+                      ...prev.map(e => ({ ...e, sort_order: e.sort_order + 1 }))
+                    ]);
+                    notify("success", "Experience added!");
+                  }
                 }}
                 className={btnAdd}
               >
@@ -1886,11 +2108,42 @@ export default function AdminDashboard() {
                       Save
                     </button>
                     <button
-                      onClick={async () => {
-                        if (!confirm(`Delete "${exp.role}" at ${exp.company}?`)) return;
-                        const { error } = await supabase.from("experiences").delete().eq("id", exp.id);
-                        if (error) notify("error", error.message);
-                        else { setExperiences(experiences.filter((x) => x.id !== exp.id)); notify("success", "Experience deleted"); }
+                      onClick={() => {
+                        showConfirm(
+                          "Delete Experience",
+                          `Are you sure you want to delete "${exp.role}" at ${exp.company}?`,
+                          async () => {
+                            const { error } = await supabase.from("experiences").delete().eq("id", exp.id);
+                            if (error) {
+                              notify("error", error.message);
+                            } else {
+                              // Store deleted experience for potential undo
+                              const deletedExperience = exp;
+                              setExperiences(experiences.filter((x) => x.id !== exp.id));
+                              notify("success", "Experience deleted");
+                              
+                              // Show undo toast
+                              showUndoToast({
+                                message: "Experience deleted",
+                                actionLabel: "Undo",
+                                duration: 5000,
+                                onUndo: async () => {
+                                  // Restore the experience
+                                  const { error } = await supabase
+                                    .from("experiences")
+                                    .insert(deletedExperience);
+                                  if (error) {
+                                    notify("error", "Failed to undo: " + error.message);
+                                  } else {
+                                    setExperiences((prev) => [...prev, deletedExperience]);
+                                    notify("success", "Experience restored");
+                                  }
+                                }
+                              });
+                            }
+                          },
+                          { variant: "danger", confirmLabel: "Delete" }
+                        );
                       }}
                       className={btnDanger}
                     >
@@ -1916,12 +2169,27 @@ export default function AdminDashboard() {
               <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Testimonials ({testimonials.length})</h1>
               <button
                 onClick={async () => {
+                  // Increment all existing testimonials' sort_order by 1
+                  for (const t of testimonials) {
+                    await supabase.from("testimonials").update({ sort_order: t.sort_order + 1 }).eq("id", t.id);
+                  }
+                  
+                  // Insert new testimonial at the minimum sort_order (will be 1 after increment)
+                  const minSortOrder = testimonials.length >0 ? Math.min(...testimonials.map(t => t.sort_order)) :0;
                   const { data, error } = await supabase
                     .from("testimonials")
-                    .insert({ name: "Name", role: "Role", company: "Company", content: "Testimonial content here.", sort_order: testimonials.length + 1 })
+                    .insert({ name: "Name", role: "Role", company: "Company", content: "Testimonial content here.", sort_order: minSortOrder })
                     .select().single();
-                  if (error) notify("error", error.message);
-                  else { setTestimonials((t) => [...t, data]); notify("success", "Testimonial added!"); }
+                  if (error) {
+                    notify("error", error.message);
+                  } else {
+                    // Update local state: new item at top, increment existing items
+                    setTestimonials((prev) => [
+                      data,
+                      ...prev.map(t => ({ ...t, sort_order: t.sort_order + 1 }))
+                    ]);
+                    notify("success", "Testimonial added!");
+                  }
                 }}
                 className={btnAdd}
               >
@@ -1970,11 +2238,42 @@ export default function AdminDashboard() {
                       Save
                     </button>
                     <button
-                      onClick={async () => {
-                        if (!confirm(`Delete testimonial from "${t.name}"?`)) return;
-                        const { error } = await supabase.from("testimonials").delete().eq("id", t.id);
-                        if (error) notify("error", error.message);
-                        else { setTestimonials(testimonials.filter((x) => x.id !== t.id)); notify("success", "Testimonial deleted"); }
+                      onClick={() => {
+                        showConfirm(
+                          "Delete Testimonial",
+                          `Are you sure you want to delete testimonial from "${t.name}"?`,
+                          async () => {
+                            const { error } = await supabase.from("testimonials").delete().eq("id", t.id);
+                            if (error) {
+                              notify("error", error.message);
+                            } else {
+                              // Store deleted testimonial for potential undo
+                              const deletedTestimonial = t;
+                              setTestimonials(testimonials.filter((x) => x.id !== t.id));
+                              notify("success", "Testimonial deleted");
+                              
+                              // Show undo toast
+                              showUndoToast({
+                                message: "Testimonial deleted",
+                                actionLabel: "Undo",
+                                duration: 5000,
+                                onUndo: async () => {
+                                  // Restore the testimonial
+                                  const { error } = await supabase
+                                    .from("testimonials")
+                                    .insert(deletedTestimonial);
+                                  if (error) {
+                                    notify("error", "Failed to undo: " + error.message);
+                                  } else {
+                                    setTestimonials((prev) => [...prev, deletedTestimonial]);
+                                    notify("success", "Testimonial restored");
+                                  }
+                                }
+                              });
+                            }
+                          },
+                          { variant: "danger", confirmLabel: "Delete" }
+                        );
                       }}
                       className={btnDanger}
                     >
@@ -2128,7 +2427,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-6">
-                {blogPosts.map((post) => (
+                {blogPosts.map((post, idx) => (
                   <div key={post.id} id={`post-${post.id}`} className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden scroll-mt-8">
                     {/* ── Post Header Bar ── */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80">
@@ -2564,17 +2863,51 @@ export default function AdminDashboard() {
                           </button>
                           <button
                             type="button"
-                            onClick={async () => {
-                              if (!confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
-                              const { error } = await supabase
-                                .from("blog_posts")
-                                .delete()
-                                .eq("id", post.id);
-                              if (error) notify("error", error.message);
-                              else {
-                                setBlogPosts((prev) => prev.filter((p) => p.id !== post.id));
-                                notify("success", "Post deleted");
-                              }
+                            onClick={() => {
+                              const deletedIndex = idx; // Capture original index from map
+                              showConfirm(
+                                "Delete Blog Post",
+                                `Are you sure you want to delete "${post.title}"?`,
+                                async () => {
+                                  const { error } = await supabase
+                                    .from("blog_posts")
+                                    .delete()
+                                    .eq("id", post.id);
+                                  if (error) {
+                                    notify("error", error.message);
+                                  } else {
+                                    // Store deleted post and original index for undo
+                                    const deletedPost = post;
+                                    const deletedIdx = deletedIndex;
+                                    setBlogPosts((prev) => prev.filter((p) => p.id !== post.id));
+                                    notify("success", "Post deleted");
+                                    
+                                    // Show undo toast
+                                    showUndoToast({
+                                      message: "Post deleted",
+                                      actionLabel: "Undo",
+                                      duration: 5000,
+                                      onUndo: async () => {
+                                        // Restore the post at original index
+                                        const { error } = await supabase
+                                          .from("blog_posts")
+                                          .insert(deletedPost);
+                                        if (error) {
+                                          notify("error", "Failed to undo: " + error.message);
+                                        } else {
+                                          setBlogPosts((prev) => {
+                                            const newArr = [...prev];
+                                            newArr.splice(deletedIdx, 0, deletedPost); // Insert at original index
+                                            return newArr;
+                                          });
+                                          notify("success", "Post restored");
+                                        }
+                                      }
+                                    });
+                                  }
+                                },
+                                { variant: "danger", confirmLabel: "Delete" }
+                              );
                             }}
                             className={btnDanger}
                           >
@@ -2721,10 +3054,46 @@ export default function AdminDashboard() {
                           </button>
                         )}
                         <button
-                          onClick={async () => {
-                            if (!confirm("Delete this message?")) return;
-                            await supabase.from("messages").delete().eq("id", msg.id);
-                            setMessages(messages.filter((m) => m.id !== msg.id));
+                          onClick={() => {
+                            showConfirm(
+                              "Delete Message",
+                              "Are you sure you want to delete this message?",
+                              async () => {
+                                try {
+                                  const { error } = await supabase.from("messages").delete().eq("id", msg.id);
+                                  if (error) {
+                                    notify("error", "Failed to delete message: " + error.message);
+                                    return;
+                                  }
+                                  // Store deleted message for potential undo
+                                  const deletedMessage = msg;
+                                  setMessages(messages.filter((m) => m.id !== msg.id));
+
+                                  // Show undo toast
+                                  showUndoToast({
+                                    message: "Message deleted",
+                                    actionLabel: "Undo",
+                                    duration: 5000,
+                                    onUndo: async () => {
+                                      // Restore the message
+                                      const { error } = await supabase
+                                        .from("messages")
+                                        .insert(deletedMessage);
+                                      if (error) {
+                                        notify("error", "Failed to undo: " + error.message);
+                                      } else {
+                                        setMessages((prev) => [...prev, deletedMessage]);
+                                        notify("success", "Message restored");
+                                      }
+                                    }
+                                  });
+                                } catch (error) {
+                                  notify("error", "Failed to delete message. Please try again.");
+                                  console.error("Delete message error:", error);
+                                }
+                              },
+                              { variant: "danger", confirmLabel: "Delete" }
+                            );
                           }}
                           className="text-xs text-red-400 hover:underline"
                         >
@@ -2829,22 +3198,9 @@ export default function AdminDashboard() {
                   />
                   <p className="text-xs text-zinc-400 mt-2">PDF format only. Your portfolio's resume link will automatically update.</p>
                 </Card>
-              {/* ── CRON_SECRET generator ── */}
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">
-                  Generate CRON_SECRET
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
-                  Use this to protect your scheduled publish endpoint.
-                  Copy the generated value into your <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">.env</code> file
-                  and Vercel / GitHub Actions secrets.
-                </p>
-
-                <CronSecretGenerator />
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* ══════════════════════════════════════════════
             TAB: ANALYTICS — Phase 3 P5
@@ -2910,13 +3266,70 @@ export default function AdminDashboard() {
                 })}
               </div>
             </div>
-
             {/* Analytics stats display */}
             <AnalyticsDisplay />
           </div>
         )}
+
+        {/* ════════════════════════════════════════════
+            TAB: SETTINGS — Secret Generators
+        ════════════════════════════════════════════ */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            {/* ── CRON_SECRET generator ── */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">
+                Generate CRON_SECRET
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+                Use this to protect your scheduled publish endpoint.
+                Copy the generated value into your <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">.env</code> file
+                and Vercel / GitHub Actions secrets.
+              </p>
+
+              <CronSecretGenerator />
+            </div>
+
+            {/* ── CSRF_SECRET generator ── */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">
+                Generate CSRF_SECRET
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+                Use this to protect your forms from CSRF attacks.
+                Copy the generated value into your <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">.env</code> file
+                and Vercel environment variables.
+              </p>
+
+              <CSRFSecretGenerator />
+            </div>
+
+            {/* ── Environment Variables Info ── */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-3">
+                Environment Variables Guide
+              </h3>
+              <div className="space-y-3 text-xs text-zinc-600 dark:text-zinc-400">
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
+                  <p className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">.env file (local development)</p>
+                  <pre className="block whitespace-pre bg-zinc-100 dark:bg-zinc-900 p-2 rounded text-xs text-zinc-900 dark:text-zinc-50">CRON_SECRET=your_cron_secret_here CSRF_SECRET=your_csrf_secret_here</pre>
+                </div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
+                  <p className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">Vercel (Production)</p>
+                  <p>Go to Project → Settings → Environment Variables and add both secrets.</p>
+                </div>
+                <div className="rounded-lg bg-amber-50 p-3 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                  <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">⚠️ Important</p>
+                  <p className="text-amber-700 dark:text-amber-300">
+                    After updating environment variables on Vercel, you must redeploy your project for changes to take effect.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );
 }
-

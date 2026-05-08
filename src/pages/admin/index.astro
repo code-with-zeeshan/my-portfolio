@@ -10,16 +10,27 @@ import AdminLayout from "@/layouts/AdminLayout.astro";
 </AdminLayout>
 
 <script>
-  // Dynamically import AdminDashboard to reduce initial bundle size
+  // Dynamically import AdminDashboard and error boundary to reduce initial bundle size
+  // Astro will process this script and resolve path aliases correctly
   import('@/components/react/AdminDashboard.tsx').then(async (module) => {
     const AdminDashboard = module.default;
+    const { AdminErrorBoundary } = await import('@/components/react/AdminErrorBoundary.tsx');
     const React = await import('react');
     const { createRoot } = await import('react-dom/client');
-
+    
     const container = document.getElementById('admin-root');
     if (container) {
       const root = createRoot(container);
-      root.render(React.createElement(AdminDashboard));
+      // Wrap AdminDashboard with error boundary
+      root.render(
+        React.createElement(
+          AdminErrorBoundary,
+          null,
+          React.createElement(AdminDashboard)
+        )
+      );
     }
+  }).catch((err) => {
+    console.error('Failed to load admin dashboard:', err);
   });
 </script>

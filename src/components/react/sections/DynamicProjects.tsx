@@ -146,6 +146,7 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
           <img
             src={imgSrc}
             alt={project.title}
+            loading="lazy"
             className="h-full w-full object-cover"
             style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
             onError={(e) => {

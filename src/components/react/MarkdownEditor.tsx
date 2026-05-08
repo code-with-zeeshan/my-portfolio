@@ -33,6 +33,8 @@ export default function MarkdownEditor({
     // Dynamically import to avoid SSR issues
     import("@uiw/react-md-editor").then((mod) => {
       setMDEditor(() => mod.default);
+    }).catch((err) => {
+      console.error('Failed to load markdown editor:', err);
     });
   }, []);
 

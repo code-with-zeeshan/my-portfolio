@@ -63,6 +63,7 @@ const icons: Record<string, string> = {
   "panel-right":   '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
   clock:           '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   image:           '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+  "grip-vertical": '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/>',
 };
 
 export default function ReactIcon({ name, size = 24, className = "" }: Props) {

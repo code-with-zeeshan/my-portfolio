@@ -85,8 +85,12 @@ Element subtly follows the cursor on hover. Used on social icons in Footer.
 | `strength` | `number` | `0.3` | Magnetic pull strength (0-1)
 
 ### ScrollProgress
+
 Thin brand-colored bar at the top of the page showing scroll position.
+
 Included automatically in `BaseLayout.astro` — no manual usage needed.
+
+> **Note:** The SVG icon that previously appeared on scroll has been removed for a cleaner experience. Only the progress bar remains.
 
 ### PageTransition
 Fade-in animation on page load. Used in `BlogLayout.astro`.

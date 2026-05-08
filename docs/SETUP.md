@@ -61,6 +61,10 @@ PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
 # Cron job security (for scheduled post publishing)
 CRON_SECRET=your_random_secret_string
+# CSRF protection for POST API endpoints
+CSRF_SECRET=your_random_csrf_secret
+# Optional: restrict admin access to specific email
+# ADMIN_EMAIL=admin@example.com
 # Analytics provider: vercel | plausible | posthog | umami | none
 PUBLIC_ANALYTICS_PROVIDER=vercel
 # ── Plausible config (cloud) ──
@@ -73,6 +77,10 @@ PUBLIC_PLAUSIBLE_API_KEY=your-api-key
 PUBLIC_UMAMI_WEBSITE_ID=your_website_id_here
 PUBLIC_UMAMI_URL=https://umami.example.com
 ```
+
+> **💡 Note:** You can also edit ALL your details through the **Admin Dashboard** (`Ctrl+Shift+A`) after deployment - no coding required!
+
+> See **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)** for automated setup with AI agents.
 
 ## Step 5 — Seed Your Data
 
@@ -93,3 +101,4 @@ PUBLIC_UMAMI_URL=https://umami.example.com
 | Admin redirects to home | Session expired — press `Ctrl+Shift+A` and log in again |
 | Scheduled posts not publishing | Verify `CRON_SECRET` matches in `.env` and Vercel crons |
 | Analytics not tracking | Check `PUBLIC_ANALYTICS_PROVIDER` is set correctly (vercel/plausible/posthog/umami/none) |
+| CSRF errors on contact form | Verify `CSRF_SECRET` is set in `.env` and Vercel environment variables |

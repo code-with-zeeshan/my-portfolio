@@ -105,6 +105,7 @@ export default function DynamicBlogPost({ slug }: Props) {
           <img
             src={heroSrc}
             alt={post.title}
+            loading="lazy"
             className="mb-10 w-full rounded-2xl object-cover shadow-lg"
           />
         )}

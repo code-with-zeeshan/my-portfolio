@@ -60,14 +60,15 @@ export default function PlausibleAnalytics() {
   const [error,   setError]   = useState<string | null>(null);
 
   // ── Read both cloud and self-hosted config ──
-  const apiKey = (import.meta as any).env?.PUBLIC_PLAUSIBLE_API_KEY  ?? "";
-  const domain = (import.meta as any).env?.PUBLIC_PLAUSIBLE_DOMAIN   ?? "";
+  const env = (import.meta as { env?: Record<string, string> }).env;
+  const apiKey = env?.PUBLIC_PLAUSIBLE_API_KEY ?? "";
+  const domain = env?.PUBLIC_PLAUSIBLE_DOMAIN ?? "";
 
   // For self-hosted, point to your own instance
   // Cloud default: https://plausible.io
   // Self-hosted:   https://analytics.yourdomain.com
-  const apiHost = (import.meta as any).env?.PUBLIC_PLAUSIBLE_API_HOST
-                    ? (import.meta as any).env.PUBLIC_PLAUSIBLE_API_HOST.replace(/\/$/, "")
+  const apiHost = env?.PUBLIC_PLAUSIBLE_API_HOST
+                    ? env.PUBLIC_PLAUSIBLE_API_HOST.replace(/\/$/, "")
                     : "https://plausible.io";
 
   const hasCredentials = Boolean(apiKey && domain);

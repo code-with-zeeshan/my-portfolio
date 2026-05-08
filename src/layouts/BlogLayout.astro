@@ -67,13 +67,14 @@ const updatedDateFormatted = updatedDate instanceof Date && !isNaN(updatedDate.g
         </div>
       </header>
 
-      {heroImage && (
-        <img
-          src={heroImage}
-          alt={title}
-          class="mb-8 md:mb-12 w-full rounded-2xl object-cover"
-        />
-      )}
+       {heroImage && (
+         <img
+           src={heroImage}
+           alt={title}
+           class="mb-8 md:mb-12 w-full rounded-2xl object-cover"
+           loading="lazy"
+         />
+       )}
 
       <div class="prose prose-zinc mx-auto dark:prose-invert prose-headings:font-semibold prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
         <slot />

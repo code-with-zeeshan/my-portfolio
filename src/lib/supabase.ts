@@ -32,6 +32,10 @@ export function createAdminClient() {
   if (!serviceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set. Cannot perform admin operations.");
   }
+  // Additional safety: prevent client-side usage
+  if (typeof window !== "undefined") {
+    throw new Error("Admin client cannot be used in browser/client-side context");
+  }
   return createClient(supabaseUrl!, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,

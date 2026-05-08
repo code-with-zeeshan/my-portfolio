@@ -21,7 +21,7 @@ export function getProvider(): AnalyticsProvider {
   }
 
   // Fall back to env variable
-  const val = (import.meta as any).env?.PUBLIC_ANALYTICS_PROVIDER ?? "vercel";
+  const val = (import.meta as { env?: Record<string, string> }).env?.PUBLIC_ANALYTICS_PROVIDER ?? "vercel";
   const validProviders: AnalyticsProvider[] = ["vercel", "plausible", "posthog", "umami", "none"];
   if (validProviders.includes(val as AnalyticsProvider)) {
     return val as AnalyticsProvider;

@@ -131,7 +131,23 @@ PUBLIC_PLAUSIBLE_SCRIPT_URL=https://mydomain.com/stats/js/script.js
 
 Add `.mdx` files to `src/data/blog/` or create via Admin → Blog → **+ New Post**.
 
-### 11. Projects
+### 11. Blog Search
+
+The blog index now has a **search bar** that filters posts by title, description, or tags.
+
+- Works with both static MDX files and dynamic Supabase posts
+- No configuration needed — works automatically
+
+### 12. Server-Side Contact Form
+
+The contact form now uses a server-side API endpoint (`/api/contact`) with:
+- Server-side validation and sanitization
+- Per-email rate limiting (1 submission per minute)
+- No Supabase client dependency needed
+
+No configuration needed — works automatically.
+
+### 13. Projects
 
 Edit `src/data/projects.ts` or use Admin → Projects → **+ Add Project**.
 
@@ -148,3 +164,11 @@ If you need an icon not in `ReactIcon.tsx` or `Icons.astro`:
 ```
 
 Both files must stay in sync.
+
+## AI-Powered Setup
+
+Want to automate your setup? See **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)**:
+
+- Fill in the `USER CONFIGURATION SECTION` with your details
+- Provide to any AI agent for automated setup
+- Or skip and edit everything through the **Admin Dashboard** (`Ctrl+Shift+A`) after deployment!

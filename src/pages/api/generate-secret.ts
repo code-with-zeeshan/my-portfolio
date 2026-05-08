@@ -31,11 +31,14 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     // Allow any authenticated user to generate secret (security via auth check above)
-    // For stricter admin-only, set ADMIN_EMAIL in .env and uncomment below:
-    // const adminEmail = import.meta.env.ADMIN_EMAIL;
-    // if (!adminEmail || user.email !== adminEmail) {
-    //   return new Response(JSON.stringify({ error: "Forbidden: Admin only" }), { status: 403 });
-    // }
+    // For stricter admin-only, set ADMIN_EMAIL in .env:
+    const adminEmail = import.meta.env.ADMIN_EMAIL;
+    if (adminEmail && user.email !== adminEmail) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Admin only" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     // ── Generate cryptographically secure random hex string ──
     // 32 bytes = 64 hex chars — same as `openssl rand -hex 32`

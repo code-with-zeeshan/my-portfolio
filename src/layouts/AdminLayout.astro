@@ -19,13 +19,28 @@ const supabaseRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>{title} | Admin</title>
+    <title>{ title } | Admin</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-     <!-- Theme: prevent flash -->
-     <script is:inline>
+    
+    <!-- Vite React Fast Refresh: Required for HMR in development -->
+    {import.meta.env.DEV && (
+      <>
+        <script type="module" src="/@vite/client"></script>
+        <script type="module">
+          import RefreshRuntime from "/@react-refresh"
+          RefreshRuntime.injectIntoGlobalHook(window)
+          window.$RefreshReg$ = () => {}
+          window.$RefreshSig$ = () => (type) => type
+          window.__vite_plugin_react_preamble_installed__ = true
+        </script>
+      </>
+    )}
+    
+    <!-- Theme: prevent flash -->
+    <script is:inline>
       (function () {
         var theme =
           localStorage.getItem("theme") ||
@@ -51,9 +66,15 @@ const supabaseRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : 
         function checkAuth() {
           try {
             var meta = document.getElementById("__admin_meta");
-            if (!meta) return; // no Supabase configured — skip guard
+            if (!meta) {
+              console.error("Supabase not configured - admin panel disabled");
+              return;
+            }
             var ref = meta.getAttribute("data-supabase-ref");
-            if (!ref) return; // no ref found — skip guard
+            if (!ref) {
+              console.error("Supabase reference not found");
+              return;
+            }
             var sessionKey = "sb-" + ref + "-auth-token";
             var session = localStorage.getItem(sessionKey);
             if (!session) {

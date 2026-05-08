@@ -1,0 +1,92 @@
+# .github/workflows/bundle-analysis.yml
+# Bundle size monitoring - runs on PRs and main branch pushes
+# Analyzes bundle size and fails if it exceeds threshold
+
+name: Bundle Analysis
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  bundle-analysis:
+    name: Analyze Bundle Size
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Analyze bundle size
+        run: |
+          echo "📦 Analyzing bundle size..."
+          
+          # Calculate total dist size
+          if [ -d dist ]; then
+            BUNDLE_SIZE=$(du -sb dist | cut -f1)
+            BUNDLE_SIZE_KB=$((BUNDLE_SIZE / 1024))
+            BUNDLE_SIZE_MB=$((BUNDLE_SIZE / 1024 / 1024))
+            
+            echo "📊 Total dist size: ${BUNDLE_SIZE_KB} KB (${BUNDLE_SIZE_MB} MB)"
+            
+            # List largest files
+            echo ""
+            echo "📄 Largest files in dist:"
+            find dist -type f -exec du -h {} + | sort -rh | head -10
+            
+            # Check against thresholds
+            WARNING_SIZE=$((3 * 1024 * 1024))  # 3MB warning
+            ERROR_SIZE=$((5 * 1024 * 1024))    # 5MB error
+            
+            if [ "$BUNDLE_SIZE" -gt "$ERROR_SIZE" ]; then
+              echo ""
+              echo "❌ ERROR: Bundle size exceeds 5MB threshold!"
+              echo "   Current: ${BUNDLE_SIZE_KB} KB"
+              echo "   Limit: 5120 KB"
+              echo ""
+              echo "   Recommendations:"
+              echo "   - Use dynamic imports for code-splitting"
+              echo "   - Remove unused dependencies"
+              echo "   - Optimize images and assets"
+              echo "   - Consider lazy loading for non-critical components"
+              exit 1
+            elif [ "$BUNDLE_SIZE" -gt "$WARNING_SIZE" ]; then
+              echo ""
+              echo "⚠️  WARNING: Bundle size exceeds 3MB threshold!"
+              echo "   Current: ${BUNDLE_SIZE_KB} KB"
+              echo "   Limit: 3072 KB"
+              echo ""
+              echo "   Consider optimizing bundle size."
+            else
+              echo ""
+              echo "✅ Bundle size is within acceptable limits"
+            fi
+          else
+            echo "❌ ERROR: dist directory not found"
+            exit 1
+          fi
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-build-${{ github.sha }}
+          path: dist/
+          retention-days: 7
