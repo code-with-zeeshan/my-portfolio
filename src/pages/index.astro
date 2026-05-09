@@ -13,7 +13,9 @@ import DynamicContact from "@/components/react/sections/DynamicContact.tsx";
 
 
 <BaseLayout title="Home">
-  <DynamicHero client:load />
+  <div style="content-visibility: auto; contain-intrinsic-size: 0 100px;">
+    <DynamicHero client:visible />
+  </div>
   <DynamicAbout client:visible />
   <DynamicProjects client:visible />
   <DynamicSkills client:visible />

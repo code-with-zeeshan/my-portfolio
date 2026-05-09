@@ -55,7 +55,7 @@ export default function DynamicBlogPreview() {
   }, []);
 
   return (
-    <section id="blog" className="py-16 md:py-24">
+    <section id="blog" className="py-16 md:py-24" style={{ contentVisibility: "auto", containIntrinsicSize: "0 700px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16 flex items-end justify-between">
@@ -84,15 +84,38 @@ export default function DynamicBlogPreview() {
                 >
                   {post.hero_image && (
                     <div className="aspect-video overflow-hidden">
-                      <img
-                        src={post.hero_image.includes("cloudinary")
-                          ? cloudinaryPresets.blogHero(post.hero_image)
-                          : post.hero_image
-                        }
-                        alt={post.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                      {post.hero_image.includes("cloudinary") ? (
+                        <picture>
+                          <source
+                            srcSet={cloudinaryPresets.blogHeroAVIF(post.hero_image)}
+                            type="image/avif"
+                          />
+                          <source
+                            srcSet={cloudinaryPresets.blogHero(post.hero_image)}
+                            type="image/webp"
+                          />
+                          <img
+                             src={cloudinaryPresets.blogHero(post.hero_image)}
+                             alt={post.title}
+                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                             loading={idx === 0 ? "eager" : "lazy"}
+                             {...({ fetchpriority: idx === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                             width={400}
+                             height={225}
+                             decoding="async"
+                           />
+                        </picture>
+                      ) : (
+                        <img
+                          src={post.hero_image}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                          width={400}
+                          height={225}
+                          decoding="async"
+                        />
+                      )}
                     </div>
                   )}
                   <div className="p-6">

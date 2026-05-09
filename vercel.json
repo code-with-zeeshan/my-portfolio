@@ -17,5 +17,19 @@
       "schedule": "0 0 * * *"
     }
   ],
-  "headers": []
+  "headers": [
+    {
+      "source": "/(.*).(woff2|woff|ttf|eot|svg|png|jpg|jpeg|gif|webp|avif|ico)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
+      "source": "/(.*).(css|js)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
+      ]
+    }
+  ]
 }

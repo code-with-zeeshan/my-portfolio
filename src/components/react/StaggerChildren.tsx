@@ -25,7 +25,7 @@ export function StaggerContainer({
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: "-50px" }
+      { threshold: 0.05, rootMargin: "-100px 0px -50px 0px" }
     );
 
     if (ref.current) observer.observe(ref.current);

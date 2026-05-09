@@ -101,6 +101,7 @@ featured: true                   # Shows on homepage
 2. **Restart dev server** after adding/removing MDX files
 3. **File names become slugs** — `first-post.mdx` → `/blog/first-post`
 4. **Draft posts** are hidden from listings but accessible by direct URL in dev
+5. **Image compression:** After adding new fallback images to `public/images/`, run `npm run compress:images` to optimize them at quality 70
 
 ## Blog Routing
 

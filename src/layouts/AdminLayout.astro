@@ -28,7 +28,7 @@ const supabaseRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : 
     <!-- Vite React Fast Refresh: Required for HMR in development -->
     {import.meta.env.DEV && (
       <>
-        <script type="module" src="/@vite/client"></script>
+        <script type="module" src="/@vite/client" />
         <script type="module">
           import RefreshRuntime from "/@react-refresh"
           RefreshRuntime.injectIntoGlobalHook(window)
@@ -38,7 +38,7 @@ const supabaseRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : 
         </script>
       </>
     )}
-    
+
     <!-- Theme: prevent flash -->
     <script is:inline>
       (function () {

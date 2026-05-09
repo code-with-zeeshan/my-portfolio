@@ -79,9 +79,12 @@ export default function DynamicBlogPost({ slug }: Props) {
   const heroSrc = post.hero_image?.includes("cloudinary")
     ? cloudinaryPresets.blogHero(post.hero_image)
     : post.hero_image;
+  const heroSrcAVIF = post.hero_image?.includes("cloudinary")
+    ? cloudinaryPresets.blogHeroAVIF(post.hero_image)
+    : undefined;
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16 md:py-24 pt-24 md:pt-32">
+    <article className="mx-auto max-w-3xl px-6 py-16 md:py-24 pt-24 md:pt-32" style={{ contentVisibility: "auto", containIntrinsicSize: "0 900px" }}>
       <FadeIn>
         <a href="/blog" className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-brand-500 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
@@ -102,12 +105,33 @@ export default function DynamicBlogPost({ slug }: Props) {
         </header>
 
         {heroSrc && (
-          <img
-            src={heroSrc}
-            alt={post.title}
-            loading="lazy"
-            className="mb-10 w-full rounded-2xl object-cover shadow-lg"
-          />
+          heroSrcAVIF ? (
+            <picture>
+              <source srcSet={heroSrcAVIF} type="image/avif" />
+              <source srcSet={heroSrc} type="image/webp" />
+              <img
+                src={heroSrc}
+                alt={post.title}
+                loading="eager"
+                {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                width={1200}
+                height={630}
+                decoding="async"
+                className="mb-10 w-full rounded-2xl object-cover shadow-lg"
+              />
+            </picture>
+          ) : (
+            <img
+              src={heroSrc}
+              alt={post.title}
+              loading="eager"
+              {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+              width={1200}
+              height={630}
+              decoding="async"
+              className="mb-10 w-full rounded-2xl object-cover shadow-lg"
+            />
+          )
         )}
 
         <div

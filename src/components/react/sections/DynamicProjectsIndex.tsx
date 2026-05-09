@@ -79,7 +79,7 @@ export default function DynamicProjectsIndex() {
       : displayProjects;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32">
+    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32" style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
       <FadeIn>
         <div className="mb-10 md:mb-16">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
@@ -130,23 +130,51 @@ export default function DynamicProjectsIndex() {
                 className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all hover:border-brand-500/30 hover:shadow-lg hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                  <img
-                    src={
-                      project.image_url?.includes("cloudinary")
-                        ? cloudinaryPresets.projectThumbnail(project.image_url)
-                        : project.image_url || "/images/projects/sample_project.webp"
-                    }
-                    alt={project.title}
-                    // ✅ B8: object-contain so image is never cropped
-                    className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    onError={(e) => {
-                      const img = e.target as HTMLImageElement;
-                      if (img.dataset.errored) return;
-                      img.dataset.errored = "true";
-                      img.src = "/images/projects/sample_project.webp";
-                    }}
-                  />
+                  {project.image_url?.includes("cloudinary") ? (
+                    <picture>
+                      <source
+                        srcSet={cloudinaryPresets.projectThumbnailAVIF(project.image_url)}
+                        type="image/avif"
+                      />
+                      <source
+                        srcSet={cloudinaryPresets.projectThumbnail(project.image_url)}
+                        type="image/webp"
+                      />
+                      <img
+                        src={cloudinaryPresets.projectThumbnail(project.image_url)}
+                        alt={project.title}
+                        className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                        loading={index === 0 ? "eager" : "lazy"}
+                        {...({ fetchpriority: index === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                        width={400}
+                        height={300}
+                        decoding="async"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          if (img.dataset.errored) return;
+                          img.dataset.errored = "true";
+                          img.src = "/images/projects/sample_project.webp";
+                        }}
+                      />
+                    </picture>
+                  ) : (
+                    <img
+                      src={project.image_url || "/images/projects/sample_project.webp"}
+                      alt={project.title}
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      {...({ fetchpriority: index === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                      width={400}
+                      height={300}
+                      decoding="async"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        if (img.dataset.errored) return;
+                        img.dataset.errored = "true";
+                        img.src = "/images/projects/sample_project.webp";
+                      }}
+                    />
+                  )}
                 </div>
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-2">

@@ -50,7 +50,7 @@ export default function DynamicSkills() {
   }, []);
 
   return (
-    <section id="skills" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50">
+    <section id="skills" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50" style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16">

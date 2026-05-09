@@ -320,7 +320,17 @@ Edit these files:
 - `src/data/skills.ts` - Skill categories
 - `src/data/testimonials.ts` - Client testimonials
 
-### Step 10: Test Locally
+### Step 10: Optimize Images
+
+Compress fallback images to reduce download size:
+
+```bash
+npm run compress:images
+```
+
+This uses Sharp to compress images at quality 70. Typical savings: **~70% reduction** on uncompressed PNGs (especially the 512×512 manifest icon).
+
+### Step 11: Test Locally
 
 ```bash
 npm run dev
@@ -334,7 +344,7 @@ Verify:
 - [ ] Press `Ctrl+Shift+A` → Login with admin credentials
 - [ ] Admin dashboard loads
 
-### Step 11: Deploy to Vercel
+### Step 12: Deploy to Vercel
 
 ```bash
 git add .
@@ -350,7 +360,7 @@ git push origin main
    - Set for: Production, Preview, Development
 6. Redeploy if needed
 
-### Step 12: Post-Deployment Setup
+### Step 13: Post-Deployment Setup
 
 1. Visit your Vercel URL (e.g., `https://your-project.vercel.app`)
 2. Press `Ctrl+Shift+A` → Login with admin credentials
@@ -360,7 +370,7 @@ git push origin main
    - Upload images via Cloudinary integration
    - Upload resume PDF
 
-### Step 13: Custom Domain (Optional)
+### Step 14: Custom Domain (Optional)
 
 1. Purchase domain (Namecheap, Cloudflare, Porkbun)
 2. Vercel → Project → Settings → Domains → **Add Domain**
@@ -389,6 +399,7 @@ After deployment, verify:
 - [ ] OG image preview works (test at [opengraph.xyz](https://opengraph.xyz))
 - [ ] Sitemap accessible at `/sitemap.xml`
 - [ ] Analytics tracking (if configured)
+- [ ] Run `npm run compress:images` to optimize fallback images
 
 ---
 

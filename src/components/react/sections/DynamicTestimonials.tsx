@@ -54,7 +54,7 @@ export default function DynamicTestimonials() {
   }, []);
 
   return (
-    <section id="testimonials" className="py-16 md:py-24">
+    <section id="testimonials" className="py-16 md:py-24" style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16">

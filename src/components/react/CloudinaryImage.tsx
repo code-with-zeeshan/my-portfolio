@@ -14,6 +14,7 @@ interface Props {
   width?: number;
   height?: number;
   loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "auto" | "low";
   showBlurPlaceholder?: boolean;
 }
 
@@ -25,6 +26,7 @@ export default function CloudinaryImage({
   width,
   height,
   loading = "lazy",
+  fetchpriority = "auto",
   showBlurPlaceholder = true,
 }: Props) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -34,8 +36,15 @@ export default function CloudinaryImage({
   const optimizedSrc = preset
     ? cloudinaryPresets[preset](src)
     : src.includes("cloudinary")
-    ? getOptimizedUrl(src, { width, height, format: "auto", quality: "auto" })
+    ? getOptimizedUrl(src, { width, height, format: "auto", quality: "auto:low" })
     : src;
+
+  // AVIF source for next-gen delivery
+  const avifSrc = src.includes("cloudinary")
+    ? preset
+      ? (cloudinaryPresets as Record<string, (url: string) => string>)[preset + "AVIF"]?.(src)
+      : getOptimizedUrl(src, { width, height, format: "avif", quality: "auto:low" })
+    : undefined;
 
   // Blur placeholder URL (very small image for loading state)
   const blurSrc = showBlurPlaceholder && src.includes("cloudinary")
@@ -54,6 +63,23 @@ export default function CloudinaryImage({
     );
   }
 
+  const imgElement = (
+    <img
+      src={optimizedSrc}
+      alt={alt}
+      loading={loading}
+      {...({ fetchpriority: fetchpriority } as React.ImgHTMLAttributes<HTMLImageElement>)}
+      width={width}
+      height={height}
+      onLoad={() => setIsLoaded(true)}
+      onError={() => setHasError(true)}
+      decoding="async"
+      className={`h-full w-full object-cover transition-opacity duration-500 ${
+        isLoaded ? "opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* Blur placeholder */}
@@ -66,19 +92,16 @@ export default function CloudinaryImage({
         />
       )}
 
-      {/* Main image */}
-      <img
-        src={optimizedSrc}
-        alt={alt}
-        loading={loading}
-        width={width}
-        height={height}
-        onLoad={() => setIsLoaded(true)}
-        onError={() => setHasError(true)}
-        className={`h-full w-full object-cover transition-opacity duration-500 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
-      />
+      {/* Main image — with AVIF <picture> when available */}
+      {avifSrc ? (
+        <picture>
+          <source srcSet={avifSrc} type="image/avif" />
+          <source srcSet={optimizedSrc} type="image/webp" />
+          {imgElement}
+        </picture>
+      ) : (
+        imgElement
+      )}
     </div>
   );
 }

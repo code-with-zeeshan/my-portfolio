@@ -127,6 +127,8 @@ PUBLIC_PLAUSIBLE_SCRIPT_URL=https://mydomain.com/stats/js/script.js
 | Favicon | `public/favicon.svg` | SVG format |
 | Resume | Upload via Admin → Resume tab | PDF only |
 
+> **💡 Image Compression:** Run `npm run compress:images` to compress fallback images at quality 70 using Sharp. This reduces download size significantly — especially for the Web app manifest PNGs (224 KB → ~27 KB). The script is located at `scripts/compress-images.mjs` and is included in the project's `package.json`.
+
 ### 10. Blog Posts
 
 Add `.mdx` files to `src/data/blog/` or create via Admin → Blog → **+ New Post**.

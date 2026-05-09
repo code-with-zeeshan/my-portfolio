@@ -50,7 +50,7 @@ export default function DynamicExperience() {
   }, []);
 
   return (
-    <section id="experience" className="py-16 md:py-24">
+    <section id="experience" className="py-16 md:py-24" style={{ contentVisibility: "auto", containIntrinsicSize: "0 700px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16">

@@ -47,6 +47,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   const imgSrc = project.image_url?.includes("cloudinary")
     ? cloudinaryPresets.projectThumbnail(project.image_url)
     : project.image_url || "/images/projects/sample_project.webp";
+  const imgSrcAVIF = project.image_url?.includes("cloudinary")
+    ? cloudinaryPresets.projectThumbnailAVIF(project.image_url)
+    : undefined;
 
   return (
     <article
@@ -61,19 +64,43 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       {/* Clicking card opens dedicated project page */}
       <a href={`/projects/${project.id}`} className="block">
         <div className="relative aspect-video overflow-hidden">
-          <img
-            src={imgSrc}
-            alt={project.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-            onError={(e) => {
-              const img = e.target as HTMLImageElement;
-              // Guard: only fire once — prevents infinite loop if fallback also missing
-              if (img.dataset.errored) return;
-              img.dataset.errored = "true";
-              img.src = "/images/projects/sample_project.webp";
-            }}
-          />
+          {imgSrcAVIF ? (
+            <picture>
+              <source srcSet={imgSrcAVIF} type="image/avif" />
+              <source srcSet={imgSrc} type="image/webp" />
+              <img
+                src={imgSrc}
+                alt={project.title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+                width={400}
+                height={300}
+                decoding="async"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  if (img.dataset.errored) return;
+                  img.dataset.errored = "true";
+                  img.src = "/images/projects/sample_project.webp";
+                }}
+              />
+            </picture>
+          ) : (
+            <img
+              src={imgSrc}
+              alt={project.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              width={400}
+              height={300}
+              decoding="async"
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                if (img.dataset.errored) return;
+                img.dataset.errored = "true";
+                img.src = "/images/projects/sample_project.webp";
+              }}
+            />
+          )}
           <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
             {project.live_url && (
@@ -137,26 +164,56 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
   const imgSrc = project.image_url?.includes("cloudinary")
     ? cloudinaryPresets.projectThumbnail(project.image_url)
     : project.image_url || "/images/projects/sample_project.webp";
+  const imgSrcAVIF = project.image_url?.includes("cloudinary")
+    ? cloudinaryPresets.projectThumbnailAVIF(project.image_url)
+    : undefined;
 
   return (
     <div className="mb-8 md:mb-12 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="grid lg:grid-cols-2">
         {/* Image */}
         <div className="relative aspect-video lg:aspect-auto overflow-hidden">
-          <img
-            src={imgSrc}
-            alt={project.title}
-            loading="lazy"
-            className="h-full w-full object-cover"
-            style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
-            onError={(e) => {
-              const img = e.target as HTMLImageElement;
-              // Guard: only fire once — prevents infinite loop if fallback also missing
-              if (img.dataset.errored) return;
-              img.dataset.errored = "true";
-              img.src = "/images/projects/sample_project.webp";
-            }}
-          />
+          {imgSrcAVIF ? (
+            <picture>
+              <source srcSet={imgSrcAVIF} type="image/avif" />
+              <source srcSet={imgSrc} type="image/webp" />
+              <img
+                src={imgSrc}
+                alt={project.title}
+                loading="lazy"
+                {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                width={800}
+                height={450}
+                decoding="async"
+                className="h-full w-full object-cover"
+                style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  if (img.dataset.errored) return;
+                  img.dataset.errored = "true";
+                  img.src = "/images/projects/sample_project.webp";
+                }}
+              />
+            </picture>
+          ) : (
+            <img
+              src={imgSrc}
+              alt={project.title}
+              loading="lazy"
+              {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+              width={800}
+              height={450}
+              decoding="async"
+              className="h-full w-full object-cover"
+              style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                if (img.dataset.errored) return;
+                img.dataset.errored = "true";
+                img.src = "/images/projects/sample_project.webp";
+              }}
+            />
+          )}
           {/* Arrows */}
           <button onClick={() => navigate(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90 dark:text-zinc-50">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -254,7 +311,7 @@ const displayProjects = supabaseDown
   const cardProjects = featuredProjects.length > 0 ? featuredProjects : displayProjects;
 
   return (
-    <section id="projects" className="py-16 md:py-24">
+    <section id="projects" className="py-16 md:py-24" style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-8 md:mb-12">

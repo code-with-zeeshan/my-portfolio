@@ -147,7 +147,7 @@ export default function DynamicAbout() {
   const profileImageUrl = getProfileImageUrl(data.profile_photo_url);
 
   return (
-    <section id="about" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50">
+    <section id="about" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50" style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}>
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16">
@@ -162,19 +162,44 @@ export default function DynamicAbout() {
           <FadeIn direction="left" className="md:col-span-5 lg:col-span-5">
             <div>
               <div className="relative aspect-4/5 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                <img
-                  src={profileImageUrl}
-                  alt={data.name}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    // Guard: only fire once — prevents infinite loop if fallback also missing
-                    if (img.dataset.errored) return;
-                    img.dataset.errored = "true";
-                    img.src = "/images/profile.webp";
-                  }}
-                />
+                {profileImageUrl.includes("cloudinary") ? (
+                  <picture>
+                    <source srcSet={cloudinaryPresets.profilePhotoAVIF(profileImageUrl)} type="image/avif" />
+                    <source srcSet={cloudinaryPresets.profilePhoto(profileImageUrl)} type="image/webp" />
+                    <img
+                      src={cloudinaryPresets.profilePhoto(profileImageUrl)}
+                      alt={data.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                      width={600}
+                      height={600}
+                      decoding="async"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        if (img.dataset.errored) return;
+                        img.dataset.errored = "true";
+                        img.src = "/images/profile.webp";
+                      }}
+                    />
+                  </picture>
+                ) : (
+                  <img
+                    src={profileImageUrl}
+                    alt={data.name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    width={600}
+                    height={600}
+                    decoding="async"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      if (img.dataset.errored) return;
+                      img.dataset.errored = "true";
+                      img.src = "/images/profile.webp";
+                    }}
+                  />
+                )}
               </div>
 
               <div className="mt-8">

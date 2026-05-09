@@ -101,6 +101,10 @@ All images upload directly to **Cloudinary CDN**. After uploading:
 - Images are resized to optimal dimensions per use case
 - Old images remain in Cloudinary until manually deleted from the dashboard
 
+### Fallback Image Compression
+
+Fallback images in `public/images/` are compressed at quality 70 using Sharp to reduce download size. Run `npm run compress:images` after adding or replacing fallback images. This is especially impactful for the Web app manifest PNGs (224 KB → ~27 KB).
+
 ## Backend: Supabase
 
 - **Dashboard:** supabase.com → Your Project → Table Editor

@@ -82,7 +82,19 @@ PUBLIC_UMAMI_URL=https://umami.example.com
 
 > See **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)** for automated setup with AI agents.
 
-## Step 5 — Seed Your Data
+## Step 5 — Optimize Images
+
+Compress fallback images to reduce download size:
+
+```bash
+npm run compress:images
+```
+
+This uses [Sharp](https://github.com/lovell/sharp) to compress images in `public/images/` and `public/*.png` at quality 70. Typical savings: **~70% reduction** on uncompressed images.
+
+> **When to run:** After adding new images to `public/images/`, or before production deployment.
+
+## Step 6 — Seed Your Data
 
 1. Start dev server: `npm run dev`
 2. Press `Ctrl+Shift+A` → log in with your Supabase credentials

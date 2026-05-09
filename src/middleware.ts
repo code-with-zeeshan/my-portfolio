@@ -2,15 +2,8 @@
 // Security headers middleware - adds CSP and other security headers
 import { defineMiddleware } from "astro:middleware";
 
-// Generate a random nonce for CSP
-function generateNonce(): string {
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array));
-}
-
 // Build CSP based on environment variables
-function buildCSP(nonce: string, isAdminRoute: boolean, isDev: boolean): string {
+function buildCSP(isAdminRoute: boolean, isDev: boolean): string {
   const directives: string[] = [];
 
   // Default source
@@ -19,66 +12,57 @@ function buildCSP(nonce: string, isAdminRoute: boolean, isDev: boolean): string 
   // Script sources
   const scriptSrc = [
     "'self'",
+    // Astro generates inline hydration/React scripts at build time.
+    // These cannot be nonce'd, so 'unsafe-inline' is required.
+    "'unsafe-inline'",
   ];
-  
-  // In development, allow unsafe-inline (Vite needs this for React refresh)
-  // Also allow blob: for workers (Vite uses blob workers)
-  // In production, use nonce-based CSP for security
+
+  // In development, also allow blob: and unsafe-eval for Vite
   if (isDev) {
-    scriptSrc.push("'unsafe-inline'");
     scriptSrc.push("blob:");
-  } else {
-    scriptSrc.push(`'nonce-${nonce}'`);
+    scriptSrc.push("'unsafe-eval'");
   }
-  
+
   // Add environment-specific sources
   if (process.env.PUBLIC_CLOUDINARY_CLOUD_NAME) {
     scriptSrc.push("https://res.cloudinary.com", "https://*.cloudinary.com");
   }
-  
+
   if (process.env.PUBLIC_SUPABASE_URL) {
     const supabaseHost = new URL(process.env.PUBLIC_SUPABASE_URL).hostname;
     scriptSrc.push(`https://${supabaseHost}`);
   }
-  
+
   if (process.env.PUBLIC_PLAUSIBLE_API_HOST) {
     scriptSrc.push(process.env.PUBLIC_PLAUSIBLE_API_HOST);
   }
-  
+
   if (process.env.PUBLIC_POSTHOG_API_KEY) {
     scriptSrc.push("https://*.posthog.com");
     scriptSrc.push("https://us-assets.i.posthog.com");
   }
-  
+
   if (process.env.PUBLIC_UMAMI_URL) {
     scriptSrc.push(process.env.PUBLIC_UMAMI_URL);
   }
-  
-  // CDN for libraries
+
+  // CDN for libraries + Vercel analytics
   scriptSrc.push("https://cdn.jsdelivr.net");
-  
-  // Only allow unsafe-eval in development
-  if (isDev) {
-    scriptSrc.push("'unsafe-eval'");
-  }
-  
+  scriptSrc.push("https://va.vercel-scripts.com");
+  scriptSrc.push("https://us-assets.i.posthog.com");
+
+
   directives.push(`script-src ${scriptSrc.join(" ")}`);
 
   // Style sources
   const styleSrc = [
     "'self'",
+    // Astro generates inline styles at build time.
+    // These cannot be nonce'd, so 'unsafe-inline' is required.
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
   ];
-  
-  // In development, allow unsafe-inline for styles (Astro dev tools)
-  // In production, use nonce + unsafe-hashes for inline styles
-  if (isDev) {
-    styleSrc.push("'unsafe-inline'");
-  } else {
-    styleSrc.push(`'nonce-${nonce}'`);
-    styleSrc.push("'unsafe-hashes'");
-  }
-  styleSrc.push("https://fonts.googleapis.com");
-  
+
   directives.push(`style-src ${styleSrc.join(" ")}`);
 
   // Image sources
@@ -151,17 +135,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const isAdminRoute = url.pathname.startsWith("/admin");
   const isDev = import.meta.env.DEV;
 
-  // Generate nonce for CSP
-  const nonce = generateNonce();
-
-  // Store nonce in locals so it can be accessed by Astro pages
-  context.locals.nonce = nonce;
-
   const response = await next();
 
   if (!isApiRoute && !isAsset) {
     // Build CSP with environment variables (no hardcoded URLs)
-    const csp = buildCSP(nonce, isAdminRoute, isDev);
+    const csp = buildCSP(isAdminRoute, isDev);
     
     // Set CSP header with nonce
     response.headers.set("Content-Security-Policy", csp);

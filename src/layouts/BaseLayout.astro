@@ -47,10 +47,16 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preconnect" href="https://supabase.co" crossorigin />
+    <link rel="preconnect" href="https://*.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="//vitals.vercel-analytics.com" />
     <link rel="dns-prefetch" href="//plausible.io" />
     <link rel="dns-prefetch" href="//umami.is" />
     <link rel="dns-prefetch" href="//posthog.com" />
+
+    <!-- Preload Inter font for faster FCP -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" crossorigin />
 
     <!-- Primary Meta Tags -->
     <title>{title} | Mohammad Zeeshan</title>
@@ -79,13 +85,45 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <link rel="apple-touch-icon" sizes="180x180"   href="/apple-touch-icon.png" />
     <link rel="manifest"         href="/site.webmanifest" crossorigin="use-credentials" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts — preloaded above, display=swap for non-blocking rendering -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Critical CSS (above-the-fold) — rest deferred -->
+    <style is:inline>
+      {`
+        *,::before,::after{box-sizing:border-box;margin:0;padding:0}
+        html{font-family:"Inter",system-ui,-apple-system,sans-serif;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;font-display:optional}
+        body{min-height:100vh}
+        .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+        .fixed{position:fixed}
+        .absolute{position:absolute}
+        .relative{position:relative}
+        .min-h-screen{min-height:100vh}
+        .z-50{z-index:50}
+        .mx-auto{margin-left:auto;margin-right:auto}
+        .flex{display:flex}
+        .h-16{height:4rem}
+        .w-full{width:100%}
+        .max-w-5xl{max-width:64rem}
+        .items-center{align-items:center}
+        .justify-between{justify-content:space-between}
+        .px-6{padding-left:1.5rem;padding-right:1.5rem}
+        .border-b{border-bottom-width:1px}
+        .border-zinc-200\\/60{border-color:rgba(228,228,231,.6)}
+        .bg-zinc-50\\/80{background-color:rgba(250,250,250,.8)}
+        .text-zinc-900{color:#18181b}
+        .text-zinc-500{color:#71717a}
+        .text-sm{font-size:.875rem}
+        .font-medium{font-weight:500}
+        .tracking-tight{letter-spacing:-.025em}
+        .hover\\:text-brand-500:hover{color:rgb(var(--color-brand-500))}
+        .transition-colors{transition-property:color;transition-timing-function:ease;transition-duration:.3s}
+        #main-content{padding-top:4rem}
+      `}
+    </style>
 
     <!-- JSON-LD -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify({
@@ -100,22 +138,6 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
         "https://x.com/yourusername"
       ]
     })} />
-
-    <!-- ── Vercel Analytics — injected only when provider=vercel ── -->
-    {analyticsProvider === "vercel" && (
-      <script is:inline>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-      </script>
-    )}
-
-
-    <!-- ── Plausible Analytics — injected only when provider=plausible AND domain is configured ── -->
-    {analyticsProvider === "plausible" && plausibleDomain && (
-      <script is:inline>
-        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-        plausible.init()
-      </script>
-    )}
 
     <!-- Theme: prevent flash -->
     <script is:inline>
@@ -161,23 +183,24 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     -->
     <AnalyticsProvider client:idle />
 
-    {/* Analytics scripts based on provider */}
+    {/* Analytics scripts — deferred to avoid blocking render */}
     {analyticsProvider === "vercel" && (
       <script is:inline src="https://va.vercel-scripts.com/v1/script.js" defer />
     )}
-    {analyticsProvider === "plausible" && (
-      <!-- Privacy-friendly analytics by Plausible -->
-      <script async src="https://plausible.io/js/pa-UBkQJ0o4gGEULdawmWnIw.js"></script>
-      <script is:inline>
-        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-        plausible.init()
-      </script>
+    {analyticsProvider === "plausible" && plausibleDomain && (
+      <>
+        <script defer src={`https://plausible.io/js/pa-UBkQJ0o4gGEULdawmWnIw.js`} data-domain={plausibleDomain} />
+        <script is:inline>
+          {`window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+          if(document.readyState==='complete'){plausible.init();}else{window.addEventListener('load',function(){plausible.init();});}`}
+        </script>
+      </>
     )}
     {analyticsProvider === "posthog" && (
       <PostHog />
     )}
     {analyticsProvider === "umami" && umamiWebsiteId && (
-      <script is:inline defer src={`${umamiUrl || 'https://cloud.umami.is'}/script.js`} data-website-id={umamiWebsiteId}></script>
+      <script defer src={`${umamiUrl || 'https://cloud.umami.is'}/script.js`} data-website-id={umamiWebsiteId}></script>
     )}
   </body>
 </html>

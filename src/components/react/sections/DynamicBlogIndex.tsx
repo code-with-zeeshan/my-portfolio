@@ -72,12 +72,31 @@ export default function DynamicBlogIndex() {
               >
                 {post.hero_image && (
                   <div className="hidden sm:block w-32 h-24 shrink-0 overflow-hidden rounded-xl">
-                    <img
-                      src={post.hero_image.includes("cloudinary") ? cloudinaryPresets.blogHero(post.hero_image) : post.hero_image}
-                      alt={post.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                    {post.hero_image.includes("cloudinary") ? (
+                      <picture>
+                        <source srcSet={cloudinaryPresets.blogHeroAVIF(post.hero_image)} type="image/avif" />
+                        <source srcSet={cloudinaryPresets.blogHero(post.hero_image)} type="image/webp" />
+                        <img
+                          src={cloudinaryPresets.blogHero(post.hero_image)}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                          width={128}
+                          height={96}
+                          decoding="async"
+                        />
+                      </picture>
+                    ) : (
+                      <img
+                        src={post.hero_image}
+                        alt={post.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                        width={128}
+                        height={96}
+                        decoding="async"
+                      />
+                    )}
                   </div>
                 )}
                 <div className="flex-1">
@@ -107,7 +126,7 @@ export default function DynamicBlogIndex() {
   };
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32">
+    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32" style={{ contentVisibility: "auto", containIntrinsicSize: "0 700px" }}>
       <FadeIn>
         <div className="mb-10 md:mb-16">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>

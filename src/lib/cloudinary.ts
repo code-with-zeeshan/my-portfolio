@@ -61,7 +61,7 @@ export async function deleteFromCloudinary(publicId: string): Promise<boolean> {
 interface TransformOptions {
   width?: number;
   height?: number;
-  quality?: "auto" | number;
+  quality?: "auto" | "auto:low" | number;
   format?: "auto" | "webp" | "avif" | "jpg" | "png";
   crop?: "fill" | "fit" | "scale" | "thumb" | "crop";
   gravity?: "auto" | "face" | "center";
@@ -110,17 +110,27 @@ export function getOptimizedUrl(
 // ─── Preset URL builders ───────────────────────────────
 export const cloudinaryPresets = {
   projectThumbnail: (url: string) =>
-    getOptimizedUrl(url, { width: 800, height: 450, crop: "fill", gravity: "auto", format: "auto", quality: "auto" }),
+    getOptimizedUrl(url, { width: 800, height: 450, crop: "fill", gravity: "auto", format: "auto", quality: "auto:low" }),
 
   profilePhoto: (url: string) =>
-    getOptimizedUrl(url, { width: 600, height: 600, crop: "thumb", gravity: "face", format: "auto", quality: "auto", radius: "max" }),
+    getOptimizedUrl(url, { width: 600, height: 600, crop: "thumb", gravity: "face", format: "auto", quality: "auto:low", radius: "max" }),
 
   blogHero: (url: string) =>
-    getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", gravity: "auto", format: "auto", quality: "auto" }),
+    getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", gravity: "auto", format: "auto", quality: "auto:low" }),
 
   ogImage: (url: string) =>
-    getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", format: "auto", quality: "auto" }),
+    getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", format: "auto", quality: "auto:low" }),
 
   blurPlaceholder: (url: string) =>
     getOptimizedUrl(url, { width: 20, quality: 30, blur: 1000, format: "auto" }),
+
+  // AVIF presets for next-gen image delivery
+  projectThumbnailAVIF: (url: string) =>
+    getOptimizedUrl(url, { width: 800, height: 450, crop: "fill", gravity: "auto", format: "avif", quality: "auto:low" }),
+
+  profilePhotoAVIF: (url: string) =>
+    getOptimizedUrl(url, { width: 600, height: 600, crop: "thumb", gravity: "face", format: "avif", quality: "auto:low", radius: "max" }),
+
+  blogHeroAVIF: (url: string) =>
+    getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", gravity: "auto", format: "avif", quality: "auto:low" }),
 };

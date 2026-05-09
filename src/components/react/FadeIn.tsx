@@ -38,7 +38,7 @@ export default function FadeIn({
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: "-50px" }
+      { threshold: 0.05, rootMargin: "-100px 0px -50px 0px" }
     );
 
     if (ref.current) observer.observe(ref.current);
@@ -57,6 +57,7 @@ export default function FadeIn({
           ? "translate3d(0, 0, 0)"
           : `translate3d(${offset.x}px, ${offset.y}px, 0)`,
         transition: `opacity ${duration}s cubic-bezier(0.21, 0.47, 0.32, 0.98), transform ${duration}s cubic-bezier(0.21, 0.47, 0.32, 0.98)`,
+        willChange: "opacity, transform",
       }}
     >
       {children}

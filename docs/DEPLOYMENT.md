@@ -84,5 +84,6 @@ npx wrangler pages deploy dist
 - [ ] Submit sitemap to [Google Search Console](https://search.google.com/search-console)
 - [ ] Analytics tracking (if configured)
 - [ ] CSP headers working (check browser DevTools)
+- [ ] Run `npm run compress:images` to optimize fallback images for production
 
 > **💡 Tip:** See **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)** for automated setup with AI agents!

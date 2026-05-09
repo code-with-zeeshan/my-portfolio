@@ -3312,7 +3312,7 @@ export default function AdminDashboard() {
               <div className="space-y-3 text-xs text-zinc-600 dark:text-zinc-400">
                 <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                   <p className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">.env file (local development)</p>
-                  <pre className="block whitespace-pre bg-zinc-100 dark:bg-zinc-900 p-2 rounded text-xs text-zinc-900 dark:text-zinc-50">CRON_SECRET=your_cron_secret_here CSRF_SECRET=your_csrf_secret_here</pre>
+                  <pre className="block whitespace-pre bg-zinc-100 dark:bg-zinc-900 p-2 rounded text-xs text-zinc-900 dark:text-zinc-50">CRON_SECRET=your_cron_secret_here | CSRF_SECRET=your_csrf_secret_here</pre>
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                   <p className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">Vercel (Production)</p>

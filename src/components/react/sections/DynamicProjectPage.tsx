@@ -316,6 +316,13 @@ export default function DynamicProjectPage({ projectId }: Props) {
       ? cloudinaryPresets.blogHero(project.image_url)
       : project.image_url || "/images/projects/sample_project.webp";
 
+  const imgSrcAVIF =
+    project.image_url?.includes("cloudinary")
+      ? cloudinaryPresets.blogHeroAVIF(project.image_url)
+      : undefined;
+
+  const fallbackSrc = "/images/projects/sample_project.webp";
+
   return (
     <article className="mx-auto max-w-4xl px-6 py-16 md:py-24 pt-24 md:pt-32">
       <FadeIn>
@@ -364,18 +371,46 @@ export default function DynamicProjectPage({ projectId }: Props) {
           </p>
         </header>
 
-        {/* ── Hero image ── */}
-        <img
-          src={imgSrc}
-          alt={project.title}
-          className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            if (img.dataset.errored) return;
-            img.dataset.errored = "true";
-            img.src = "/images/projects/sample_project.webp";
-          }}
-        />
+        {/* ── Hero image — AVIF + WebP + fallback ── */}
+        {imgSrcAVIF ? (
+          <picture>
+            <source srcSet={imgSrcAVIF} type="image/avif" />
+            <source srcSet={imgSrc} type="image/webp" />
+            <img
+              src={imgSrc}
+              alt={project.title}
+              className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+              loading="eager"
+              {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+              decoding="async"
+              width={1200}
+              height={630}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                if (img.dataset.errored) return;
+                img.dataset.errored = "true";
+                img.src = fallbackSrc;
+              }}
+            />
+          </picture>
+        ) : (
+          <img
+            src={imgSrc}
+            alt={project.title}
+            className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+            loading="eager"
+            {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+            decoding="async"
+            width={1200}
+            height={630}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              if (img.dataset.errored) return;
+              img.dataset.errored = "true";
+              img.src = fallbackSrc;
+            }}
+          />
+        )}
 
         {/* ── Action buttons ── */}
         <div className="flex flex-wrap gap-4 mb-10">

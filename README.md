@@ -209,6 +209,7 @@ Open [http://localhost:4321](http://localhost:4321) in your browser.
 | `npm run build` | Type-check and build for production |
 | `npm run preview` | Preview production build locally |
 | `npm run check` | Run Astro type checking only |
+| `npm run compress:images` | Compress fallback images at quality 70 (Sharp) |
 
 ## ⚙️ Environment Variables
 
@@ -318,7 +319,8 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including c
 ├── Input sanitization                     ✅ sanitize-html integration
 ├── Rate limiting for API endpoints       ✅ Supabase-backed rate limiting
 ├── Server-side contact form endpoint     ✅ /api/contact with rate limiting
-└── CSRF protection for POST endpoints    ✅ CSRF_SECRET + safeCompare
+├── CSRF protection for POST endpoints    ✅ CSRF_SECRET + safeCompare
+└── Image compression for fallbacks       ✅ scripts/compress-images.mjs (Sharp, quality=70)
 ```
 
 ## 🤖 AI Setup Guide
