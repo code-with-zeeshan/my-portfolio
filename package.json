@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && node scripts/compress-images.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write .",

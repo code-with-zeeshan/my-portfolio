@@ -1,7 +1,7 @@
 // scripts/compress-images.mjs
 // Compress fallback images with a quality factor to reduce download size
 import sharp from "sharp";
-import { statSync, unlinkSync, renameSync } from "fs";
+import { statSync, unlinkSync, renameSync, existsSync } from "fs";
 import { join, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -17,6 +17,9 @@ const images = [
   // Web app manifest images (used as PWA icons, large uncompressed PNGs)
   { path: "web-app-manifest-192x192.png", quality: PNG_QUALITY },
   { path: "web-app-manifest-512x512.png", quality: PNG_QUALITY },
+  // Favicon and touch icons
+  { path: "favicon-96x96.png", quality: PNG_QUALITY },
+  { path: "apple-touch-icon.png", quality: PNG_QUALITY },
 ];
 
 async function compressImage(inputPath, quality) {
@@ -26,7 +29,11 @@ async function compressImage(inputPath, quality) {
 
   const sharpPipeline = sharp(inputPath);
 
-  if (ext === "webp") {
+  if (ext === "ico") {
+    // Skip ICO files — browsers expect ICO format from .ico URLs
+    console.log(`  ⏭️  ${img} (skipped — ICO format preserved)\n`);
+    return;
+  } else if (ext === "webp") {
     sharpPipeline.webp({ quality, effort: 6 });
   } else if (ext === "png") {
     sharpPipeline.png({ quality, compressionLevel: 9 });
@@ -56,6 +63,10 @@ async function main() {
   const results = [];
   for (const { path: img, quality } of images) {
     const fullPath = join(PUBLIC_DIR, img);
+    if (!existsSync(fullPath)) {
+      console.log(`  ⏭️  ${img} (skipped — not found)\n`);
+      continue;
+    }
     try {
       const result = await compressImage(fullPath, quality);
       results.push(result);

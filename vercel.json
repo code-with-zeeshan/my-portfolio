@@ -22,13 +22,22 @@
       "source": "/(.*).(woff2|woff|ttf|eot|svg|png|jpg|jpeg|gif|webp|avif|ico)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "Vary", "value": "Accept" }
+        { "key": "Vary", "value": "Accept" },
+        { "key": "Expires", "value": "access plus 1 year" }
       ]
     },
     {
       "source": "/(.*).(css|js)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
+        { "key": "Cache-Control", "value": "public, max-age=604800, immutable" },
+        { "key": "Expires", "value": "access plus 7 days" }
+      ]
+    },
+    {
+      "source": "/(.*).(html|json|xml|rss|txt)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600, must-revalidate" },
+        { "key": "Expires", "value": "access plus 1 hour" }
       ]
     }
   ]
