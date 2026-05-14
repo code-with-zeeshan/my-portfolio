@@ -1,12 +1,13 @@
 // src/components/react/sections/DynamicProjectsIndex.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import FadeIn from "@/components/react/FadeIn";
-import { cloudinaryPresets } from "@/lib/cloudinary";
+import { useState } from "react";
+import { useSupabaseData } from "@/lib/useSupabaseData";
 import { projects as staticProjects } from "@/data/projects";
+import { mapStaticProject } from "@/lib/utils";
+import FadeIn from "@/components/react/FadeIn";
 import { Skeleton } from "@/components/ui/Skeleton";
+import OptimizedImage from "@/components/react/OptimizedImage";
 
 interface Project {
   id: string;
@@ -23,55 +24,22 @@ interface Project {
 }
 
 export default function DynamicProjectsIndex() {
-  const [projects, setProjects]         = useState<Project[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [supabaseDown, setSupabaseDown] = useState(false);
-  const [filter, setFilter]             = useState<"all" | "featured">("all");
+  const [filter, setFilter] = useState<"all" | "featured">("all");
 
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const { data, error } = await supabase
-          .from("projects")
-          .select("*")
-          .order("sort_order", { ascending: true });
+  const {
+    data: projects,
+    loading,
+    supabaseDown,
+  } = useSupabaseData<Project>({
+    table: "projects",
+    order: { column: "sort_order", ascending: true },
+    fallback: staticProjects.map((p, i) => mapStaticProject(p, i)),
+  });
 
-        if (error) {
-          // ✅ B7: Supabase reachable but returned error (RLS, missing table, etc.)
-          console.warn("Supabase error — using static fallback:", error.message);
-          setSupabaseDown(true);
-        } else {
-          // ✅ B7: Supabase reachable — use WHATEVER it returned, even []
-          // An empty array means the user deleted all projects — show empty state, NOT fallback
-          setProjects(data ?? []);
-          setSupabaseDown(false);
-        }
-      } catch {
-        // ✅ B7: Network error — Supabase truly unreachable
-        setSupabaseDown(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProjects();
-  }, []);
-
-  // ✅ B7: Only use static data when Supabase is truly unreachable
+  // ✅ Only use static data when Supabase is truly unreachable
   const displayProjects = supabaseDown
-    ? staticProjects.map((p, i) => ({
-        id:          `static-${i}`,
-        title:       p.title,
-        description: p.description,
-        image_url:   p.image,
-        tags:        p.tags,
-        live_url:    p.liveUrl  || null,
-        github_url:  p.githubUrl || null,
-        featured:    p.featured,
-        year:        p.year,
-        outcome:     p.outcome || null,
-        sort_order:  i,
-      }))
-    : projects;
+    ? staticProjects.map((p, i) => mapStaticProject(p, i))
+    : projects ?? [];
 
   const filtered =
     filter === "featured"
@@ -79,7 +47,10 @@ export default function DynamicProjectsIndex() {
       : displayProjects;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32" style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
+    <section
+      className="mx-auto max-w-5xl px-6 py-16 md:py-24 pt-24 md:pt-32"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}
+    >
       <FadeIn>
         <div className="mb-10 md:mb-16">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
@@ -130,51 +101,16 @@ export default function DynamicProjectsIndex() {
                 className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all hover:border-brand-500/30 hover:shadow-lg hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                  {project.image_url?.includes("cloudinary") ? (
-                    <picture>
-                      <source
-                        srcSet={cloudinaryPresets.projectThumbnailAVIF(project.image_url)}
-                        type="image/avif"
-                      />
-                      <source
-                        srcSet={cloudinaryPresets.projectThumbnail(project.image_url)}
-                        type="image/webp"
-                      />
-                      <img
-                        src={cloudinaryPresets.projectThumbnail(project.image_url)}
-                        alt={project.title}
-                        className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                        loading={index === 0 ? "eager" : "lazy"}
-                        {...({ fetchpriority: index === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-                        width={400}
-                        height={300}
-                        decoding="async"
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          if (img.dataset.errored) return;
-                          img.dataset.errored = "true";
-                          img.src = "/images/projects/sample_project.webp";
-                        }}
-                      />
-                    </picture>
-                  ) : (
-                    <img
-                      src={project.image_url || "/images/projects/sample_project.webp"}
-                      alt={project.title}
-                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      loading={index === 0 ? "eager" : "lazy"}
-                      {...({ fetchpriority: index === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-                      width={400}
-                      height={300}
-                      decoding="async"
-                      onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        if (img.dataset.errored) return;
-                        img.dataset.errored = "true";
-                        img.src = "/images/projects/sample_project.webp";
-                      }}
-                    />
-                  )}
+                  <OptimizedImage
+                    src={project.image_url}
+                    alt={project.title}
+                    preset="projectThumbnail"
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    width={400}
+                    height={300}
+                    className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-2">
@@ -220,9 +156,20 @@ export default function DynamicProjectsIndex() {
         <FadeIn>
           <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-700">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400">
-                <rect width="20" height="14" x="2" y="6" rx="2"/>
-                <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-zinc-400"
+              >
+                <rect width="20" height="14" x="2" y="6" rx="2" />
+                <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
             </div>
             <p className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-50">

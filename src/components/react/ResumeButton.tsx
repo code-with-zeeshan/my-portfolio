@@ -12,7 +12,8 @@ interface Props {
 }
 
 export default function ResumeButton({ className = "", label = "Resume", onClick }: Props) {
-  const [resumeUrl, setResumeUrl] = useState("/resume.pdf");
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [noResume, setNoResume] = useState(false);
 
   useEffect(() => {
     supabase
@@ -22,11 +23,20 @@ export default function ResumeButton({ className = "", label = "Resume", onClick
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.file_url) setResumeUrl(data.file_url);
+        if (data?.file_url) {
+          setResumeUrl(data.file_url);
+        } else {
+          setNoResume(true);
+        }
       });
   }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (noResume || !resumeUrl) {
+      e.preventDefault();
+      window.alert("No resume is added yet.");
+      return;
+    }
     // Track resume download event
     trackEvent("resume_download", { filename: resumeUrl });
     // Call custom onClick handler if provided
@@ -37,7 +47,7 @@ export default function ResumeButton({ className = "", label = "Resume", onClick
 
   return (
     <a
-      href={resumeUrl}
+      href={resumeUrl || "#"}
       target="_blank"
       rel="noopener noreferrer"
       className={className}

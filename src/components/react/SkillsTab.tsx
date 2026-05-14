@@ -1,12 +1,15 @@
+// src/components/react/SkillsTab.tsx
 "use client";
 
 import React from "react";
 import { supabase } from "@/lib/supabase";
 import Field from "@/components/react/Field";
 import TagInput from "@/components/react/TagInput";
-import { showUndoToast } from "@/components/react/UndoToast";
-import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { updateItem } from "@/lib/utils";
+import { useAdminCrud } from "@/lib/useAdminCrud";
+
 export default function SkillsTab({
   skills,
   setSkills,
@@ -30,72 +33,78 @@ export default function SkillsTab({
   loading: boolean;
   notify: (type: "success" | "error", message: string) => void;
 }) {
-  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const { handleDelete, handleAdd, ConfirmDialogComponent } =
+    useAdminCrud<any>();
 
   const handleAddCategory = async () => {
-    for (const s of skills) {
-      await supabase.from("skill_categories").update({ sort_order: s.sort_order + 1 }).eq("id", s.id);
-    }
-    const minSortOrder = skills.length > 0 ? Math.min(...skills.map((s: any) => s.sort_order)) : 0;
-    const { data, error } = await supabase
-      .from("skill_categories")
-      .insert({ title: "New Category", skills: [], sort_order: minSortOrder })
-      .select().single();
-    if (error) {
-      notify("error", error.message);
-    } else {
-      setSkills((prev: any[]) => [
-        data,
-        ...prev.map((s: any) => ({ ...s, sort_order: s.sort_order + 1 })),
-      ]);
-      notify("success", "Category added!");
-    }
+    await handleAdd({
+      tableName: "Category",
+      defaultItem: {
+        title: "New Category",
+        skills: [],
+        sort_order: 0,
+      },
+      onInsert: async (item) => {
+        const { data, error } = await supabase
+          .from("skill_categories")
+          .insert(item)
+          .select()
+          .single();
+        return error ? { error } : { data };
+      },
+      items: skills,
+      setItems: setSkills,
+      notify,
+    });
   };
 
   const handleSaveSkill = async (cat: any) => {
-    const { error } = await supabase.from("skill_categories").update(cat).eq("id", cat.id);
+    const { error } = await supabase
+      .from("skill_categories")
+      .update(cat)
+      .eq("id", cat.id);
     if (error) notify("error", error.message);
     else notify("success", `"${cat.title}" saved!`);
   };
 
   const handleDeleteSkill = (cat: any, idx: number) => {
-    const deletedIdx = idx;
-    showConfirm(
-      "Delete Category",
-      `Are you sure you want to delete "${cat.title}" category?`,
-      async () => {
-        const { error } = await supabase.from("skill_categories").delete().eq("id", cat.id);
-        if (error) {
-          notify("error", error.message);
-        } else {
-          const deletedCategory = cat;
+    handleDelete(
+      {
+        tableName: "Category",
+        itemLabel: cat.title,
+        item: cat,
+        onDelete: async (id) => {
+          const { error } = await supabase
+            .from("skill_categories")
+            .delete()
+            .eq("id", id);
+          return error ? { error } : {};
+        },
+        onInsert: async (item) => {
+          const { error } = await supabase
+            .from("skill_categories")
+            .insert(item);
+          return error ? { error } : {};
+        },
+        onLocalDelete: () => {
           setSkills(skills.filter((s: any) => s.id !== cat.id));
-          notify("success", "Category deleted");
-
-          showUndoToast({
-            message: "Category deleted",
-            actionLabel: "Undo",
-            duration: 5000,
-            onUndo: async () => {
-              const { data, error } = await supabase
-                .from("skill_categories")
-                .insert(deletedCategory)
-                .select().single();
-              if (error) {
-                notify("error", "Failed to undo: " + error.message);
-              } else {
-                setSkills((prev: any[]) => {
-                  const newArr = [...prev];
-                  newArr.splice(deletedIdx, 0, data);
-                  return newArr;
-                });
-                notify("success", "Category restored");
-              }
-            },
+        },
+        onUndo: (restored: any) => {
+          setSkills((prev: any[]) => {
+            const newArr = [...prev];
+            newArr.splice(idx, 0, restored);
+            return newArr;
           });
-        }
+        },
+        notify,
       },
-      { variant: "danger", confirmLabel: "Delete" }
+      "Delete"
+    );
+  };
+
+  const updateSkillField = (id: string, field: string, value: any) => {
+    setSkills((prev) =>
+      updateItem(prev, id, (s) => ({ ...s, [field]: value }))
     );
   };
 
@@ -113,16 +122,18 @@ export default function SkillsTab({
 
       <div className="space-y-4">
         {skills.map((cat: any, idx: number) => (
-          <Card key={cat.id} variant="bordered" className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0">
+          <Card
+            key={cat.id}
+            variant="bordered"
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0"
+          >
             <div className="grid gap-3 md:grid-cols-3 mb-4">
               <Field label="Category Name">
                 <input
                   type="text"
                   value={cat.title}
                   onChange={(e) =>
-                    setSkills(skills.map((s: any) =>
-                      s.id === cat.id ? { ...s, title: e.target.value } : s
-                    ))
+                    updateSkillField(cat.id, "title", e.target.value)
                   }
                   className={inputCls}
                   placeholder="e.g. Frontend"
@@ -133,9 +144,11 @@ export default function SkillsTab({
                   type="number"
                   value={cat.sort_order}
                   onChange={(e) =>
-                    setSkills(skills.map((s: any) =>
-                      s.id === cat.id ? { ...s, sort_order: Number(e.target.value) } : s
-                    ))
+                    updateSkillField(
+                      cat.id,
+                      "sort_order",
+                      Number(e.target.value)
+                    )
                   }
                   className={inputCls}
                 />
@@ -145,9 +158,7 @@ export default function SkillsTab({
               <TagInput
                 value={cat.skills}
                 onChange={(newSkills: string[]) =>
-                  setSkills(skills.map((s: any) =>
-                    s.id === cat.id ? { ...s, skills: newSkills } : s
-                  ))
+                  updateSkillField(cat.id, "skills", newSkills)
                 }
                 placeholder="Type a skill and press Enter or comma..."
               />
@@ -185,7 +196,9 @@ export default function SkillsTab({
 
         {skills.length === 0 && !loading && (
           <div className="rounded-2xl border border-dashed border-zinc-300 p-12 text-center dark:border-zinc-700">
-            <p className="text-zinc-500">No skill categories. Click "+ Add Category" above.</p>
+            <p className="text-zinc-500">
+              No skill categories. Click "+ Add Category" above.
+            </p>
           </div>
         )}
       </div>

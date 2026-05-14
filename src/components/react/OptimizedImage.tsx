@@ -1,6 +1,6 @@
-// src/components/react/CloudinaryImage.tsx
+// src/components/react/OptimizedImage.tsx
 import React from "react";
-import { cloudinaryPresets, getOptimizedUrl } from "@/lib/cloudinary";
+import { cloudinaryPresets } from "@/lib/cloudinary";
 
 interface Props {
   src: string | null | undefined;
@@ -13,30 +13,41 @@ interface Props {
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "auto" | "low";
   onErrorFallback?: string;
+  avifPreset?: keyof typeof cloudinaryPresets;
+  style?: React.CSSProperties;
 }
 
-export default function CloudinaryImage({
+/**
+ * Renders an image with AVIF <source> + WebP <source> + <img> fallback.
+ * Handles Cloudinary URLs (applying presets) and local/static paths.
+ * Centralises the 3-branch picture pattern duplicated across 6+ components.
+ */
+export default function OptimizedImage({
   src,
   alt,
   preset = "projectThumbnail",
-  fallbackSrc,
+  fallbackSrc = "/images/projects/sample_project.webp",
   width,
   height,
   className = "",
   loading = "lazy",
   fetchPriority,
   onErrorFallback = "/images/projects/sample_project.webp",
+  avifPreset,
+  style,
 }: Props) {
-  const imgSrc = src
-    ? cloudinaryPresets[preset]?.(src) ?? src
-    : fallbackSrc;
+  const isCloudinary = src?.includes("cloudinary") ?? false;
 
-  const avifPresetKey = `${preset}AVIF` as keyof typeof cloudinaryPresets;
-  const imgSrcAVIF = src?.includes("cloudinary")
-    ? cloudinaryPresets[avifPresetKey]?.(src)
+  const imgSrc: string = isCloudinary
+    ? cloudinaryPresets[preset]?.(src!) ?? src!
+    : src || fallbackSrc;
+
+  const avifPresetKey = avifPreset ?? (`${preset}AVIF` as keyof typeof cloudinaryPresets);
+  const imgSrcAVIF: string | undefined = isCloudinary
+    ? cloudinaryPresets[avifPresetKey]?.(src!)
     : undefined;
 
-  const imageElement = (
+  const imgElement = (
     <img
       src={imgSrc}
       alt={alt}
@@ -45,6 +56,7 @@ export default function CloudinaryImage({
       width={width}
       height={height}
       decoding="async"
+      style={style}
       {...(fetchPriority ? { fetchPriority } : {})}
       onError={(e) => {
         const img = e.target as HTMLImageElement;
@@ -60,10 +72,10 @@ export default function CloudinaryImage({
       <picture>
         <source srcSet={imgSrcAVIF} type="image/avif" />
         <source srcSet={imgSrc} type="image/webp" />
-        {imageElement}
+        {imgElement}
       </picture>
     );
   }
 
-  return imageElement;
+  return imgElement;
 }

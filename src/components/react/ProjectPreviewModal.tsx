@@ -6,7 +6,7 @@
 import { useEffect, useCallback, useState } from "react";
 import ReactIcon from "@/components/react/ReactIcon";
 import { PreviewModal } from "@/components/ui/preview-modal";
-import { cloudinaryPresets } from "@/lib/cloudinary";
+import OptimizedImage from "@/components/react/OptimizedImage";
 
 interface Project {
   title: string;
@@ -114,11 +114,6 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
     };
   }, [handleKeyDown]);
 
-  const imgSrc = project.image_url || "/images/projects/sample_project.webp";
-  const imgSrcAVIF = project.image_url?.includes("cloudinary")
-    ? cloudinaryPresets.blogHeroAVIF(project.image_url)
-    : undefined;
-  const fallbackSrc = "/images/projects/sample_project.webp";
   const gallery = Array.isArray(project.gallery_images)
     ? project.gallery_images
     : [];
@@ -190,46 +185,17 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
             {project.description || "No description yet."}
           </p>
 
-          {/* Hero image — AVIF + WebP + fallback */}
-          {imgSrcAVIF ? (
-            <picture>
-              <source srcSet={imgSrcAVIF} type="image/avif" />
-              <source srcSet={imgSrc} type="image/webp" />
-              <img
-                src={imgSrc}
-                alt={project.title}
-                className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-                loading="lazy"
-                decoding="async"
-                width={1200}
-                height={630}
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  if (img.dataset.errored) return;
-                  img.dataset.errored = "true";
-                  img.src = fallbackSrc;
-                }}
-              />
-            </picture>
-          ) : (
-            imgSrc && (
-              <img
-                src={imgSrc}
-                alt={project.title}
-                className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-                loading="lazy"
-                decoding="async"
-                width={1200}
-                height={630}
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  if (img.dataset.errored) return;
-                  img.dataset.errored = "true";
-                  img.src = fallbackSrc;
-                }}
-              />
-            )
-          )}
+          {/* Hero image — using OptimizedImage */}
+          <OptimizedImage
+            src={project.image_url}
+            alt={project.title}
+            preset="blogHero"
+            fallbackSrc="/images/projects/sample_project.webp"
+            className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+            loading="lazy"
+            width={1200}
+            height={630}
+          />
 
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-4 mb-8">

@@ -6,8 +6,9 @@ import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
 import SkillBar from "@/components/react/SkillBar";
 import ReactIcon from "@/components/react/ReactIcon";
-import { cloudinaryPresets } from "@/lib/cloudinary";
 import type { TopSkill, Highlight } from "@/lib/types";
+import OptimizedImage from "@/components/react/OptimizedImage";
+import { formatDate } from "@/lib/utils";
 
 interface PersonalInfo {
   id: string;
@@ -30,16 +31,16 @@ const STATIC_FALLBACK: PersonalInfo = {
   profile_photo_url: null,
   top_skills: [
     { name: "React / Next.js", level: 95 },
-    { name: "TypeScript",       level: 90 },
-    { name: "Node.js",          level: 85 },
-    { name: "Tailwind CSS",     level: 92 },
-    { name: "PostgreSQL",       level: 78 },
+    { name: "TypeScript", level: 90 },
+    { name: "Node.js", level: 85 },
+    { name: "Tailwind CSS", level: 92 },
+    { name: "PostgreSQL", level: 78 },
   ],
   highlights: [
-    { icon: "briefcase", label: "Years Experience",    value: "5+"  },
-    { icon: "calendar",  label: "Projects Completed",  value: "30+" },
-    { icon: "coffee",    label: "Cups of Coffee",      value: "∞"   },
-    { icon: "heart",     label: "Happy Clients",       value: "20+" },
+    { icon: "briefcase", label: "Years Experience", value: "5+" },
+    { icon: "calendar", label: "Projects Completed", value: "30+" },
+    { icon: "coffee", label: "Cups of Coffee", value: "∞" },
+    { icon: "heart", label: "Happy Clients", value: "20+" },
   ],
 };
 
@@ -62,38 +63,35 @@ function BioText({ text }: { text: string }) {
   );
 }
 
-// ─── Profile image URL helper ───
-function getProfileImageUrl(url: string | null | undefined): string {
-  if (!url) return "/images/profile.webp";
-  if (url.includes("cloudinary")) return cloudinaryPresets.profilePhoto(url);
-  return url;
-}
-
 // ─── Resume download handler ───
-async function handleResumeDownload(resumeUrl: string) {
-  try {
-    const response = await fetch(resumeUrl);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
+async function handleResumeDownload(resumeUrl: string | null) {
+   if (!resumeUrl) {
+     window.alert("No resume is added yet.");
+     return;
+   }
+   try {
+     const response = await fetch(resumeUrl);
+     const blob = await response.blob();
+     const blobUrl = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = "Resume.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+     const link = document.createElement("a");
+     link.href = blobUrl;
+     link.download = "Resume.pdf";
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
 
-    // Revoke object URL after short delay to free memory
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  } catch {
-    // Fallback: open in new tab if download fails (e.g. cross-origin restriction)
-    window.open(resumeUrl, "_blank");
-  }
-}
+     // Revoke object URL after short delay to free memory
+     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+   } catch {
+     // Fallback: open in new tab if download fails (e.g. cross-origin restriction)
+     window.open(resumeUrl, "_blank");
+   }
+ }
 
 export default function DynamicAbout() {
   const [data, setData] = useState<PersonalInfo>(STATIC_FALLBACK);
-  const [resumeUrl, setResumeUrl] = useState("/resume.pdf");
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch personal info including JSONB columns
@@ -113,22 +111,22 @@ export default function DynamicAbout() {
           return;
         }
 
-        // console.log("DynamicAbout: fetched row:", row);
-
         setData({
-          id:               row.id,
-          name:             row.name             ?? STATIC_FALLBACK.name,
-          bio:              row.bio              ?? STATIC_FALLBACK.bio,
-          github_url:       row.github_url       ?? null,
-          linkedin_url:     row.linkedin_url     ?? null,
+          id: row.id,
+          name: row.name ?? STATIC_FALLBACK.name,
+          bio: row.bio ?? STATIC_FALLBACK.bio,
+          github_url: row.github_url ?? null,
+          linkedin_url: row.linkedin_url ?? null,
           profile_photo_url: row.profile_photo_url ?? null,
           // Explicit null/empty checks — don't silently fall back
-          top_skills: Array.isArray(row.top_skills) && row.top_skills.length > 0
-            ? row.top_skills
-            : STATIC_FALLBACK.top_skills,
-          highlights: Array.isArray(row.highlights) && row.highlights.length > 0
-            ? row.highlights
-            : STATIC_FALLBACK.highlights,
+          top_skills:
+            Array.isArray(row.top_skills) && row.top_skills.length > 0
+              ? row.top_skills
+              : STATIC_FALLBACK.top_skills,
+          highlights:
+            Array.isArray(row.highlights) && row.highlights.length > 0
+              ? row.highlights
+              : STATIC_FALLBACK.highlights,
         });
       });
 
@@ -144,69 +142,44 @@ export default function DynamicAbout() {
       });
   }, []);
 
-  const profileImageUrl = getProfileImageUrl(data.profile_photo_url);
-
   return (
-    <section id="about" className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50" style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}>
+    <section
+      id="about"
+      className="py-16 md:py-24 bg-zinc-100 dark:bg-zinc-900/50"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}
+    >
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">About Me</p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Who I Am</h2>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+              About Me
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
+              Who I Am
+            </h2>
           </div>
         </FadeIn>
 
         <div className="grid gap-8 md:grid-cols-12 lg:grid-cols-12">
-
           {/* ── LEFT: Photo + Skill Bars ── */}
           <FadeIn direction="left" className="md:col-span-5 lg:col-span-5">
             <div>
               <div className="relative aspect-4/5 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                {profileImageUrl.includes("cloudinary") ? (
-                  <picture>
-                    <source srcSet={cloudinaryPresets.profilePhotoAVIF(profileImageUrl)} type="image/avif" />
-                    <source srcSet={cloudinaryPresets.profilePhoto(profileImageUrl)} type="image/webp" />
-                    <img
-                      src={cloudinaryPresets.profilePhoto(profileImageUrl)}
-                      alt={data.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                      {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-                      width={600}
-                      height={600}
-                      decoding="async"
-                      onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        if (img.dataset.errored) return;
-                        img.dataset.errored = "true";
-                        img.src = "/images/profile.webp";
-                      }}
-                    />
-                  </picture>
-                ) : (
-                  <img
-                    src={profileImageUrl}
-                    alt={data.name}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    width={600}
-                    height={600}
-                    decoding="async"
-                    onError={(e) => {
-                      const img = e.target as HTMLImageElement;
-                      if (img.dataset.errored) return;
-                      img.dataset.errored = "true";
-                      img.src = "/images/profile.webp";
-                    }}
-                  />
-                )}
+                <OptimizedImage
+                  src={data.profile_photo_url}
+                  alt={data.name}
+                  preset="profilePhoto"
+                  loading="lazy"
+                  width={600}
+                  height={600}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div className="mt-8">
                 <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
                   Top Skills
                 </h3>
-                {/* ✅ Skills now come from Supabase — editable in admin */}
                 <SkillBar skills={data.top_skills} />
               </div>
             </div>
@@ -215,27 +188,29 @@ export default function DynamicAbout() {
           {/* ── RIGHT: Bio + Highlights + CTA ── */}
           <FadeIn direction="right" className="md:col-span-7 lg:col-span-7">
             <div className="flex h-full flex-col justify-center">
-
               <BioText text={data.bio} />
 
-              {/* ✅ Highlights Grid — now dynamic from Supabase with ReactIcon SVGs */}
+              {/* Highlights Grid */}
               <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {data.highlights.map(({ icon, label, value }) => (
                   <div
                     key={label}
                     className="rounded-xl border border-zinc-200 bg-white p-4 text-center dark:border-zinc-800 dark:bg-zinc-900"
                   >
-                    {/* ✅ ReactIcon renders proper SVG — same visual as Icons.astro */}
                     <div className="mx-auto mb-2 flex justify-center text-brand-500">
                       <ReactIcon name={icon} size={20} />
                     </div>
-                    <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{value}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
+                    <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                      {value}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {label}
+                    </p>
                   </div>
                 ))}
               </div>
 
-              {/* ✅ CTA — Download Resume triggers browser download */}
+              {/* CTA — Download Resume */}
               <div className="mt-8 flex flex-wrap gap-4">
                 <button
                   onClick={() => handleResumeDownload(resumeUrl)}
@@ -251,7 +226,6 @@ export default function DynamicAbout() {
                   Let's Talk
                 </a>
               </div>
-
             </div>
           </FadeIn>
         </div>

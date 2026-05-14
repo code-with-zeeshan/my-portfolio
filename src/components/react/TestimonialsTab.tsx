@@ -1,12 +1,13 @@
+// src/components/react/TestimonialsTab.tsx
 "use client";
 
 import React from "react";
 import { supabase } from "@/lib/supabase";
-import { showUndoToast } from "@/components/react/UndoToast";
-import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Field from "@/components/react/Field";
+import { updateItem } from "@/lib/utils";
+import { useAdminCrud } from "@/lib/useAdminCrud";
 
 export default function TestimonialsTab({
   testimonials,
@@ -27,65 +28,71 @@ export default function TestimonialsTab({
   loading: boolean;
   notify: (type: "success" | "error", message: string) => void;
 }) {
-  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const { handleDelete, handleAdd, ConfirmDialogComponent } =
+    useAdminCrud<any>();
 
   const handleAddTestimonial = async () => {
-    for (const t of testimonials) {
-      await supabase.from("testimonials").update({ sort_order: t.sort_order + 1 }).eq("id", t.id);
-    }
-    const minSortOrder = testimonials.length > 0 ? Math.min(...testimonials.map((t: any) => t.sort_order)) : 0;
-    const { data, error } = await supabase
-      .from("testimonials")
-      .insert({ name: "Name", role: "Role", company: "Company", content: "Testimonial content here.", sort_order: minSortOrder })
-      .select().single();
-    if (error) {
-      notify("error", error.message);
-    } else {
-      setTestimonials((prev: any[]) => [
-        data,
-        ...prev.map((t: any) => ({ ...t, sort_order: t.sort_order + 1 })),
-      ]);
-      notify("success", "Testimonial added!");
-    }
+    await handleAdd({
+      tableName: "Testimonial",
+      defaultItem: {
+        name: "Name",
+        role: "Role",
+        company: "Company",
+        content: "Testimonial content here.",
+        sort_order: 0,
+      },
+      onInsert: async (item) => {
+        const { data, error } = await supabase
+          .from("testimonials")
+          .insert(item)
+          .select()
+          .single();
+        return error ? { error } : { data };
+      },
+      items: testimonials,
+      setItems: setTestimonials,
+      notify,
+    });
   };
 
   const handleDeleteTestimonial = (t: any, idx: number) => {
-    const deletedIdx = idx;
-    showConfirm(
-      "Delete Testimonial",
-      `Are you sure you want to delete testimonial from "${t.name}"?`,
-      async () => {
-        const { error } = await supabase.from("testimonials").delete().eq("id", t.id);
-        if (error) {
-          notify("error", error.message);
-        } else {
-          const deletedTestimonial = t;
+    handleDelete(
+      {
+        tableName: "Testimonial",
+        itemLabel: t.name,
+        item: t,
+        onDelete: async (id) => {
+          const { error } = await supabase
+            .from("testimonials")
+            .delete()
+            .eq("id", id);
+          return error ? { error } : {};
+        },
+        onInsert: async (item) => {
+          const { error } = await supabase
+            .from("testimonials")
+            .insert(item);
+          return error ? { error } : {};
+        },
+        onLocalDelete: () => {
           setTestimonials(testimonials.filter((x: any) => x.id !== t.id));
-          notify("success", "Testimonial deleted");
-
-          showUndoToast({
-            message: "Testimonial deleted",
-            actionLabel: "Undo",
-            duration: 5000,
-            onUndo: async () => {
-              const { error } = await supabase
-                .from("testimonials")
-                .insert(deletedTestimonial);
-              if (error) {
-                notify("error", "Failed to undo: " + error.message);
-              } else {
-                setTestimonials((prev: any[]) => {
-                  const newArr = [...prev];
-                  newArr.splice(deletedIdx, 0, deletedTestimonial);
-                  return newArr;
-                });
-                notify("success", "Testimonial restored");
-              }
-            },
+        },
+        onUndo: (restored: any) => {
+          setTestimonials((prev: any[]) => {
+            const newArr = [...prev];
+            newArr.splice(idx, 0, restored);
+            return newArr;
           });
-        }
+        },
+        notify,
       },
-      { variant: "danger", confirmLabel: "Delete" }
+      "Delete"
+    );
+  };
+
+  const updateTestimonialField = (id: string, field: string, value: any) => {
+    setTestimonials((prev) =>
+      updateItem(prev, id, (t) => ({ ...t, [field]: value }))
     );
   };
 
@@ -103,16 +110,18 @@ export default function TestimonialsTab({
 
       <div className="space-y-4">
         {testimonials.map((t: any, idx: number) => (
-          <Card key={t.id} variant="bordered" className="bg-white dark:bg-zinc-900 rounded-2xl p-8 gap-0">
+          <Card
+            key={t.id}
+            variant="bordered"
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-8 gap-0"
+          >
             <div className="grid gap-3 md:grid-cols-3 mb-3">
               <Field label="Name">
                 <input
                   type="text"
                   value={t.name}
                   onChange={(e) =>
-                    setTestimonials(testimonials.map((x: any) =>
-                      x.id === t.id ? { ...x, name: e.target.value } : x
-                    ))
+                    updateTestimonialField(t.id, "name", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -122,9 +131,7 @@ export default function TestimonialsTab({
                   type="text"
                   value={t.role}
                   onChange={(e) =>
-                    setTestimonials(testimonials.map((x: any) =>
-                      x.id === t.id ? { ...x, role: e.target.value } : x
-                    ))
+                    updateTestimonialField(t.id, "role", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -134,9 +141,7 @@ export default function TestimonialsTab({
                   type="text"
                   value={t.company}
                   onChange={(e) =>
-                    setTestimonials(testimonials.map((x: any) =>
-                      x.id === t.id ? { ...x, company: e.target.value } : x
-                    ))
+                    updateTestimonialField(t.id, "company", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -148,9 +153,7 @@ export default function TestimonialsTab({
                   rows={3}
                   value={t.content}
                   onChange={(e) =>
-                    setTestimonials(testimonials.map((x: any) =>
-                      x.id === t.id ? { ...x, content: e.target.value } : x
-                    ))
+                    updateTestimonialField(t.id, "content", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -161,9 +164,11 @@ export default function TestimonialsTab({
                 type="number"
                 value={t.sort_order}
                 onChange={(e) =>
-                  setTestimonials(testimonials.map((x: any) =>
-                    x.id === t.id ? { ...x, sort_order: Number(e.target.value) } : x
-                  ))
+                  updateTestimonialField(
+                    t.id,
+                    "sort_order",
+                    Number(e.target.value)
+                  )
                 }
                 className={inputCls + " w-24"}
               />
@@ -180,7 +185,10 @@ export default function TestimonialsTab({
               <button
                 type="button"
                 onClick={async () => {
-                  const { error } = await supabase.from("testimonials").update(t).eq("id", t.id);
+                  const { error } = await supabase
+                    .from("testimonials")
+                    .update(t)
+                    .eq("id", t.id);
                   if (error) notify("error", error.message);
                   else notify("success", `"${t.name}" saved!`);
                 }}

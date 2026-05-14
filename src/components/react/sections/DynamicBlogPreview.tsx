@@ -4,9 +4,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
-import { cloudinaryPresets } from "@/lib/cloudinary";
 import { Skeleton } from "@/components/ui/Skeleton";
-//import { getCollection } from "astro:content";
+import OptimizedImage from "@/components/react/OptimizedImage";
+import { formatDate } from "@/lib/utils";
 
 interface BlogPost {
   id: string;
@@ -18,14 +18,6 @@ interface BlogPost {
   hero_image: string | null;
   published: boolean;
   pub_date: string;
-}
-
-function formatDate(dateStr: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(dateStr));
 }
 
 export default function DynamicBlogPreview() {
@@ -55,16 +47,29 @@ export default function DynamicBlogPreview() {
   }, []);
 
   return (
-    <section id="blog" className="py-16 md:py-24" style={{ contentVisibility: "auto", containIntrinsicSize: "0 700px" }}>
+    <section
+      id="blog"
+      className="py-16 md:py-24"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 700px" }}
+    >
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <div className="mb-10 md:mb-16 flex items-end justify-between">
             <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">Blog</p>
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">Latest Articles</h2>
-              <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">Thoughts on web development, design, and technology.</p>
+              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+                Blog
+              </p>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
+                Latest Articles
+              </h2>
+              <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
+                Thoughts on web development, design, and technology.
+              </p>
             </div>
-            <a href="/blog" className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline">
+            <a
+              href="/blog"
+              className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline"
+            >
               View All →
             </a>
           </div>
@@ -72,7 +77,9 @@ export default function DynamicBlogPreview() {
 
         {loading ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" className="h-64" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} variant="card" className="h-64" />
+            ))}
           </div>
         ) : posts.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -84,50 +91,34 @@ export default function DynamicBlogPreview() {
                 >
                   {post.hero_image && (
                     <div className="aspect-video overflow-hidden">
-                      {post.hero_image.includes("cloudinary") ? (
-                        <picture>
-                          <source
-                            srcSet={cloudinaryPresets.blogHeroAVIF(post.hero_image)}
-                            type="image/avif"
-                          />
-                          <source
-                            srcSet={cloudinaryPresets.blogHero(post.hero_image)}
-                            type="image/webp"
-                          />
-                          <img
-                             src={cloudinaryPresets.blogHero(post.hero_image)}
-                             alt={post.title}
-                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                             loading={idx === 0 ? "eager" : "lazy"}
-                             {...({ fetchpriority: idx === 0 ? "high" : "auto" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-                             width={400}
-                             height={225}
-                             decoding="async"
-                           />
-                        </picture>
-                      ) : (
-                        <img
-                          src={post.hero_image}
-                          alt={post.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                          width={400}
-                          height={225}
-                          decoding="async"
-                        />
-                      )}
+                      <OptimizedImage
+                        src={post.hero_image}
+                        alt={post.title}
+                        preset="blogHero"
+                        loading={idx === 0 ? "eager" : "lazy"}
+                        width={400}
+                        height={225}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
                     </div>
                   )}
                   <div className="p-6">
                     <div className="flex flex-wrap gap-2 mb-3">
                       {post.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-medium text-brand-500">{tag}</span>
+                        <span
+                          key={tag}
+                          className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-medium text-brand-500"
+                        >
+                          {tag}
+                        </span>
                       ))}
                     </div>
                     <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{post.description}</p>
+                    <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                      {post.description}
+                    </p>
                     <time className="mt-4 block text-xs text-zinc-500 dark:text-zinc-400">
                       {formatDate(post.pub_date)}
                     </time>
@@ -144,7 +135,10 @@ export default function DynamicBlogPreview() {
           </FadeIn>
         )}
 
-        <a href="/blog" className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline sm:hidden">
+        <a
+          href="/blog"
+          className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline sm:hidden"
+        >
           View All Posts →
         </a>
       </div>

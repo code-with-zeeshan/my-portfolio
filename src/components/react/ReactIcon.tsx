@@ -64,6 +64,7 @@ const icons: Record<string, string> = {
   clock:           '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   image:           '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
   "grip-vertical": '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/>',
+  "refresh-ccw":   '<path d="M1 4v1.5L4.5 3"/><path d="M1 10v1.5L4.5 9"/><path d="M1 16v1.5L4.5 15"/><path d="M15 3l-1.5 3.5"/><path d="M11 8l-1.5 3.5"/><path d="M7 13l-1.5 3.5"/>',
 };
 
 export default function ReactIcon({ name, size = 24, className = "" }: Props) {

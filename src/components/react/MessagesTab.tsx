@@ -1,9 +1,10 @@
+// src/components/react/MessagesTab.tsx
 "use client";
 
 import React from "react";
 import { supabase } from "@/lib/supabase";
-import { showUndoToast } from "@/components/react/UndoToast";
-import { useConfirmDialog } from "@/components/react/ConfirmDialog";
+import { updateItem } from "@/lib/utils";
+import { useAdminCrud } from "@/lib/useAdminCrud";
 
 export default function MessagesTab({
   messages,
@@ -18,7 +19,7 @@ export default function MessagesTab({
   notify: (type: "success" | "error", message: string) => void;
   loadData: any;
 }) {
-  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const { handleDelete, ConfirmDialogComponent } = useAdminCrud<any>();
   const unreadCount = messages.filter((m: any) => !m.read).length;
 
   const handleMarkAllRead = async () => {
@@ -27,47 +28,47 @@ export default function MessagesTab({
   };
 
   const handleToggleRead = async (msg: any) => {
-    await supabase.from("messages").update({ read: !msg.read }).eq("id", msg.id);
+    await supabase
+      .from("messages")
+      .update({ read: !msg.read })
+      .eq("id", msg.id);
     setMessages((prev: any[]) =>
-      prev.map((m: any) => (m.id === msg.id ? { ...m, read: !msg.read } : m))
+      updateItem(prev, msg.id, (m) => ({ ...m, read: !msg.read }))
     );
   };
 
-  const handleDeleteMessage = (msg: any) => {
-    showConfirm(
-      "Delete Message",
-      "Are you sure you want to delete this message?",
-      async () => {
-        try {
-          const { error } = await supabase.from("messages").delete().eq("id", msg.id);
-          if (error) {
-            notify("error", "Failed to delete message: " + error.message);
-            return;
-          }
-          const deletedMessage = msg;
-          setMessages(messages.filter((m: any) => m.id !== msg.id));
-
-          showUndoToast({
-            message: "Message deleted",
-            actionLabel: "Undo",
-            duration: 5000,
-            onUndo: async () => {
-              const { error } = await supabase.from("messages").insert(deletedMessage);
-              if (error) {
-                notify("error", "Failed to undo: " + error.message);
-              } else {
-                setMessages((prev: any[]) => [...prev, deletedMessage]);
-                notify("success", "Message restored");
-              }
-            },
-          });
-        } catch (error) {
-          notify("error", "Failed to delete message. Please try again.");
-        }
-      },
-      { variant: "danger", confirmLabel: "Delete" }
-    );
-  };
+  const handleDeleteMessage = (msg: any, idx: number) => {
+     handleDelete(
+       {
+         tableName: "Message",
+         itemLabel: `message from ${msg.name}`,
+         item: msg,
+         onDelete: async (id) => {
+           const { error } = await supabase
+             .from("messages")
+             .delete()
+             .eq("id", id);
+           return error ? { error } : {};
+         },
+         onInsert: async (item) => {
+           const { error } = await supabase.from("messages").insert(item);
+           return error ? { error } : {};
+         },
+         onLocalDelete: () => {
+           setMessages(messages.filter((m: any) => m.id !== msg.id));
+         },
+         onUndo: (restored: any) => {
+           setMessages((prev: any[]) => {
+             const newArr = [...prev];
+             newArr.splice(idx, 0, restored);
+             return newArr;
+           });
+         },
+         notify,
+       },
+       "Delete"
+     );
+   };
 
   return (
     <div>
@@ -89,7 +90,7 @@ export default function MessagesTab({
       )}
 
       <div className="space-y-3">
-        {messages.map((msg: any) => (
+        {messages.map((msg: any, idx: number) => (
           <div
             key={msg.id}
             className={`rounded-2xl border p-5 ${
@@ -101,9 +102,16 @@ export default function MessagesTab({
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  {!msg.read && <span className="h-2 w-2 rounded-full bg-brand-500 shrink-0" />}
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-50">{msg.name}</p>
-                  <a href={`mailto:${msg.email}`} className="text-sm text-brand-500 hover:underline">
+                  {!msg.read && (
+                    <span className="h-2 w-2 rounded-full bg-brand-500 shrink-0" />
+                  )}
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    {msg.name}
+                  </p>
+                  <a
+                    href={`mailto:${msg.email}`}
+                    className="text-sm text-brand-500 hover:underline"
+                  >
                     {msg.email}
                   </a>
                 </div>
@@ -129,7 +137,7 @@ export default function MessagesTab({
                     </button>
                   )}
                   <button
-                    onClick={() => handleDeleteMessage(msg)}
+                    onClick={() => handleDeleteMessage(msg, idx)}
                     className="text-xs text-red-400 hover:underline"
                   >
                     Delete
@@ -143,7 +151,8 @@ export default function MessagesTab({
         {messages.length === 0 && !loading && (
           <div className="rounded-2xl border border-dashed border-zinc-300 p-12 text-center dark:border-zinc-700">
             <p className="text-zinc-500">
-              No messages yet. Messages from your contact form will appear here.
+              No messages yet. Messages from your contact form will appear
+              here.
             </p>
           </div>
         )}

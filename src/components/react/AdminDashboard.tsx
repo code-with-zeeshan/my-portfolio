@@ -125,6 +125,7 @@ export default function AdminDashboard() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [resumeData, setResumeData] = useState<Resume | null>(null);
+  const [resumeHistory, setResumeHistory] = useState<Resume[]>([]);
 
   // ── Auth ref for timeout checks ──
   const authStateRef = useRef<AuthState>("checking");
@@ -251,10 +252,20 @@ export default function AdminDashboard() {
           break;
         }
         case "resume": {
-          const { data } = await supabase.from("resume").select("*").order("uploaded_at", { ascending: false }).limit(1).maybeSingle();
-          setResumeData(data);
-          break;
-        }
+           const { data: currentResume } = await supabase
+             .from("resume")
+             .select("*")
+             .order("uploaded_at", { ascending: false })
+             .limit(1)
+             .maybeSingle();
+           setResumeData(currentResume);
+           const { data: history } = await supabase
+             .from("resume")
+             .select("*")
+             .order("uploaded_at", { ascending: false });
+           if (history) setResumeHistory(history ?? []);
+           break;
+         }
       }
     } catch (err) {
       notify("error", `Failed to load ${tab} data`);
@@ -671,13 +682,15 @@ export default function AdminDashboard() {
         ══════════════════════════════════════════════ */}
         {activeTab === "resume" && (
           <ResumeTab
-            resumeData={resumeData}
-            setResumeData={setResumeData}
-            saving={saving}
-            setSaving={setSaving}
-            notify={notify}
-            loadData={loadData}
-          />
+             resumeData={resumeData}
+             setResumeData={setResumeData}
+             resumeHistory={resumeHistory}
+             setResumeHistory={setResumeHistory}
+             saving={saving}
+             setSaving={setSaving}
+             notify={notify}
+             loadData={loadData}
+           />
         )}
 
         {/* ══════════════════════════════════════════════

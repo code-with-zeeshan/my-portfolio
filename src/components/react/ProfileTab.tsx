@@ -288,7 +288,6 @@ export default function ProfileTab({
         <Field label="Profile Photo">
           <ImageCropUpload
             folder="portfolio/profile"
-            label="Profile Photo"
             hint="Square recommended (min 600×600px) — use the 1:1 crop preset"
             currentUrl={personal.profile_photo_url || null}
             defaultAspect="square"

@@ -6,6 +6,7 @@
 import { useEffect, useCallback } from "react";
 import ReactIcon from "@/components/react/ReactIcon";
 import { parseMarkdown } from "@/lib/markdown";
+import { formatDate } from "@/lib/utils";
 import { PreviewModal } from "@/components/ui/preview-modal";
 
 interface BlogPost {
@@ -22,14 +23,6 @@ interface BlogPost {
 interface Props {
   post: BlogPost;
   onClose: () => void;
-}
-
-function formatDate(d: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(d));
 }
 
 export default function BlogPreviewModal({ post, onClose }: Props) {
@@ -54,7 +47,6 @@ export default function BlogPreviewModal({ post, onClose }: Props) {
   return (
     <PreviewModal open={true} onClose={onClose} fullScreen={true}>
       <div className="flex flex-col h-full">
-
         {/* ── Modal Header ── */}
         <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900 shrink-0">
           <div className="flex items-center gap-3">
@@ -93,59 +85,58 @@ export default function BlogPreviewModal({ post, onClose }: Props) {
         {/* ── Scrollable Content ── */}
         <div className="flex-1 overflow-y-auto">
           <article className="mx-auto max-w-3xl px-6 py-16">
-
-          {/* Back link (non-functional in preview) */}
-          <div className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-400 cursor-not-allowed">
-            <ReactIcon name="arrow-left" size={14} />
-            Back to Blog
-          </div>
-
-          {/* Header */}
-          <header className="mb-10">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-500"
-                >
-                  {tag}
-                </span>
-              ))}
+            {/* Back link (non-functional in preview) */}
+            <div className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-400 cursor-not-allowed">
+              <ReactIcon name="arrow-left" size={14} />
+              Back to Blog
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50">
-              {post.title || "Untitled Post"}
-            </h1>
+            {/* Header */}
+            <header className="mb-10">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {post.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-500"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
 
-            <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-              {post.description}
-            </p>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50">
+                {post.title || "Untitled Post"}
+              </h1>
 
-            <time className="mt-4 block text-sm text-zinc-500">
-              {formatDate(post.pub_date || new Date().toISOString())}
-            </time>
-          </header>
+              <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+                {post.description}
+              </p>
 
-          {/* Hero Image */}
-          {post.hero_image && (
-            <img
-              src={post.hero_image}
-              alt={post.title}
-              className="mb-10 w-full rounded-2xl object-cover shadow-lg"
-            />
-          )}
+              <time className="mt-4 block text-sm text-zinc-500">
+                {formatDate(post.pub_date || new Date().toISOString())}
+              </time>
+            </header>
 
-          {/* Content */}
-          {post.content ? (
-            <div
-              className="prose-content"
-              dangerouslySetInnerHTML={{ __html: parseMarkdown(post.content) }}
-            />
-          ) : (
-            <div className="rounded-2xl border-2 border-dashed border-zinc-200 p-12 text-center dark:border-zinc-800">
-              <p className="text-zinc-400">No content yet — start writing in the editor.</p>
-            </div>
-          )}
+            {/* Hero Image */}
+            {post.hero_image && (
+              <img
+                src={post.hero_image}
+                alt={post.title}
+                className="mb-10 w-full rounded-2xl object-cover shadow-lg"
+              />
+            )}
+
+            {/* Content */}
+            {post.content ? (
+              <div
+                className="prose-content"
+                dangerouslySetInnerHTML={{ __html: parseMarkdown(post.content) }}
+              />
+            ) : (
+              <div className="rounded-2xl border-2 border-dashed border-zinc-200 p-12 text-center dark:border-zinc-800">
+                <p className="text-zinc-400">No content yet — start writing in the editor.</p>
+              </div>
+            )}
           </article>
         </div>
       </div>

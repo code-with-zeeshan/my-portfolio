@@ -4,9 +4,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import FadeIn from "@/components/react/FadeIn";
-import { cloudinaryPresets } from "@/lib/cloudinary";
 import { projects as staticProjects } from "@/data/projects";
 import type { Project } from "@/lib/types";
+import OptimizedImage from "@/components/react/OptimizedImage";
+import { mapStaticProject } from "@/lib/utils";
 
 interface Props {
   projectId: string;
@@ -75,9 +76,21 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
               className="absolute top-3 right-3 flex items-center gap-1 rounded-lg bg-black/40 px-2.5 py-1.5 text-xs text-white opacity-0 hover:opacity-100 transition-opacity backdrop-blur-sm group-hover:opacity-100"
               title="View fullscreen"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h6v6"/><path d="M9 21H3v-6"/>
-                <path d="M21 3 14 10"/><path d="M3 21l7-7"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 3h6v6" />
+                <path d="M9 21H3v-6" />
+                <path d="M21 3 14 10" />
+                <path d="M3 21l7-7" />
               </svg>
               Expand
             </button>
@@ -90,8 +103,18 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
                   className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90"
                   aria-label="Previous screenshot"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m15 18-6-6 6-6"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m15 18-6-6 6-6" />
                   </svg>
                 </button>
                 <button
@@ -99,8 +122,18 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
                   className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90"
                   aria-label="Next screenshot"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m9 18 6-6-6-6"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
                   </svg>
                 </button>
               </>
@@ -162,8 +195,19 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
             onClick={() => setIsFullscreen(false)}
             className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
             </svg>
           </button>
 
@@ -179,19 +223,45 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
           {total > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); prev(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prev();
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m15 18-6-6 6-6"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
                 </svg>
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); next(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  next();
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m9 18 6-6-6-6"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
                 </svg>
               </button>
             </>
@@ -232,22 +302,23 @@ export default function DynamicProjectPage({ projectId }: Props) {
       const p = staticProjects[idx];
       if (p) {
         setProject({
-          id:               projectId,
-          title:            p.title,
-          description:      p.description,
+          id: projectId,
+          title: p.title,
+          description: p.description,
           long_description: p.longDescription || null,
-          image_url:        p.image,
-          // ✅ B6: always produce a real array, never null
-          gallery_images:   Array.isArray(p.gallery_images) ? p.gallery_images : [],
-          tags:             p.tags,
-          live_url:         p.liveUrl  || null,
-          github_url:       p.githubUrl || null,
-          featured:         p.featured,
-          year:             p.year,
-          outcome:          p.outcome  || null,
-          sort_order:       p.sortOrder,
-          created_at:       new Date().toISOString(),
-          updated_at:       new Date().toISOString(),
+          image_url: p.image,
+          gallery_images: Array.isArray(p.gallery_images)
+            ? p.gallery_images
+            : [],
+          tags: p.tags,
+          live_url: p.liveUrl || null,
+          github_url: p.githubUrl || null,
+          featured: p.featured,
+          year: p.year,
+          outcome: p.outcome || null,
+          sort_order: p.sortOrder,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
         setLoading(false);
         return;
@@ -266,7 +337,6 @@ export default function DynamicProjectPage({ projectId }: Props) {
         } else {
           setProject({
             ...data,
-            // ✅ B6: normalise null → [] so carousel check is always safe
             gallery_images: Array.isArray(data.gallery_images)
               ? data.gallery_images
               : [],
@@ -311,16 +381,6 @@ export default function DynamicProjectPage({ projectId }: Props) {
     );
   }
 
-  const imgSrc =
-    project.image_url?.includes("cloudinary")
-      ? cloudinaryPresets.blogHero(project.image_url)
-      : project.image_url || "/images/projects/sample_project.webp";
-
-  const imgSrcAVIF =
-    project.image_url?.includes("cloudinary")
-      ? cloudinaryPresets.blogHeroAVIF(project.image_url)
-      : undefined;
-
   const fallbackSrc = "/images/projects/sample_project.webp";
 
   return (
@@ -331,8 +391,19 @@ export default function DynamicProjectPage({ projectId }: Props) {
           href="/projects"
           className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-brand-500 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
           </svg>
           Back to Projects
         </a>
@@ -372,45 +443,17 @@ export default function DynamicProjectPage({ projectId }: Props) {
         </header>
 
         {/* ── Hero image — AVIF + WebP + fallback ── */}
-        {imgSrcAVIF ? (
-          <picture>
-            <source srcSet={imgSrcAVIF} type="image/avif" />
-            <source srcSet={imgSrc} type="image/webp" />
-            <img
-              src={imgSrc}
-              alt={project.title}
-              className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-              loading="eager"
-              {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-              decoding="async"
-              width={1200}
-              height={630}
-              onError={(e) => {
-                const img = e.target as HTMLImageElement;
-                if (img.dataset.errored) return;
-                img.dataset.errored = "true";
-                img.src = fallbackSrc;
-              }}
-            />
-          </picture>
-        ) : (
-          <img
-            src={imgSrc}
-            alt={project.title}
-            className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-            loading="eager"
-            {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
-            decoding="async"
-            width={1200}
-            height={630}
-            onError={(e) => {
-              const img = e.target as HTMLImageElement;
-              if (img.dataset.errored) return;
-              img.dataset.errored = "true";
-              img.src = fallbackSrc;
-            }}
-          />
-        )}
+        <OptimizedImage
+          src={project.image_url}
+          alt={project.title}
+          preset="blogHero"
+          loading="eager"
+          width={1200}
+          height={630}
+          fallbackSrc={fallbackSrc}
+          onErrorFallback={fallbackSrc}
+          className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+        />
 
         {/* ── Action buttons ── */}
         <div className="flex flex-wrap gap-4 mb-10">
@@ -421,9 +464,20 @@ export default function DynamicProjectPage({ projectId }: Props) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-white hover:bg-brand-600 transition-colors dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-brand-500 dark:hover:text-white"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h6v6"/><path d="M10 14 21 3"/>
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 3h6v6" />
+                <path d="M10 14 21 3" />
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
               </svg>
               Live Demo
             </a>
@@ -435,9 +489,19 @@ export default function DynamicProjectPage({ projectId }: Props) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-6 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-colors dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
-                <path d="M9 18c-4.51 2-5-2-7-2"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                <path d="M9 18c-4.51 2-5-2-7-2" />
               </svg>
               Source Code
             </a>

@@ -1,12 +1,14 @@
+// src/components/react/ExperienceTab.tsx
 "use client";
 
 import React from "react";
 import { supabase } from "@/lib/supabase";
 import Field from "@/components/react/Field";
-import { showUndoToast } from "@/components/react/UndoToast";
-import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { updateItem } from "@/lib/utils";
+import { useAdminCrud } from "@/lib/useAdminCrud";
+
 export default function ExperienceTab({
   experiences,
   setExperiences,
@@ -26,28 +28,34 @@ export default function ExperienceTab({
   loading: boolean;
   notify: (type: "success" | "error", message: string) => void;
 }) {
-  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const { handleDelete, handleAdd, ConfirmDialogComponent } =
+    useAdminCrud<any>();
 
   const achievementsToText = (arr: string[]) => arr.join("\n");
 
   const handleAddExperience = async () => {
-    for (const e of experiences) {
-      await supabase.from("experiences").update({ sort_order: e.sort_order + 1 }).eq("id", e.id);
-    }
-    const minSortOrder = experiences.length > 0 ? Math.min(...experiences.map((e: any) => e.sort_order)) : 0;
-    const { data, error } = await supabase
-      .from("experiences")
-      .insert({ company: "Company Name", role: "Job Title", period: "2024 — Present", description: "Description here.", achievements: [], sort_order: minSortOrder })
-      .select().single();
-    if (error) {
-      notify("error", error.message);
-    } else {
-      setExperiences((prev: any[]) => [
-        data,
-        ...prev.map((e: any) => ({ ...e, sort_order: e.sort_order + 1 })),
-      ]);
-      notify("success", "Experience added!");
-    }
+    await handleAdd({
+      tableName: "Experience",
+      defaultItem: {
+        company: "Company Name",
+        role: "Job Title",
+        period: "2024 — Present",
+        description: "Description here.",
+        achievements: [],
+        sort_order: 0,
+      },
+      onInsert: async (item) => {
+        const { data, error } = await supabase
+          .from("experiences")
+          .insert(item)
+          .select()
+          .single();
+        return error ? { error } : { data };
+      },
+      items: experiences,
+      setItems: setExperiences,
+      notify,
+    });
   };
 
   const handleSaveExperience = async (exp: any) => {
@@ -73,42 +81,43 @@ export default function ExperienceTab({
   };
 
   const handleDeleteExperience = (exp: any, idx: number) => {
-    const deletedIdx = idx;
-    showConfirm(
-      "Delete Experience",
-      `Are you sure you want to delete "${exp.role}" at ${exp.company}?`,
-      async () => {
-        const { error } = await supabase.from("experiences").delete().eq("id", exp.id);
-        if (error) {
-          notify("error", error.message);
-        } else {
-          const deletedExperience = exp;
+    handleDelete(
+      {
+        tableName: "Experience",
+        itemLabel: `${exp.role} at ${exp.company}`,
+        item: exp,
+        onDelete: async (id) => {
+          const { error } = await supabase
+            .from("experiences")
+            .delete()
+            .eq("id", id);
+          return error ? { error } : {};
+        },
+        onInsert: async (item) => {
+          const { error } = await supabase
+            .from("experiences")
+            .insert(item);
+          return error ? { error } : {};
+        },
+        onLocalDelete: () => {
           setExperiences(experiences.filter((x: any) => x.id !== exp.id));
-          notify("success", "Experience deleted");
-
-          showUndoToast({
-            message: "Experience deleted",
-            actionLabel: "Undo",
-            duration: 5000,
-            onUndo: async () => {
-              const { error } = await supabase
-                .from("experiences")
-                .insert(deletedExperience);
-              if (error) {
-                notify("error", "Failed to undo: " + error.message);
-              } else {
-                setExperiences((prev: any[]) => {
-                  const newArr = [...prev];
-                  newArr.splice(deletedIdx, 0, deletedExperience);
-                  return newArr;
-                });
-                notify("success", "Experience restored");
-              }
-            },
+        },
+        onUndo: (restored: any) => {
+          setExperiences((prev: any[]) => {
+            const newArr = [...prev];
+            newArr.splice(idx, 0, restored);
+            return newArr;
           });
-        }
+        },
+        notify,
       },
-      { variant: "danger", confirmLabel: "Delete" }
+      "Delete"
+    );
+  };
+
+  const updateExperienceField = (id: string, field: string, value: any) => {
+    setExperiences((prev) =>
+      updateItem(prev, id, (e) => ({ ...e, [field]: value }))
     );
   };
 
@@ -126,16 +135,18 @@ export default function ExperienceTab({
 
       <div className="space-y-4">
         {experiences.map((exp: any, idx: number) => (
-          <Card key={exp.id} variant="bordered" className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0">
+          <Card
+            key={exp.id}
+            variant="bordered"
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0"
+          >
             <div className="grid gap-3 md:grid-cols-3 mb-3">
               <Field label="Role / Job Title">
                 <input
                   type="text"
                   value={exp.role}
                   onChange={(e) =>
-                    setExperiences(experiences.map((x: any) =>
-                      x.id === exp.id ? { ...x, role: e.target.value } : x
-                    ))
+                    updateExperienceField(exp.id, "role", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -145,9 +156,7 @@ export default function ExperienceTab({
                   type="text"
                   value={exp.company}
                   onChange={(e) =>
-                    setExperiences(experiences.map((x: any) =>
-                      x.id === exp.id ? { ...x, company: e.target.value } : x
-                    ))
+                    updateExperienceField(exp.id, "company", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -157,9 +166,7 @@ export default function ExperienceTab({
                   type="text"
                   value={exp.period}
                   onChange={(e) =>
-                    setExperiences(experiences.map((x: any) =>
-                      x.id === exp.id ? { ...x, period: e.target.value } : x
-                    ))
+                    updateExperienceField(exp.id, "period", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -171,9 +178,7 @@ export default function ExperienceTab({
                   rows={2}
                   value={exp.description}
                   onChange={(e) =>
-                    setExperiences(experiences.map((x: any) =>
-                      x.id === exp.id ? { ...x, description: e.target.value } : x
-                    ))
+                    updateExperienceField(exp.id, "description", e.target.value)
                   }
                   className={inputCls}
                 />
@@ -186,11 +191,7 @@ export default function ExperienceTab({
                   value={achievementsToText(exp.achievements)}
                   onChange={(e) => {
                     const rawLines = e.target.value.split("\n");
-                    setExperiences(
-                      experiences.map((x: any) =>
-                        x.id === exp.id ? { ...x, achievements: rawLines } : x
-                      )
-                    );
+                    updateExperienceField(exp.id, "achievements", rawLines);
                   }}
                   className={inputCls}
                   placeholder={`Reduced page load time by 45%\nLed migration from CRA to Next.js\nMentored 4 junior developers`}
@@ -212,9 +213,11 @@ export default function ExperienceTab({
                 type="number"
                 value={exp.sort_order}
                 onChange={(e) =>
-                  setExperiences(experiences.map((x: any) =>
-                    x.id === exp.id ? { ...x, sort_order: Number(e.target.value) } : x
-                  ))
+                  updateExperienceField(
+                    exp.id,
+                    "sort_order",
+                    Number(e.target.value)
+                  )
                 }
                 className={inputCls + " w-24"}
               />

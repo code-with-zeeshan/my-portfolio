@@ -2,16 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  tags: string[];
-  hero_image: string | null;
-  pub_date: string;
-}
+import type { BlogPost } from "@/lib/types";
 
 interface BlogSearchProps {
   posts: BlogPost[];
