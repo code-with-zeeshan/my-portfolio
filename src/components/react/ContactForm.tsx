@@ -4,7 +4,11 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { trackEvent } from "@/components/react/AnalyticsProvider";
-import validator from "validator";
+
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -25,8 +29,8 @@ export default function ContactForm() {
     };
 
     // Client-side validation
-    // Validate email format using validator.js (RFC compliant)
-    if (!validator.isEmail(rawData.email)) {
+    // Validate email format
+    if (!isValidEmail(rawData.email)) {
       setStatus("idle");
       setErrorMessage("Please enter a valid email address");
       return;

@@ -25,14 +25,18 @@ export default function AdminGate() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+Shift+A (or Cmd+Shift+A on Mac)
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "A") {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "a") {
         e.preventDefault();
-        // Check device type at event time
         if (isMobile()) {
           setShowMobilePrompt(true);
         } else {
           setShowLogin(true);
         }
+      }
+      // Ctrl+Shift+C (or Cmd+Shift+C on Mac) - Contact Edit only
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        localStorage.setItem("openContactEdit", "true");
       }
       // Escape to close
       if (e.key === "Escape") {
@@ -44,7 +48,7 @@ export default function AdminGate() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);  // Empty deps - isMobile() is called at event time instead
+  }, []);
 
   const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,7 +68,6 @@ export default function AdminGate() {
       }
 
       if (data.session) {
-        // Store session and redirect to admin
         window.location.href = "/admin";
       }
     } catch {
@@ -90,7 +93,7 @@ export default function AdminGate() {
             </div>
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Desktop Recommended</h2>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Admin features work best on desktop. On mobile, use a browser keyboard with Ctrl+Shift+A to access login.
+              Admin features work best on desktop. On mobile, Switch to desktop mode and use a browser keyboard with Ctrl+Shift+A to access login.
             </p>
           </div>
           <button

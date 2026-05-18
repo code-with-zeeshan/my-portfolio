@@ -1,6 +1,7 @@
 // src/pages/api/contact.ts
 import type { APIRoute } from "astro";
 import { createAdminClient } from "@/lib/supabase";
+import { sanitizeInput } from "@/lib/utils";
 
 export const prerender = false;
 
@@ -96,11 +97,11 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Basic sanitization
+    // Sanitize user inputs to prevent XSS
     const data = {
-      name: name.replace(/<script[^>]*>.*?<\/script>/gi, '').trim(),
+      name: sanitizeInput(name).trim(),
       email: email.trim().toLowerCase(),
-      message: message.replace(/<script[^>]*>.*?<\/script>/gi, '').trim(),
+      message: sanitizeInput(message).trim(),
     };
 
     // Insert into Supabase

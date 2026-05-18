@@ -80,6 +80,9 @@ npx wrangler pages deploy dist
 - [ ] Blog posts load (with search functionality)
 - [ ] Project pages load
 - [ ] Mobile layout looks correct
+- [ ] Section visibility toggles work in Settings tab
+- [ ] Homepage sections hide/show based on settings
+- [ ] Removed resume shows "No resume added yet" prompt
 - [ ] OG preview correct (test at [opengraph.xyz](https://opengraph.xyz))
 - [ ] Submit sitemap to [Google Search Console](https://search.google.com/search-console)
 - [ ] Analytics tracking (if configured)

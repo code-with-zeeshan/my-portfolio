@@ -91,37 +91,23 @@ export function useAdminCrud<T extends { id: string; sort_order?: number }>() {
     async (options: AddItemOptions<T>) => {
       const { tableName, defaultItem, onInsert, items, setItems, notify } = options;
 
-      // Increment all existing items' sort_order by 1
-      for (const item of items) {
-        if (item.sort_order !== undefined) {
-          await onInsert({
-            ...item,
-            sort_order: item.sort_order + 1,
-          } as Partial<T> & { sort_order: number });
-        }
-      }
+      const maxSortOrder = items.length > 0
+        ? Math.max(...items.map((i) => (i as any).sort_order ?? 0))
+        : 0;
+      const newSortOrder = maxSortOrder + 1;
 
-      const minSortOrder =
-        items.length > 0
-          ? Math.min(...items.map((i) => (i as any).sort_order ?? 0))
-          : 0;
       const { data, error } = await onInsert({
         ...defaultItem,
-        sort_order: minSortOrder,
+        sort_order: newSortOrder,
       });
 
       if (error) {
         notify("error", error.message);
       } else {
-        setItems((prev: T[]) => [
-          data as T,
-          ...prev.map((i) => ({
-            ...i,
-            sort_order: (i as any).sort_order
-              ? (i as any).sort_order + 1
-              : undefined,
-          })),
-        ]);
+        const sortedItems = [data as T, ...items].sort((a, b) =>
+          ((a as any).sort_order ?? 0) - ((b as any).sort_order ?? 0)
+        );
+        setItems(sortedItems);
         notify("success", `${tableName} added! Edit below.`);
       }
     },

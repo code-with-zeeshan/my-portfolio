@@ -26,7 +26,7 @@ export default function ThemeToggle() {
     };
   }, []);
 
-  const toggleTheme = async (e: React.MouseEvent) => {
+  const toggleTheme = async () => {
     const next = theme === "light" ? "dark" : "light";
 
     if (!btnRef.current || !document.startViewTransition) {

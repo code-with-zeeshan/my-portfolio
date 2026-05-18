@@ -90,10 +90,55 @@ featured: true                   # Shows on homepage
 4. Click **Save**
 
 ### New Project
-1. Admin → Projects tab → **+ Add Project**
+1. Admin → Projects tab → **+ Add Project** (added at top with sort_order: 1)
 2. Fill in fields, upload image via Cloudinary drag & drop
 3. Toggle **Featured on homepage** if desired
 4. Click **Save**
+
+### Reordering Content
+In Profile tab, you can **drag & drop** to reorder:
+- **Social Links** — Drag by the grip handle on the left to reorder
+- **Highlights** — Drag by the grip handle on the left to reorder
+
+In Projects, Skills, Experience, and Testimonials tabs:
+- New items are added at the top with sort_order: 1
+- Sort orders auto-adjust (1,2,3,4...) when adding or deleting items
+- When deleting an item, remaining items automatically reindex
+
+### Clickable Social Handles
+In Profile tab's social links section, click on any social platform name (GitHub, LinkedIn, X, etc.) below to quickly add them as highlights.
+
+### Clickable Icons
+In Profile tab's highlights section, click on any icon name to add a new highlight with a smart default label (e.g., "trophy" → "Awards Won").
+
+## Contact Page Quick Edit
+
+The homepage contact section supports quick editing without the full admin panel:
+
+### Access Methods
+- **Keyboard:** Press `Ctrl+Shift+C` (or `Cmd+Shift+C` on Mac) on the homepage
+- After login, the contact form becomes editable
+
+### What You Can Edit
+- **Email** — Click on the label to edit (shown as "Email" with dropdown arrow)
+- **Social Handles** — Up to 5 total items (email + 4 social handles), minimum 3
+- **Platform Selection:** Click on any handle label (GitHub, LinkedIn, etc.) to open a dropdown and select a different platform
+- **URLs:** Enter the full URL for each social handle (e.g., https://github.com/yourusername)
+
+### Adding/Removing Handles
+- At **3 items**: Only + button appears on the last handle
+- At **4 items**: Both + and X buttons appear on the last handle
+- At **5 items**: Only X button appears (maximum reached)
+- When clicking X, the handle is removed; when clicking +, a new handle is added with the next available platform
+
+### Save & Exit
+- **Save Button:** Click to persist edit mode across page refreshes. Shows confirmation dialog when saved.
+- **Exit Button:** Click to close edit mode. Prompts: "Stay Logged In" or "Logout & Exit"
+
+### Display Format
+Social handles display as @username (e.g., @code-with-zeeshan) instead of full URLs, with clickable links that open in a new tab.
+
+All icons use the ReactIcon component for consistent rendering across all social platforms.
 
 ## Important Notes
 
@@ -109,3 +154,22 @@ Static MDX posts (`src/data/blog/*.mdx`) are served via `src/pages/blog/[...slug
 Dynamic Supabase posts are served via `src/pages/blog/[slug].astro` (SSR, `prerender = false`).
 
 Both routes coexist — MDX posts use their file `id` as slug, Supabase posts use their `slug` field.
+
+## Section Visibility
+
+All portfolio sections can be toggled on/off via the **Settings** tab in the admin panel:
+- **Projects** — Toggle visibility on homepage
+- **Skills** — Toggle visibility on homepage and about page
+- **Experience** — Toggle visibility on homepage and about page
+- **Testimonials** — Toggle visibility on homepage and about page
+- **Blog** — Toggle visibility on homepage
+
+Changes are instant — no page refresh needed (uses localStorage + storage events).
+
+## Use Static Data
+
+In Settings tab, each section has a "Use Static Data" toggle. When enabled:
+- Sync Static Data will only sync that specific section
+- Useful for re-syncing individual sections without affecting others
+
+This gives granular control over which sections get static data during sync.

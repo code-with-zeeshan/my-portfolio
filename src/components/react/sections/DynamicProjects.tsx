@@ -1,7 +1,7 @@
 // src/components/react/sections/DynamicProjects.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSupabaseData } from "@/lib/useSupabaseData";
 import { projects as staticProjects } from "@/data/projects";
 import { mapStaticProject } from "@/lib/utils";
@@ -27,6 +27,15 @@ interface Project {
 // ─── Project Card ───
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const [visible, setVisible] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
 
   return (
     <article
@@ -41,8 +50,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           },
           { threshold: 0.1 }
         );
+        observerRef.current = observer;
         observer.observe(el);
-        return () => observer.disconnect();
       }}
       className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
       style={{
@@ -368,7 +377,7 @@ export default function DynamicProjects() {
               href="/projects"
               className="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:underline"
             >
-              View All Projects →
+              View All Projects &rarr;
             </a>
           </div>
         </FadeIn>

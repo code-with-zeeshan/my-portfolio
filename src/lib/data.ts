@@ -39,10 +39,8 @@ export async function getPersonalInfo(): Promise<PersonalInfo | null> {
       location: staticPersonal.location,
       email: staticPersonal.email,
       availability: staticPersonal.availability,
-      github_url: staticPersonal.socials.github,
-      linkedin_url: staticPersonal.socials.linkedin,
-      twitter_url: staticPersonal.socials.twitter,
-      profile_photo_url: staticPersonal.profilePhoto,
+      socials: staticPersonal.socials.map((s) => ({ ...s })),
+       profile_photo_url: staticPersonal.profilePhoto,
       top_skills: staticPersonal.topSkills.map((s) => ({
         name: s.name,
         level: s.level,

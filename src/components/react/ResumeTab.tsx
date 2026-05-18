@@ -6,6 +6,7 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import ReactIcon from "@/components/react/ReactIcon";
+import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 
 export default function ResumeTab({
   resumeData,
@@ -27,6 +28,7 @@ export default function ResumeTab({
   loadData: any;
 }) {
   const [activeView, setActiveView] = useState<"current" | "history">("current");
+  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,45 +63,80 @@ export default function ResumeTab({
   };
 
   const handleRemove = async () => {
-    if (!confirm("Remove current resume? It will remain in history unless you delete it.")) return;
-    const { error } = await supabase.from("resume").delete().eq("id", resumeData.id);
-    if (error) notify("error", error.message);
-    else {
-      setResumeData(null);
-      notify("success", "Resume removed. It is still available in History.");
-    }
-  };
+      showConfirm(
+        "Remove Resume",
+        "Remove current resume? It will remain in history unless you delete it.",
+        async () => {
+          // Store removed resume ID in localStorage so it stays in history across refreshes
+          const removedIds: string[] = JSON.parse(
+            localStorage.getItem("removed_resume_ids") || "[]"
+          );
+          localStorage.setItem(
+            "removed_resume_ids",
+            JSON.stringify([...removedIds, resumeData.id])
+          );
+          setResumeData(null);
+          notify("success", "Resume removed. It is still available in History.");
+          // Dispatch event so ResumeButton components update reactively
+          window.dispatchEvent(new Event("resumeRemoved"));
+        },
+        { variant: "danger", confirmLabel: "Remove" }
+      );
+    };
 
   const handleRestore = async (historyItem: any) => {
-    if (!confirm(`Restore "${historyItem.filename}" as the current resume?`)) return;
+      showConfirm(
+        "Restore Resume",
+        `Restore "${historyItem.filename}" as the current resume?`,
+        async () => {
+          setSaving(true);
+          // Re-insert the historical record as a new entry so the full history is preserved
+          const { error } = await supabase.from("resume").insert({
+            file_url: historyItem.file_url,
+            filename: historyItem.filename,
+          });
+          setSaving(false);
 
-    setSaving(true);
-    // Re-insert the historical record as a new entry so the full history is preserved
-    const { error } = await supabase.from("resume").insert({
-      file_url: historyItem.file_url,
-      filename: historyItem.filename,
-    });
-    setSaving(false);
+          if (error) {
+            notify("error", error.message);
+          } else {
+            // Remove the old "removed" marker so it doesn't linger in history
+            const removedIds: string[] = JSON.parse(
+              localStorage.getItem("removed_resume_ids") || "[]"
+            );
+            localStorage.setItem(
+              "removed_resume_ids",
+              JSON.stringify(removedIds.filter((id: string) => id !== historyItem.id))
+            );
+            // Delete the old record from the DB since it's been superseded
+            await supabase.from("resume").delete().eq("id", historyItem.id);
 
-    if (error) {
-      notify("error", error.message);
-    } else {
-      notify("success", `"${historyItem.filename}" restored as current resume!`);
-      loadData("resume");
-    }
-  };
+            notify("success", `"${historyItem.filename}" restored as current resume!`);
+            // Dispatch event so ResumeButton components update reactively
+            window.dispatchEvent(new Event("resumeRestored"));
+            loadData("resume");
+          }
+        },
+        { confirmLabel: "Restore" }
+      );
+    };
 
   const handleDeleteHistory = async (historyItem: any) => {
-    if (!confirm(`Permanently delete "${historyItem.filename}" from history?`)) return;
-
-    const { error } = await supabase.from("resume").delete().eq("id", historyItem.id);
-    if (error) {
-      notify("error", error.message);
-    } else {
-      setResumeHistory((prev) => prev.filter((h: any) => h.id !== historyItem.id));
-      notify("success", `"${historyItem.filename}" deleted from history.`);
-    }
-  };
+     showConfirm(
+       "Delete Resume",
+       `Permanently delete "${historyItem.filename}" from history?`,
+       async () => {
+         const { error } = await supabase.from("resume").delete().eq("id", historyItem.id);
+         if (error) {
+           notify("error", error.message);
+         } else {
+           setResumeHistory((prev) => prev.filter((h: any) => h.id !== historyItem.id));
+           notify("success", `"${historyItem.filename}" deleted from history.`);
+         }
+       },
+       { variant: "danger", confirmLabel: "Delete" }
+     );
+   };
 
   // History entries are all records except the current one
   const historyEntries = resumeHistory.filter(
@@ -108,6 +145,7 @@ export default function ResumeTab({
 
   return (
     <div>
+      {ConfirmDialogComponent}
       <h1 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-50">Resume</h1>
 
       {/* ── Tabs: Current / History ── */}

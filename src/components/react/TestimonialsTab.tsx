@@ -75,13 +75,34 @@ export default function TestimonialsTab({
           return error ? { error } : {};
         },
         onLocalDelete: () => {
-          setTestimonials(testimonials.filter((x: any) => x.id !== t.id));
+          const filtered = testimonials.filter((x: any) => x.id !== t.id);
+          const reindexed = filtered.map((x: any, i: number) => ({
+            ...x,
+            sort_order: i + 1,
+          }));
+          setTestimonials(reindexed);
+          reindexed.forEach(async (x: any) => {
+            await supabase
+              .from("testimonials")
+              .update({ sort_order: x.sort_order })
+              .eq("id", x.id);
+          });
         },
         onUndo: (restored: any) => {
           setTestimonials((prev: any[]) => {
             const newArr = [...prev];
             newArr.splice(idx, 0, restored);
-            return newArr;
+            const reindexed = newArr.map((x: any, i: number) => ({
+              ...x,
+              sort_order: i + 1,
+            }));
+            reindexed.forEach(async (x: any) => {
+              await supabase
+                .from("testimonials")
+                .update({ sort_order: x.sort_order })
+                .eq("id", x.id);
+            });
+            return reindexed;
           });
         },
         notify,
@@ -162,12 +183,12 @@ export default function TestimonialsTab({
             <Field label="Sort Order">
               <input
                 type="number"
-                value={t.sort_order}
+                value={t.sort_order || 1}
                 onChange={(e) =>
                   updateTestimonialField(
                     t.id,
                     "sort_order",
-                    Number(e.target.value)
+                    Math.max(1, Number(e.target.value))
                   )
                 }
                 className={inputCls + " w-24"}

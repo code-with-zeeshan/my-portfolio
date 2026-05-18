@@ -16,20 +16,36 @@ export default function ResumeButton({ className = "", label = "Resume", onClick
   const [noResume, setNoResume] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("resume")
-      .select("file_url")
-      .order("uploaded_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.file_url) {
-          setResumeUrl(data.file_url);
-        } else {
-          setNoResume(true);
-        }
-      });
-  }, []);
+      const fetchResume = () => {
+        const removedIds: string[] = JSON.parse(
+          localStorage.getItem("removed_resume_ids") || "[]"
+        );
+        supabase
+          .from("resume")
+          .select("*")
+          .order("uploaded_at", { ascending: false })
+          .then(({ data }) => {
+            const latest = (data ?? []).find((r: any) => !removedIds.includes(r.id));
+            if (latest?.file_url) {
+              setResumeUrl(latest.file_url);
+              setNoResume(false);
+            } else {
+              setResumeUrl(null);
+              setNoResume(true);
+            }
+          });
+      };
+
+      fetchResume();
+
+      window.addEventListener("resumeRemoved", fetchResume);
+      window.addEventListener("resumeRestored", fetchResume);
+
+      return () => {
+        window.removeEventListener("resumeRemoved", fetchResume);
+        window.removeEventListener("resumeRestored", fetchResume);
+      };
+    }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (noResume || !resumeUrl) {

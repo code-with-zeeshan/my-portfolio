@@ -7,6 +7,7 @@ import ScrollProgress from "@/components/react/ScrollProgress.tsx";
 import AdminGate from "@/components/react/AdminGate.tsx";
 import AnalyticsProvider from "@/components/react/AnalyticsProvider.tsx";
 import PostHog from "@/components/posthog.astro";
+import { createAdminClient } from "@/lib/supabase";
 // PostHog and Umami loaded via inline scripts when needed
 
 // ── Analytics config from env ──
@@ -19,6 +20,18 @@ const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN ?? "";
 // Umami config
 const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID ?? "";
 const umamiUrl = import.meta.env.PUBLIC_UMAMI_URL ?? "";
+
+// Server-side fetch for footer data to avoid client-side delay
+let footerData = null;
+try {
+  const supabase = createAdminClient();
+  const { data: personal } = await supabase
+    .from("personal")
+    .select("name, socials, email")
+    .limit(1)
+    .single();
+  if (personal) footerData = personal;
+} catch {}
 
 interface Props {
   title:        string;
@@ -171,7 +184,7 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
-    <DynamicFooter client:visible />
+    <DynamicFooter client:load initialData={footerData} />
 
     <!--
       Plug-and-play analytics provider

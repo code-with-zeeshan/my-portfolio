@@ -4,6 +4,8 @@
 // - DynamicBlogPost.tsx
 // - ProjectPreviewModal.tsx (uses simple split/join, can use this too)
 
+import { sanitizeMarkdownOutput } from "./utils";
+
 /**
  * Parse markdown content to HTML
  * Supports: code blocks, inline code, headers (h1-h3), bold, italic, lists, links, horizontal rules, paragraphs
@@ -43,7 +45,7 @@ export function parseMarkdown(text: string): string {
     .replace(/^(?![<])/, '<p class="text-zinc-600 dark:text-zinc-300 leading-relaxed">')
     + '</p>';
 
-  return html;
+  return sanitizeMarkdownOutput(html);
 }
 
 /**
@@ -80,7 +82,7 @@ export function parseMarkdownLite(text: string): string {
       '<p class="mb-4">$1</p>'
     );
 
-  return html;
+  return sanitizeMarkdownOutput(html);
 }
 
 export default parseMarkdown;

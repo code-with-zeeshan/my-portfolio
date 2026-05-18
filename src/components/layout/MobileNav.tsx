@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import ResumeButton from "@/components/react/ResumeButton.tsx";
-import useDarkMode from "@/hooks/useDarkMode";
+import ResumeButton from "@/components/react/ResumeButton";
 
 interface NavLink {
   href: string;
@@ -17,9 +16,17 @@ interface Props {
 export default function MobileNav({ navLinks }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const [isDark, setIsDark] = useState(false);
 
-  // Use shared dark mode hook
-  const { isDark } = useDarkMode();
+  // Check for dark mode
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Lock body scroll when drawer is open
   useEffect(() => {

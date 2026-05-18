@@ -7,11 +7,11 @@ export const personal = {
     location: "New Delhi, India",
     email: "zeeshansayfyebusiness@gmail.com",
     availability: "Open to freelance & full-time opportunities",
-    socials: {
-      github: "https://github.com/code-with-zeeshan",
-      linkedin: "https://linkedin.com/in/mohammad-zeeshan-37637a1a5",
-      twitter: "https://twitter.com/yourusername",
-    },
+    socials: [
+       { platform: "GitHub", url: "https://github.com/code-with-zeeshan" },
+       { platform: "LinkedIn", url: "https://linkedin.com/in/mohammad-zeeshan-37637a1a5" },
+       { platform: "Twitter", url: "https://twitter.com/yourusername" },
+     ],
     profilePhoto: "/profile-photo.jpg",
     topSkills: [
       {"name": "React / Next.js", "level": 95},

@@ -58,27 +58,38 @@ export default function ProjectsTab({
     useAdminCrud<any>();
 
   const handleAddProject = async () => {
-    await handleAdd({
-      tableName: "Project",
-      defaultItem: {
+    const updatedItems = projects.map((p: any, idx: number) => ({
+      ...p,
+      sort_order: idx + 2,
+    }));
+    
+    const { data, error } = await supabase
+      .from("projects")
+      .insert({
         title: "New Project",
         description: "Description",
         tags: [],
         featured: false,
-        sort_order: 0,
-      },
-      onInsert: async (item) => {
-        const { data, error } = await supabase
+        sort_order: 1,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      notify("error", error.message);
+    } else {
+      for (const item of updatedItems) {
+        await supabase
           .from("projects")
-          .insert(item)
-          .select()
-          .single();
-        return error ? { error } : { data };
-      },
-      items: projects,
-      setItems: setProjects,
-      notify,
-    });
+          .update({ sort_order: item.sort_order })
+          .eq("id", item.id);
+      }
+      const sortedItems = [data, ...updatedItems].sort((a: any, b: any) => 
+        (a.sort_order || 0) - (b.sort_order || 0)
+      );
+      setProjects(sortedItems);
+      notify("success", "Project added! Edit below.");
+    }
   };
 
   const handleSaveProject = async (project: any) => {
@@ -113,15 +124,34 @@ export default function ProjectsTab({
           return error ? { error } : {};
         },
         onLocalDelete: () => {
-          setProjects((prev: any[]) =>
-            prev.filter((p: any) => p.id !== project.id)
-          );
+          const filtered = projects.filter((p: any) => p.id !== project.id);
+          const reindexed = filtered.map((p: any, i: number) => ({
+            ...p,
+            sort_order: i + 1,
+          }));
+          setProjects(reindexed);
+          reindexed.forEach(async (p: any) => {
+            await supabase
+              .from("projects")
+              .update({ sort_order: p.sort_order })
+              .eq("id", p.id);
+          });
         },
         onUndo: (restored: any) => {
           setProjects((prev: any[]) => {
             const newArr = [...prev];
             newArr.splice(idx, 0, restored);
-            return newArr;
+            const reindexed = newArr.map((p: any, i: number) => ({
+              ...p,
+              sort_order: i + 1,
+            }));
+            reindexed.forEach(async (p: any) => {
+              await supabase
+                .from("projects")
+                .update({ sort_order: p.sort_order })
+                .eq("id", p.id);
+            });
+            return reindexed;
           });
         },
         notify,
@@ -368,15 +398,15 @@ export default function ProjectsTab({
                     className={inputCls}
                   />
                 </Field>
-                <Field label="Sort Order (lower = first)">
+                <Field label="Sort Order">
                   <input
                     type="number"
-                    value={project.sort_order}
+                    value={project.sort_order || 1}
                     onChange={(e) =>
                       updateProjectField(
                         project.id,
                         "sort_order",
-                        Number(e.target.value)
+                        Math.max(1, Number(e.target.value))
                       )
                     }
                     className={inputCls}
@@ -556,13 +586,9 @@ export default function ProjectsTab({
           ))}
 
           {projects.length === 0 && !loading && (
-            <EmptyState title="No content yet" description="Add your first item using the form above." />
+            <EmptyState title="No Project Yet" description='Add your first project. Click "+ Add Project" above.' />
           )}
         </div>
-        {/* end of projects list */}
-        {projects.length === 0 && !loading && (
-          <EmptyState title="No content yet" description="Add your first item using the form above." />
-        )}
       </div>
       {/* end flex-1 */}
 

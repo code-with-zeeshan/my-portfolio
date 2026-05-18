@@ -8,6 +8,16 @@ export const prerender = false;
 
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
+// Timing-safe string comparison
+function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 // Helper to get the last sync time from Supabase (persistent across serverless invocations)
 async function getLastSyncTime(): Promise<number | null> {
   try {
@@ -48,7 +58,31 @@ async function setLastSyncTime(timestamp: number): Promise<void> {
   }
 }
 
-export const POST: APIRoute = async () => {
+export const POST: APIRoute = async ({ request }) => {
+  const CSRF_SECRET = import.meta.env.CSRF_SECRET;
+  
+  // Check if request has Authorization header (user is authenticated via admin)
+  const authHeader = request.headers.get("Authorization");
+  const isAuthenticated = authHeader?.startsWith("Bearer ");
+  
+  // Skip CSRF check if user is authenticated (admin is already logged in)
+  // Only check CSRF for unauthenticated requests when CSRF_SECRET is set
+  if (CSRF_SECRET && !isAuthenticated) {
+    const csrfToken = request.headers.get("x-csrf-token");
+    if (!csrfToken || !safeCompare(csrfToken, CSRF_SECRET)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid CSRF token" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  let body: { sections?: string[] } = {};
+  try {
+    body = await request.json();
+  } catch {}
+
+  const sectionsToSync = body.sections || null;
   const now = Date.now();
   const supabase = createAdminClient();
 
@@ -96,7 +130,7 @@ export const POST: APIRoute = async () => {
     const blogPosts = await getCollection("blog");
 
     // 2. Pass the fetched data to the sync function
-    const result = await syncFallbackToSupabase(blogPosts);
+    const result = await syncFallbackToSupabase(blogPosts, sectionsToSync);
 
     if (!result.success) {
       return new Response(JSON.stringify(result), {

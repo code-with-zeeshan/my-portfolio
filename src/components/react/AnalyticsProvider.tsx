@@ -15,9 +15,11 @@ const STORAGE_KEY = "analytics_provider";
 // ── Get provider from localStorage or env ──
 export function getProvider(): AnalyticsProvider {
   // Check localStorage first (user selection from admin)
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && ["vercel", "plausible", "posthog", "umami", "none"].includes(stored)) {
-    return stored as AnalyticsProvider;
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored && ["vercel", "plausible", "posthog", "umami", "none"].includes(stored)) {
+      return stored as AnalyticsProvider;
+    }
   }
 
   // Fall back to env variable
@@ -32,12 +34,16 @@ export function getProvider(): AnalyticsProvider {
 
 // ── Save provider to localStorage (called from AdminDashboard) ──
 export function setAnalyticsProvider(provider: AnalyticsProvider): void {
-  localStorage.setItem(STORAGE_KEY, provider);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, provider);
+  }
 }
 
 // ── Clear provider (use env variable) ──
 export function clearAnalyticsProvider(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 // ── Plausible config ──

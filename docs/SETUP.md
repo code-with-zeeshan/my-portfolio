@@ -23,7 +23,9 @@ The site works immediately with static fallback data. No database required for l
 ## Step 2 — Supabase Setup (Required for Admin)
 
 1. Go to [supabase.com](https://supabase.com) → New Project
-2. Open **SQL Editor** → run the full schema from the project's SQL setup file
+2. Open **SQL Editor** → run the SQL setup file:
+   - **Fresh database:** Use `supabase-rls-policies-prod.sql` (creates all tables from scratch)
+   - **Existing database:** Use `supabase-rls-policies.sql` (includes migrations for schema updates)
 3. Go to **Settings → API** and copy:
    - `Project URL` → `PUBLIC_SUPABASE_URL`
    - `anon public` key → `PUBLIC_SUPABASE_ANON_KEY`
@@ -100,6 +102,15 @@ This uses [Sharp](https://github.com/lovell/sharp) to compress images in `public
 2. Press `Ctrl+Shift+A` → log in with your Supabase credentials
 3. In the Admin sidebar, click **⬆ Sync Static Data**
 4. This imports your `src/data/*.ts` files into Supabase (safe to run multiple times — skips existing data)
+5. Optionally, go to **Settings** tab to toggle section visibility and configure per-section static data sync
+
+### New Features to Explore
+
+After syncing, try these new features:
+- **Drag & Drop** — In Profile tab, drag social links and highlights to reorder them
+- **Clickable Social Handles** — Click on social platform names to add them as highlights
+- **Clickable Icons** — Click on icon names to add highlights with smart default labels
+- **Auto Sort Order** — New items in Projects, Skills, Experience, Testimonials are added at top with sort_order: 1, existing items auto-adjust
 
 ## Troubleshooting
 

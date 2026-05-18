@@ -20,6 +20,10 @@ A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **T
 - **Project Showcase** — Featured project carousel and card grid with case studies
 - **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
 - **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A` with error boundary protection
+- **Contact Page Quick Edit** — Edit email and social handles on homepage via `Ctrl+Shift+C` (max 5 items, min 3, with save/exit options)
+- **Section Visibility** — Toggle sections (Projects, Skills, Experience, Testimonials, Blog) to show/hide on homepage and about page
+- **Use Static Data** — Per-section toggle in Settings to sync specific static data sections
+- **Instant Preview** — Section visibility changes reflect immediately without page refresh (localStorage + storage events)
 - **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
 - **Contact Form** — Messages saved to Supabase inbox, readable in admin panel (with rate limiting & validation)
 - **Resume Management** — Upload and update resume PDF via admin; auto-downloads for visitors
@@ -30,6 +34,12 @@ A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **T
 - **Blog Search** — Client-side search functionality for blog posts
 - **Undo Support** — Undo toast notifications for delete operations in admin panel
 - **Confirm Dialogs** — Safe confirmation dialogs for destructive actions
+- **Drag & Drop Reordering** — Drag social links and highlights in Profile tab to reorder them
+- **Clickable Social Handles** — Click on social platform names in Profile tab to add as highlights
+- **Clickable Icons** — Click on icon names to add them as highlights with smart default labels
+- **Auto Sort Order** — Sort orders (1,2,3...) auto-adjust when adding/deleting items in Projects, Skills, Experience, Testimonials
+- **Centered Sidebar Icons** — Admin panel sidebar icons centered when collapsed
+- **ReactIcon Component** — Unified SVG icon system for all social platforms with consistent rendering
 
 ## 🛠 Tech Stack
 
@@ -99,9 +109,14 @@ my-portfolio/
 │   │   │   ├── ReactIcon.tsx      # SVG icon system for .tsx files
 │   │   │   ├── ResumeButton.tsx   # Resume link (fetches URL from Supabase)
 │   │   │   ├── ScrollProgress.tsx # Page scroll progress bar
+│   │   │   ├── SectionWrapper.tsx # Section visibility wrapper
+│   │   │   ├── SecretGenerator.tsx # Generate CRON_SECRET & CSRF_SECRET
+│   │   │   ├── SettingsTab.tsx   # Section visibility & secret generators
 │   │   │   ├── SkillBar.tsx       # Animated progress bars
 │   │   │   ├── StaggerChildren.tsx # Staggered child animations
-│   │   │   └── TextReveal.tsx     # Word-by-word text reveal
+│   │   │   ├── TextReveal.tsx     # Word-by-word text reveal
+│   │   │   ├── UndoToast.tsx     # Undo delete operations
+│   │   │   └── ConfirmDialog.tsx  # Safe delete confirmation dialogs
 │   │   │
 │   │   └── ui/
 │   │       ├── Icons.astro        # SVG icon system for .astro files
@@ -320,7 +335,11 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including c
 ├── Rate limiting for API endpoints       ✅ Supabase-backed rate limiting
 ├── Server-side contact form endpoint     ✅ /api/contact with rate limiting
 ├── CSRF protection for POST endpoints    ✅ CSRF_SECRET + safeCompare
-└── Image compression for fallbacks       ✅ scripts/compress-images.mjs (Sharp, quality=70)
+├── Image compression for fallbacks       ✅ scripts/compress-images.mjs (Sharp, quality=70)
+├── Section visibility toggle             ✅ SettingsTab.tsx + SectionWrapper.tsx
+├── Per-section Use Static Data toggle    ✅ SettingsTab.tsx (sync specific sections)
+├── Instant visibility updates            ✅ localStorage + storage events (no refresh)
+└── Resume management with history        ✅ ResumeTab.tsx + removed_resume_ids localStorage
 ```
 
 ## 🤖 AI Setup Guide

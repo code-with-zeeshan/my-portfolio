@@ -182,3 +182,73 @@ export function mapStaticExperience(e: {
     sort_order: index,
   };
 }
+
+/**
+ * Sanitize HTML to prevent XSS attacks
+ * Removes script tags, event handlers, javascript: URLs, and dangerous attributes
+ */
+export function sanitizeHtml(html: string): string {
+  if (!html) return "";
+
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/data:/gi, "");
+}
+
+/**
+ * Sanitize user input for safe display
+ * Use for names, messages, and any user-generated content
+ */
+export function sanitizeInput(input: string): string {
+  if (!input) return "";
+
+  return input
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .replace(/\//g, "&#x2F;");
+}
+
+/**
+ * Sanitize markdown-converted HTML output
+ * Use after parsing markdown to prevent XSS in rendered content
+ */
+export function sanitizeMarkdownOutput(html: string): string {
+  if (!html) return "";
+
+  let sanitized = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/data:/gi, "");
+
+  const allowedTags = [
+    "p", "br", "strong", "em", "b", "i", "u", "h1", "h2", "h3", "h4", "h5", "h6",
+    "ul", "ol", "li", "a", "img", "pre", "code", "blockquote", "hr", "span", "div"
+  ];
+
+  const tagRegex = /<\/?(\w+)[^>]*>/g;
+  sanitized = sanitized.replace(tagRegex, (match, tag) => {
+    if (allowedTags.includes(tag.toLowerCase())) {
+      if (tag.toLowerCase() === "a") {
+        return match.replace(/href=["'](?!https?:|mailto:)/gi, 'href="#"');
+      }
+      if (tag.toLowerCase() === "img") {
+        return match.replace(/(?:src|onerror)=["'][^"']*["']/gi, "").replace(/\s+/, " ");
+      }
+      return match;
+    }
+    return "";
+  });
+
+  return sanitized;
+}

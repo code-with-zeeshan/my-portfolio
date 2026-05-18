@@ -113,7 +113,7 @@ export const cloudinaryPresets = {
     getOptimizedUrl(url, { width: 800, height: 450, crop: "fill", gravity: "auto", format: "auto", quality: "auto:low" }),
 
   profilePhoto: (url: string) =>
-    getOptimizedUrl(url, { width: 600, height: 600, crop: "thumb", gravity: "face", format: "auto", quality: "auto:low", radius: "max" }),
+    getOptimizedUrl(url, { width: 600, height: 750, crop: "fill", gravity: "face", format: "auto", quality: "auto:low" }),
 
   blogHero: (url: string) =>
     getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", gravity: "auto", format: "auto", quality: "auto:low" }),
@@ -129,7 +129,7 @@ export const cloudinaryPresets = {
     getOptimizedUrl(url, { width: 800, height: 450, crop: "fill", gravity: "auto", format: "avif", quality: "auto:low" }),
 
   profilePhotoAVIF: (url: string) =>
-    getOptimizedUrl(url, { width: 600, height: 600, crop: "thumb", gravity: "face", format: "avif", quality: "auto:low", radius: "max" }),
+    getOptimizedUrl(url, { width: 600, height: 750, crop: "fill", gravity: "face", format: "avif", quality: "auto:low" }),
 
   blogHeroAVIF: (url: string) =>
     getOptimizedUrl(url, { width: 1200, height: 630, crop: "fill", gravity: "auto", format: "avif", quality: "auto:low" }),

@@ -5,13 +5,20 @@ import DynamicAbout from "@/components/react/sections/DynamicAbout.tsx";
 import DynamicSkills from "@/components/react/sections/DynamicSkills.tsx";
 import DynamicExperience from "@/components/react/sections/DynamicExperience.tsx";
 import DynamicTestimonials from "@/components/react/sections/DynamicTestimonials.tsx";
+import SectionWrapper from "@/components/react/SectionWrapper.tsx";
 ---
 
 <BaseLayout title="About" description="Learn more about me, my skills, experience, and what drives me.">
   <div class="pt-16" style="content-visibility: auto; contain-intrinsic-size: 0 200px;">
     <DynamicAbout client:load />
-    <DynamicSkills client:visible />
-    <DynamicExperience client:visible />
-    <DynamicTestimonials client:visible />
+    <SectionWrapper client:load sectionId="skills">
+      <DynamicSkills client:load />
+    </SectionWrapper>
+    <SectionWrapper client:load sectionId="experience">
+      <DynamicExperience client:load />
+    </SectionWrapper>
+    <SectionWrapper client:load sectionId="testimonials">
+      <DynamicTestimonials client:load />
+    </SectionWrapper>
   </div>
 </BaseLayout>

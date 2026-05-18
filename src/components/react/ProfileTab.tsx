@@ -34,7 +34,54 @@ export default function ProfileTab({
   notify: (type: "success" | "error", message: string) => void;
 }) {
   const [bioModalOpen, setBioModalOpen] = useState(false);
+  const [draggedSocialIdx, setDraggedSocialIdx] = useState<number | null>(null);
+  const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const { ConfirmDialogComponent } = useConfirmDialog();
+
+  const handleDragStart = (e: React.DragEvent, idx: number, type: 'social' | 'highlight') => {
+    if (type === 'social') {
+      setDraggedSocialIdx(idx);
+    } else {
+      setDraggedHighlightIdx(idx);
+    }
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', idx.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIdx(idx);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIdx(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIdx: number, type: 'social' | 'highlight') => {
+    e.preventDefault();
+    if (type === 'social' && draggedSocialIdx !== null && draggedSocialIdx !== dropIdx) {
+      const newSocials = [...personal.socials];
+      const [removed] = newSocials.splice(draggedSocialIdx, 1);
+      newSocials.splice(dropIdx, 0, removed);
+      setPersonal({ ...personal, socials: newSocials });
+    } else if (type === 'highlight' && draggedHighlightIdx !== null && draggedHighlightIdx !== dropIdx) {
+      const newHighlights = [...personal.highlights];
+      const [removed] = newHighlights.splice(draggedHighlightIdx, 1);
+      newHighlights.splice(dropIdx, 0, removed);
+      setPersonal({ ...personal, highlights: newHighlights });
+    }
+    setDraggedSocialIdx(null);
+    setDraggedHighlightIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedSocialIdx(null);
+    setDraggedHighlightIdx(null);
+    setDragOverIdx(null);
+  };
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -302,35 +349,153 @@ export default function ProfileTab({
           />
         </Field>
 
-        {(["github_url", "linkedin_url", "twitter_url"] as const).map((field) => (
-          <Field key={field} label={field.replace("_url", "").replace("_", " ").toUpperCase() + " URL"}>
-            <input
-              type="url"
-              value={personal[field] || ""}
-              onChange={(e) => setPersonal({ ...personal, [field]: e.target.value || null })}
-              className={inputCls}
-              placeholder="https://"
-            />
-          </Field>
-        ))}
+        {/* ── Social Links ── */}
+       <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+         <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
+           <div>
+             <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+               Social Links
+             </h2>
+             <p className="text-xs text-zinc-400 mt-0.5">Add or remove social media links</p>
+           </div>
+           <button
+             type="button"
+             onClick={() => {
+                if (personal.socials.length >= 7) {
+                  notify("error", "Maximum 7 social links allowed.");
+                  return;
+                }
+                setPersonal({
+                  ...personal,
+                  socials: [...personal.socials, { platform: "", url: "" }],
+                });
+              }}
+             className="rounded-lg bg-brand-500/10 px-3 py-1.5 text-xs font-medium text-brand-500 hover:bg-brand-500/20 transition-colors"
+           >
+             + Add Social Link
+           </button>
+         </div>
+
+         <div className="grid grid-cols-[1fr_2fr_40px] gap-3 px-1">
+           <span className="text-xs font-medium text-zinc-400">Platform</span>
+           <span className="text-xs font-medium text-zinc-400">URL</span>
+           <span />
+         </div>
+
+<div className="space-y-3">
+            {personal.socials.map((social: any, idx: number) => (
+              <div
+                key={idx}
+                draggable
+                onDragStart={(e) => handleDragStart(e, idx, 'social')}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, idx, 'social')}
+                onDragEnd={handleDragEnd}
+                className={`grid grid-cols-[32px_1fr_2fr_40px] gap-2 items-center rounded-lg transition-all cursor-grab active:cursor-grabbing ${
+                  dragOverIdx === idx ? 'bg-brand-50 dark:bg-brand-900/20 ring-2 ring-brand-500 ring-offset-2' : ''
+                } ${draggedSocialIdx === idx ? 'opacity-50' : ''}`}
+              >
+                <div className="flex items-center justify-center w-8 h-9 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                </div>
+                <input
+                  type="text"
+                  value={social.platform}
+                  onChange={(e) => {
+                    const updated = personal.socials.map((s: any, i: number) =>
+                      i === idx ? { ...s, platform: e.target.value } : s
+                    );
+                    setPersonal({ ...personal, socials: updated });
+                  }}
+                  className={inputCls}
+                  placeholder="e.g. GitHub"
+                />
+                <input
+                  type="url"
+                  value={social.url}
+                  onChange={(e) => {
+                    const updated = personal.socials.map((s: any, i: number) =>
+                      i === idx ? { ...s, url: e.target.value } : s
+                    );
+                    setPersonal({ ...personal, socials: updated });
+                  }}
+                  className={inputCls}
+                  placeholder="https://"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPersonal({
+                      ...personal,
+                      socials: personal.socials.filter((_: any, i: number) => i !== idx),
+                    })
+                  }
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:border-red-200 hover:text-red-500 dark:border-zinc-700 transition-colors"
+                  title="Remove"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+            ))}
+          </div>
+
+         {personal.socials.length === 0 && (
+           <p className="text-sm text-center text-zinc-400 py-4">
+             No social links yet. Click "+ Add Social Link" above.
+           </p>
+         )}
+
+{/* Available social handle names reference */}
+          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">
+              Click to add social handle
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {["GitHub", "LinkedIn", "X", "Instagram", "Facebook", "YouTube", "TikTok", "Reddit", "Pinterest", "Discord", "Telegram", "WhatsApp", "Medium", "Dev.to", "StackOverflow", "CodePen", "Dribbble", "Behance", "Figma", "Slack"].map(
+                (name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => {
+                      if (personal.socials.some((s: any) => s.platform.toLowerCase() === name.toLowerCase())) {
+                        notify("error", `${name} is already in your list`);
+                        return;
+                      }
+                      if (personal.socials.length >= 7) {
+                        notify("error", "Maximum 7 social links allowed.");
+                        return;
+                      }
+                      setPersonal({
+                        ...personal,
+                        socials: [...personal.socials, { platform: name, url: "" }],
+                      });
+                    }}
+                    className="rounded bg-zinc-100 dark:bg-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-500 dark:text-zinc-400 hover:bg-brand-500/10 hover:text-brand-500 transition-colors"
+                  >
+                    {name}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+       </div>
 
         <button
           type="button"
           onClick={async () => {
-            setSavingProfile(true);
-            const { error } = await supabase.from("personal").update({
-              name: personal.name,
-              title: personal.title,
-              tagline: personal.tagline,
-              bio: personal.bio,
-              location: personal.location,
-              email: personal.email,
-              availability: personal.availability,
-              github_url: personal.github_url,
-              linkedin_url: personal.linkedin_url,
-              twitter_url: personal.twitter_url,
-              profile_photo_url: personal.profile_photo_url ?? null,
-            }).eq("id", personal.id);
+             setSavingProfile(true);
+             const { error } = await supabase.from("personal").update({
+               name: personal.name,
+               title: personal.title,
+               tagline: personal.tagline,
+               bio: personal.bio,
+               location: personal.location,
+               email: personal.email,
+               availability: personal.availability,
+               socials: personal.socials,
+               profile_photo_url: personal.profile_photo_url ?? null,
+             }).eq("id", personal.id);
             setSavingProfile(false);
             if (error) notify("error", error.message);
             else notify("success", "Profile saved!");
@@ -473,12 +638,19 @@ export default function ProfileTab({
           </div>
           <button
             type="button"
-            onClick={() =>
-              setPersonal({
-                ...personal,
-                highlights: [...personal.highlights, { icon: "star", label: "New Stat", value: "0+" }],
-              })
-            }
+            onClick={() => {
+               const existingLabels = personal.highlights.map((h: any) => h.label);
+               let newLabel = "New Stat";
+               let counter = 2;
+               while (existingLabels.includes(newLabel)) {
+                 newLabel = `New Stat ${counter}`;
+                 counter++;
+               }
+               setPersonal({
+                 ...personal,
+                 highlights: [...personal.highlights, { icon: "star", label: newLabel, value: "0+" }],
+               });
+             }}
             className="rounded-lg bg-brand-500/10 px-3 py-1.5 text-xs font-medium text-brand-500 hover:bg-brand-500/20 transition-colors"
           >
             + Add Highlight
@@ -493,13 +665,55 @@ export default function ProfileTab({
         </div>
 
         <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
-          <p className="font-medium">Available icon names:</p>
+          <p className="font-medium">Click to add highlight</p>
           <div className="flex flex-wrap gap-1.5">
-            {["briefcase", "calendar", "coffee", "heart", "star", "user", "mail", "github", "linkedin"].map(
+            {["briefcase", "calendar", "coffee", "heart", "star", "user", "mail", "github", "linkedin", "x", "map-pin", "quote", "download", "check-circle", "trophy", "award", "target", "zap", "code", "palette", "rocket", "globe", "message", "phone"].map(
               (name: string) => (
-                <code key={name} className="rounded bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 text-[11px]">
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    const existingLabels = personal.highlights.map((h: any) => h.label);
+                    const defaultLabels: Record<string, string> = {
+                      briefcase: "Years Experience",
+                      calendar: "Projects Completed",
+                      coffee: "Cups of Coffee",
+                      heart: "Happy Clients",
+                      star: "5-Star Reviews",
+                      user: "Clients Served",
+                      mail: "Emails Sent",
+                      github: "GitHub Stars",
+                      linkedin: "Connections",
+                      x: "Followers",
+                      "map-pin": "Cities Visited",
+                      quote: "Testimonials",
+                      download: "Downloads",
+                      "check-circle": "Tasks Done",
+                      trophy: "Awards Won",
+                      award: "Certifications",
+                      target: "Goals Hit",
+                      zap: "Speed Score",
+                      code: "Lines Written",
+                      palette: "Designs Created",
+                      rocket: "Projects Launched",
+                      globe: "Countries Reached",
+                      message: "Messages",
+                      phone: "Calls Answered",
+                    };
+                    const newLabel = defaultLabels[name] || name;
+                    if (existingLabels.includes(newLabel)) {
+                      notify("error", `"${newLabel}" is already in your highlights`);
+                      return;
+                    }
+                    setPersonal({
+                      ...personal,
+                      highlights: [...personal.highlights, { icon: name, label: newLabel, value: "0+" }],
+                    });
+                  }}
+                  className="rounded bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 text-[11px] hover:bg-brand-500/10 hover:text-brand-500 transition-colors"
+                >
                   {name}
-                </code>
+                </button>
               )
             )}
           </div>
@@ -507,7 +721,21 @@ export default function ProfileTab({
 
         <div className="space-y-2">
           {personal.highlights.map((h: any, idx: number) => (
-            <div key={idx} className="grid grid-cols-[90px_1fr_90px_40px] gap-3 items-center">
+            <div
+              key={idx}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx, 'highlight')}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx, 'highlight')}
+              onDragEnd={handleDragEnd}
+              className={`grid grid-cols-[32px_90px_1fr_90px_40px] gap-2 items-center rounded-lg transition-all cursor-grab active:cursor-grabbing ${
+                dragOverIdx === idx ? 'bg-brand-50 dark:bg-brand-900/20 ring-2 ring-brand-500 ring-offset-2' : ''
+              } ${draggedHighlightIdx === idx ? 'opacity-50' : ''}`}
+            >
+              <div className="flex items-center justify-center w-8 h-9 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+              </div>
               <input
                 type="text"
                 value={h.icon}

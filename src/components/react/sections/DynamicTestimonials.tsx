@@ -2,9 +2,7 @@
 "use client";
 
 import { useSupabaseData } from "@/lib/useSupabaseData";
-import FadeIn from "@/components/react/FadeIn";
-import { Card } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { useMemo } from "react";
 
 interface Testimonial {
   id: string;
@@ -39,85 +37,101 @@ const STATIC_FALLBACK: Testimonial[] = [
     content:
       "Fantastic collaboration experience. They bridge the gap between design and development seamlessly, always considering user experience first.",
   },
+  {
+    id: "4",
+    name: "David Wilson",
+    role: "CEO",
+    company: "TechStart",
+    content:
+      "Outstanding developer who consistently delivers beyond expectations. His code is clean, well-documented, and scalable.",
+  },
+  {
+    id: "5",
+    name: "Lisa Thompson",
+    role: "Engineering Manager",
+    company: "BigTech Inc",
+    content:
+      "A rare combination of technical excellence and great communication. Made our complex project look easy.",
+  },
 ];
 
 export default function DynamicTestimonials() {
-  const { data: testimonials, loading, supabaseDown } = useSupabaseData<Testimonial>({
+  const { data: testimonials, supabaseDown } = useSupabaseData<Testimonial>({
     table: "testimonials",
     order: { column: "sort_order", ascending: true },
     fallback: STATIC_FALLBACK,
   });
 
-  const displayTestimonials = supabaseDown ? STATIC_FALLBACK : testimonials ?? [];
+  const displayTestimonials = useMemo(
+    () => (supabaseDown ? STATIC_FALLBACK : testimonials ?? STATIC_FALLBACK),
+    [supabaseDown, testimonials],
+  );
+
+  // Each card is 340px + 24px gap = 364px
+  const cardWidth = 364;
+  const totalCards = displayTestimonials.length;
+  const animationDuration = totalCards * 3.5;
 
   return (
     <section
       id="testimonials"
-      className="py-16 md:py-24"
-      style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}
+      className="testimonials-section py-16 md:py-24"
     >
       <div className="mx-auto max-w-5xl px-6">
-        <FadeIn>
-          <div className="mb-10 md:mb-16">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
-              Testimonials
-            </p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
-              What People Say
-            </h2>
-          </div>
-        </FadeIn>
+        <div className="mb-10 md:mb-16">
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
+            Testimonials
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
+            What People Say
+          </h2>
+        </div>
 
         {displayTestimonials.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {displayTestimonials.map((t, idx) => (
-              <FadeIn key={t.id} delay={idx * 0.1}>
-                <Card variant="bordered" className="bg-white dark:bg-zinc-900 p-8 rounded-2xl">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mb-4 text-brand-500/30"
-                  >
-                    <path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 4 4 0 0 0 4-4V5a2 2 0 0 0-2-2z" />
-                    <path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 4 4 0 0 0 4-4V5a2 2 0 0 0-2-2z" />
-                  </svg>
-                  <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-                    "{t.content}"
-                  </p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500/10 text-sm font-semibold text-brand-500">
-                      {t.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+          <div className="carousel-container">
+            {/* Left fade */}
+            <div className="carousel-fade carousel-fade-left" />
+
+            {/* Sliding track */}
+            <div 
+              className="carousel-track"
+              style={{
+                animation: `slideLeft ${animationDuration}s linear infinite`,
+              }}
+            >
+              {/* Render cards twice for seamless loop */}
+              {[...displayTestimonials, ...displayTestimonials].map((item, index) => (
+                <div 
+                  className="testimonial-card" 
+                  key={item.id + '-' + index}
+                  style={{ minWidth: '340px' }}
+                >
+                  <div className="testimonial-stars" aria-label="5 stars">
+                    ★★★★★
+                  </div>
+                  <p className="testimonial-text">"{item.content}"</p>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">
+                      {item.name.split(" ").map((n) => n[0]).join("")}
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                        {t.name}
-                      </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {t.role} at {t.company}
-                      </p>
+                    <div className="author-info">
+                      <span className="author-name">{item.name}</span>
+                      <span className="author-role">
+                        {item.role} at {item.company}
+                      </span>
                     </div>
                   </div>
-                </Card>
-              </FadeIn>
-            ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Right fade */}
+            <div className="carousel-fade carousel-fade-right" />
           </div>
         ) : (
-          <FadeIn>
-            <EmptyState
-              title="Testimonials coming soon"
-              description="Client testimonials and feedback will be displayed here."
-            />
-          </FadeIn>
+          <p className="text-center text-zinc-500 dark:text-zinc-400">
+            No testimonials available.
+          </p>
         )}
       </div>
     </section>

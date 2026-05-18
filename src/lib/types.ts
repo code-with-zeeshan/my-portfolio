@@ -12,23 +12,26 @@ export interface Highlight {
   value: string;
 }
 
-export interface PersonalInfo {
-  id: string;
-  name: string;
-  title: string;
-  tagline: string;
-  bio: string;
-  location: string;
-  email: string;
-  availability: string;
-  github_url: string | null;
-  linkedin_url: string | null;
-  twitter_url: string | null;
-  profile_photo_url?: string | null;
-  top_skills: TopSkill[];
-  highlights: Highlight[];
-  updated_at: string;
-}
+export interface SocialLink {
+   platform: string;
+   url: string;
+ }
+
+ export interface PersonalInfo {
+    id: string;
+    name: string;
+    title: string;
+    tagline: string;
+    bio: string;
+    location: string;
+    email: string;
+    availability: string;
+    profile_photo_url?: string | null;
+    socials: SocialLink[];
+    top_skills: TopSkill[];
+    highlights: Highlight[];
+    updated_at: string;
+  }
 
 export interface Project {
   id: string;

@@ -4,7 +4,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useDarkMode from "@/hooks/useDarkMode";
 
 interface Props {
   value: string;
@@ -23,9 +22,17 @@ export default function MarkdownEditor({
   // MDEditor is imported dynamically to avoid SSR crash
   // (it accesses window/document during module evaluation)
   const [MDEditor, setMDEditor] = useState<any>(null);
+  const [isDark, setIsDark] = useState(false);
 
-  // Use shared dark mode hook
-  const { isDark } = useDarkMode();
+  // Check for dark mode
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setMounted(true);

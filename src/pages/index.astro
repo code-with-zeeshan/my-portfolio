@@ -9,18 +9,41 @@ import DynamicExperience from "@/components/react/sections/DynamicExperience.tsx
 import DynamicTestimonials from "@/components/react/sections/DynamicTestimonials.tsx";
 import DynamicBlogPreview from "@/components/react/sections/DynamicBlogPreview.tsx";
 import DynamicContact from "@/components/react/sections/DynamicContact.tsx";
----
+import SectionWrapper from "@/components/react/SectionWrapper.tsx";
+import { createAdminClient } from "@/lib/supabase";
 
+// Server-side fetch for hero data to avoid client-side delay
+let heroData = null;
+try {
+  const supabase = createAdminClient();
+  const { data: personal } = await supabase
+    .from("personal")
+    .select("name, title, tagline, location, availability")
+    .limit(1)
+    .single();
+  if (personal) heroData = personal;
+} catch {}
+---
 
 <BaseLayout title="Home">
   <div style="content-visibility: auto; contain-intrinsic-size: 0 100px;">
-    <DynamicHero client:visible />
+    <DynamicHero client:load initialData={heroData} />
   </div>
-  <DynamicAbout client:visible />
-  <DynamicProjects client:visible />
-  <DynamicSkills client:visible />
-  <DynamicExperience client:visible />
-  <DynamicTestimonials client:visible />
-  <DynamicBlogPreview client:visible />
-  <DynamicContact client:visible />
+  <DynamicAbout client:load />
+  <SectionWrapper client:load sectionId="projects">
+    <DynamicProjects client:load />
+  </SectionWrapper>
+  <SectionWrapper client:load sectionId="skills">
+    <DynamicSkills client:load />
+  </SectionWrapper>
+  <SectionWrapper client:load sectionId="experience">
+    <DynamicExperience client:load />
+  </SectionWrapper>
+  <SectionWrapper client:load sectionId="testimonials">
+    <DynamicTestimonials client:load />
+  </SectionWrapper>
+  <SectionWrapper client:load sectionId="blog">
+    <DynamicBlogPreview client:load />
+  </SectionWrapper>
+  <DynamicContact client:load />
 </BaseLayout>

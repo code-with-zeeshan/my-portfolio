@@ -140,6 +140,7 @@ TESTIMONIALS:
 > - Log in with your admin credentials
 > - Use the dashboard to edit: Personal info, Projects, Blog posts, Experience, Skills, Testimonials, and more!
 > - No coding required - everything can be done through the user-friendly admin interface
+> - For quick contact info edits on homepage: Press `Ctrl+Shift+C` → Login → Edit email and social handles directly on the contact section
 
 ---
 
@@ -174,13 +175,16 @@ npm install
 2. Enter project details (name, password, region)
 3. Wait for project to be ready (2-3 minutes)
 4. Go to **SQL Editor** in Supabase dashboard
-5. Copy the entire contents of `supabase-rls-policies.sql` and run it
+5. Copy the entire contents of `supabase-rls-policies-prod.sql` and run it
    - This creates all tables, RLS policies, and storage policies
-6. Go to **Authentication → Users** → Add user
+   - For existing database updates, use `supabase-rls-policies.sql` instead
+6. Go to **Storage** → Create a new bucket named `portfolio-assets`
+   - Make it public (for serving images)
+7. Go to **Authentication → Users** → Add user
    - Email: Use the `ADMIN_EMAIL` from user config
    - Password: Generate a secure password
    - This is the admin login for the portfolio
-7. Go to **Settings → API**
+8. Go to **Settings → API**
    - Copy `Project URL` → Set as `SUPABASE_URL`
    - Copy `anon public` key → Set as `SUPABASE_ANON_KEY`
    - Copy `service_role` key → Set as `SUPABASE_SERVICE_ROLE_KEY`
@@ -197,7 +201,14 @@ npm install
    - Unique filename: ✅ Enabled
 5. Go to **Settings → Security** → Copy **API Key** → Set as `CLOUDINARY_API_KEY`
 
-### Step 5: Configure Environment Variables
+### Step 5: Set Up Supabase Storage (Required for Images)
+
+1. Go to Supabase → **Storage** → **New Bucket**
+2. Bucket name: `portfolio-assets`
+3. Make bucket **public** (for serving images to visitors)
+4. Click **Create Bucket**
+
+### Step 6: Configure Environment Variables
 
 Create `.env` file from example:
 
@@ -237,7 +248,7 @@ PUBLIC_ANALYTICS_PROVIDER=vercel
 # PUBLIC_UMAMI_URL=https://umami.example.com
 ```
 
-### Step 6: Update Personal Information
+### Step 7: Update Personal Information
 
 Update `src/data/personal.ts` with user's information:
 
@@ -268,7 +279,7 @@ export const personal = {
 } as const;
 ```
 
-### Step 7: Add Projects
+### Step 8: Add Projects
 
 Option A: Update `src/data/projects.ts` for static fallback:
 
@@ -294,7 +305,7 @@ export const projects: Project[] = [
 
 Option B: Use Admin Dashboard after deployment (recommended)
 
-### Step 8: Add Blog Posts
+### Step 9: Add Blog Posts
 
 Create MDX files in `src/data/blog/`:
 
@@ -313,14 +324,14 @@ draft: false
 Content in Markdown format...
 ```
 
-### Step 9: Update Experience, Skills, Testimonials
+### Step 10: Update Experience, Skills, Testimonials
 
 Edit these files:
 - `src/data/experience.ts` - Work experience
 - `src/data/skills.ts` - Skill categories
 - `src/data/testimonials.ts` - Client testimonials
 
-### Step 10: Optimize Images
+### Step 11: Optimize Images
 
 Compress fallback images to reduce download size:
 
@@ -330,7 +341,7 @@ npm run compress:images
 
 This uses Sharp to compress images at quality 70. Typical savings: **~70% reduction** on uncompressed PNGs (especially the 512×512 manifest icon).
 
-### Step 11: Test Locally
+### Step 12: Test Locally
 
 ```bash
 npm run dev
@@ -344,7 +355,7 @@ Verify:
 - [ ] Press `Ctrl+Shift+A` → Login with admin credentials
 - [ ] Admin dashboard loads
 
-### Step 12: Deploy to Vercel
+### Step 13: Deploy to Vercel
 
 ```bash
 git add .
@@ -366,6 +377,8 @@ git push origin main
 2. Press `Ctrl+Shift+A` → Login with admin credentials
 3. In Admin Dashboard:
    - Click **Sync Static Data** to import `src/data/*.ts` to Supabase
+   - Go to **Settings** to configure section visibility (show/hide sections)
+   - Optionally enable "Use Static Data" per section for targeted syncing
    - Add projects, blog posts via the UI
    - Upload images via Cloudinary integration
    - Upload resume PDF
@@ -389,6 +402,7 @@ After deployment, verify:
 - [ ] Dark/light mode toggle works and persists
 - [ ] All navigation links work
 - [ ] `Ctrl+Shift+A` opens admin login
+- [ ] `Ctrl+Shift+C` opens contact quick edit (after login)
 - [ ] Admin dashboard accessible after login
 - [ ] Contact form submits successfully
 - [ ] Messages appear in Admin → Messages
@@ -400,6 +414,11 @@ After deployment, verify:
 - [ ] Sitemap accessible at `/sitemap.xml`
 - [ ] Analytics tracking (if configured)
 - [ ] Run `npm run compress:images` to optimize fallback images
+- [ ] Section visibility toggles work in Settings tab
+- [ ] Homepage sections hide/show based on visibility settings
+- [ ] Use Static Data per-section toggle works correctly
+- [ ] Resume download works (navbar and about page)
+- [ ] Removed resume shows "No resume added yet" prompt
 
 ---
 
@@ -411,6 +430,19 @@ After deployment, verify:
 4. **Admin access** - Protected by Supabase Auth + `ADMIN_EMAIL` check
 5. **RLS Policies** - Database access restricted by Row Level Security
 6. **CSP Headers** - Content Security Policy set in `src/middleware.ts`
+
+---
+
+## ✨ New Features (Latest Updates)
+
+This portfolio includes these additional features:
+
+- **Drag & Drop Reordering** — In Profile tab, drag social links and highlights to reorder them (grip handle on left)
+- **Clickable Social Handles** — Click on social platform names to add them as highlights
+- **Clickable Icons** — Click on icon names to add highlights with smart default labels
+- **Auto Sort Order** — Sort orders (1,2,3,4...) auto-adjust when adding/deleting items in Projects, Skills, Experience, Testimonials
+- **Add at Top** — New items are added at top with sort_order: 1, existing items shift down
+- **Centered Sidebar Icons** — Admin panel sidebar icons are centered when collapsed
 
 ---
 

@@ -69,6 +69,26 @@ Edit in `src/styles/global.css`:
 | `30` | Orange |
 | `350` | Pink/Rose |
 
+### 6. Reordering Highlights
+
+In Admin → Profile → **Highlights**:
+- Drag by the grip handle on the left to reorder
+- Sort order auto-adjusts (1,2,3...)
+- New highlights are added at top
+
+### 7. Available Icons
+
+Full list of icons available for highlights:
+- **General:** `briefcase`, `calendar`, `coffee`, `heart`, `star`, `user`, `mail`, `map-pin`, `quote`, `download`, `check-circle`, `trophy`, `award`, `target`, `code`, `palette`, `rocket`, `globe`, `phone`, `message`, `zap`
+- **Social:** `github`, `linkedin`, `x` (Twitter), `instagram`, `facebook`, `youtube`, `tiktok`, `reddit`, `pinterest`, `discord`, `telegram`, `whatsapp`, `medium`, `devto`, `stackoverflow`, `codepen`, `dribbble`, `behance`, `figma`, `slack`
+
+### 8. Social Platforms
+
+Available social platforms to add via Admin → Profile → **Social Links**:
+- GitHub, LinkedIn, X (Twitter), Instagram, Facebook, YouTube, TikTok
+- Reddit, Pinterest, Discord, Telegram, WhatsApp
+- Medium, DEV.to, StackOverflow, CodePen, Dribbble, Behance, Figma, Slack
+
 ### 6. Site URL
 
 `astro.config.mjs`:
@@ -152,6 +172,20 @@ No configuration needed — works automatically.
 ### 13. Projects
 
 Edit `src/data/projects.ts` or use Admin → Projects → **+ Add Project**.
+
+### 14. Section Visibility
+
+Via Admin → Settings:
+- Toggle sections (Projects, Skills, Experience, Testimonials, Blog) to show/hide on homepage and about page
+- Use "Use Static Data" button on each section to enable per-section sync
+- Changes reflect instantly without page refresh
+
+### 15. Resume Management
+
+Via Admin → Resume:
+- Upload new PDF resume
+- Removed resumes go to history (can be restored)
+- Both navbar and about page resume buttons check removed_resume_ids localStorage for instant updates
 
 ## Adding New Icon Names
 

@@ -10,12 +10,16 @@ import type { TopSkill, Highlight } from "@/lib/types";
 import OptimizedImage from "@/components/react/OptimizedImage";
 import { formatDate } from "@/lib/utils";
 
+interface SocialLink {
+  platform: string;
+  url: string;
+}
+
 interface PersonalInfo {
   id: string;
   name: string;
   bio: string;
-  github_url: string | null;
-  linkedin_url: string | null;
+  socials: SocialLink[];
   profile_photo_url?: string | null;
   top_skills: TopSkill[];
   highlights: Highlight[];
@@ -26,8 +30,7 @@ const STATIC_FALLBACK: PersonalInfo = {
   id: "static",
   name: "Your Name",
   bio: "I'm a passionate developer with 5+ years of experience building web applications. I specialize in React, TypeScript, and Node.js.\n\nI love turning complex problems into simple, beautiful solutions.",
-  github_url: null,
-  linkedin_url: null,
+  socials: [],
   profile_photo_url: null,
   top_skills: [
     { name: "React / Next.js", level: 95 },
@@ -115,8 +118,7 @@ export default function DynamicAbout() {
           id: row.id,
           name: row.name ?? STATIC_FALLBACK.name,
           bio: row.bio ?? STATIC_FALLBACK.bio,
-          github_url: row.github_url ?? null,
-          linkedin_url: row.linkedin_url ?? null,
+          socials: Array.isArray(row.socials) ? row.socials : [],
           profile_photo_url: row.profile_photo_url ?? null,
           // Explicit null/empty checks — don't silently fall back
           top_skills:
@@ -130,16 +132,35 @@ export default function DynamicAbout() {
         });
       });
 
-    // Fetch resume URL
-    supabase
-      .from("resume")
-      .select("file_url")
-      .order("uploaded_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data: resumeRow }) => {
-        if (resumeRow?.file_url) setResumeUrl(resumeRow.file_url);
-      });
+    // Fetch resume URL with removed check
+    async function fetchResume() {
+      const removedIds: string[] = JSON.parse(localStorage.getItem("removed_resume_ids") || "[]");
+      
+      let query = supabase
+        .from("resume")
+        .select("id, file_url")
+        .order("uploaded_at", { ascending: false });
+
+      const { data: allResumes } = await query;
+      
+      if (allResumes && allResumes.length > 0) {
+        const validResume = allResumes.find((r: any) => !removedIds.includes(r.id));
+        setResumeUrl(validResume?.file_url || null);
+      } else {
+        setResumeUrl(null);
+      }
+    }
+
+    fetchResume();
+
+    const handleResumeChange = () => fetchResume();
+    window.addEventListener("resumeRemoved", handleResumeChange);
+    window.addEventListener("resumeRestored", handleResumeChange);
+
+    return () => {
+      window.removeEventListener("resumeRemoved", handleResumeChange);
+      window.removeEventListener("resumeRestored", handleResumeChange);
+    };
   }, []);
 
   return (
@@ -164,14 +185,14 @@ export default function DynamicAbout() {
           {/* ── LEFT: Photo + Skill Bars ── */}
           <FadeIn direction="left" className="md:col-span-5 lg:col-span-5">
             <div>
-              <div className="relative aspect-4/5 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
                 <OptimizedImage
                   src={data.profile_photo_url}
                   alt={data.name}
                   preset="profilePhoto"
                   loading="lazy"
                   width={600}
-                  height={600}
+                  height={750}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -187,7 +208,7 @@ export default function DynamicAbout() {
 
           {/* ── RIGHT: Bio + Highlights + CTA ── */}
           <FadeIn direction="right" className="md:col-span-7 lg:col-span-7">
-            <div className="flex h-full flex-col justify-center">
+            <div className="flex h-full flex-col">
               <BioText text={data.bio} />
 
               {/* Highlights Grid */}

@@ -87,13 +87,34 @@ export default function SkillsTab({
           return error ? { error } : {};
         },
         onLocalDelete: () => {
-          setSkills(skills.filter((s: any) => s.id !== cat.id));
+          const filtered = skills.filter((s: any) => s.id !== cat.id);
+          const reindexed = filtered.map((s: any, i: number) => ({
+            ...s,
+            sort_order: i + 1,
+          }));
+          setSkills(reindexed);
+          reindexed.forEach(async (s: any) => {
+            await supabase
+              .from("skill_categories")
+              .update({ sort_order: s.sort_order })
+              .eq("id", s.id);
+          });
         },
         onUndo: (restored: any) => {
           setSkills((prev: any[]) => {
             const newArr = [...prev];
             newArr.splice(idx, 0, restored);
-            return newArr;
+            const reindexed = newArr.map((s: any, i: number) => ({
+              ...s,
+              sort_order: i + 1,
+            }));
+            reindexed.forEach(async (s: any) => {
+              await supabase
+                .from("skill_categories")
+                .update({ sort_order: s.sort_order })
+                .eq("id", s.id);
+            });
+            return reindexed;
           });
         },
         notify,
@@ -142,12 +163,12 @@ export default function SkillsTab({
               <Field label="Sort Order">
                 <input
                   type="number"
-                  value={cat.sort_order}
+                  value={cat.sort_order || 1}
                   onChange={(e) =>
                     updateSkillField(
                       cat.id,
                       "sort_order",
-                      Number(e.target.value)
+                      Math.max(1, Number(e.target.value))
                     )
                   }
                   className={inputCls}

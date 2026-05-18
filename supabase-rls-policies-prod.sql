@@ -1,9 +1,9 @@
 -- ============================================
--- PORTFOLIO DATABASE SCHEMA - SINGLE SOURCE OF TRUTH
+-- PORTFOLIO DATABASE SCHEMA - FRESH INSTALL
 -- ============================================
--- This file contains all DDL, RLS, and storage policies for the portfolio Supabase project.
--- Run this file in Supabase SQL Editor to set up the entire database schema.
--- Avoid modifying this file directly; all changes should be version-controlled.
+-- This file sets up the entire portfolio database from scratch.
+-- Run this in Supabase SQL Editor on a fresh project.
+-- ============================================
 
 -- ============================================
 -- CORE TABLE DEFINITIONS
@@ -19,7 +19,25 @@ CREATE TABLE IF NOT EXISTS personal (
   location TEXT NOT NULL,
   email TEXT NOT NULL,
   availability TEXT NOT NULL DEFAULT 'Open to opportunities',
-  socials JSONB DEFAULT '[]'::jsonb,
+  socials JSONB DEFAULT '[
+    {"platform": "GitHub", "url": "https://github.com/code-with-zeeshan"},
+    {"platform": "LinkedIn", "url": "https://linkedin.com/in/mohammad-zeeshan-37637a1a5"},
+    {"platform": "Twitter", "url": "https://twitter.com/yourusername"}
+  ]'::jsonb,
+  profile_photo_url TEXT,
+  top_skills JSONB DEFAULT '[
+    {"name": "React / Next.js", "level": 95},
+    {"name": "TypeScript", "level": 90},
+    {"name": "Node.js", "level": 85},
+    {"name": "Tailwind CSS", "level": 92},
+    {"name": "PostgreSQL", "level": 78}
+  ]'::jsonb,
+  highlights JSONB DEFAULT '[
+    {"icon": "briefcase", "label": "Years Experience", "value": "5+"},
+    {"icon": "calendar", "label": "Projects Completed", "value": "30+"},
+    {"icon": "coffee", "label": "Cups of Coffee", "value": "∞"},
+    {"icon": "heart", "label": "Happy Clients", "value": "20+"}
+  ]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -37,6 +55,7 @@ CREATE TABLE IF NOT EXISTS projects (
   year TEXT,
   outcome TEXT,
   sort_order INT DEFAULT 0,
+  gallery_images JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -71,7 +90,11 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   hero_image TEXT,
   published BOOLEAN DEFAULT FALSE,
   pub_date TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  meta_title TEXT,
+  meta_description TEXT,
+  og_image TEXT,
+  scheduled_for TIMESTAMPTZ
 );
 
 -- 6. TESTIMONIALS
@@ -109,98 +132,12 @@ CREATE TABLE IF NOT EXISTS contact_rate_limits (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 10. APP SETTINGS (key-value store for app metadata like rate limiting)
+-- 10. APP SETTINGS (key-value store for app metadata)
 CREATE TABLE IF NOT EXISTS app_settings (
   key TEXT PRIMARY KEY,
   value JSONB NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- ============================================
--- SCHEMA MIGRATIONS (ALTER TABLES)
--- ============================================
-
--- Add profile photo URL column to personal table
-ALTER TABLE personal ADD COLUMN IF NOT EXISTS profile_photo_url TEXT;
-
--- Migrate social links from flat columns to JSONB array (Phase 4)
-ALTER TABLE personal ADD COLUMN IF NOT EXISTS socials JSONB DEFAULT '[]'::jsonb;
-
--- Backfill socials from old flat columns where they exist
-UPDATE personal t
-SET socials = s.socials
-FROM (
-  SELECT id, jsonb_agg(jsonb_build_object('platform', platform, 'url', url) ORDER BY platform) AS socials
-  FROM (
-    SELECT id, 'GitHub' AS platform, github_url AS url FROM personal WHERE github_url IS NOT NULL
-    UNION ALL
-    SELECT id, 'LinkedIn' AS platform, linkedin_url AS url FROM personal WHERE linkedin_url IS NOT NULL
-    UNION ALL
-    SELECT id, 'Twitter' AS platform, twitter_url AS url FROM personal WHERE twitter_url IS NOT NULL
-  ) sub
-  GROUP BY id
-) s
-WHERE t.id = s.id
-AND t.socials = '[]'::jsonb;
-
--- Remove old flat social URL columns
-ALTER TABLE personal DROP COLUMN IF EXISTS github_url;
-ALTER TABLE personal DROP COLUMN IF EXISTS linkedin_url;
-ALTER TABLE personal DROP COLUMN IF EXISTS twitter_url;
-
--- Add top_skills and highlights as JSONB columns on personal table
-ALTER TABLE personal
-  ADD COLUMN IF NOT EXISTS top_skills JSONB DEFAULT '[
-    {"name": "React / Next.js", "level": 95},
-    {"name": "TypeScript",       "level": 90},
-    {"name": "Node.js",          "level": 85},
-    {"name": "Tailwind CSS",     "level": 92},
-    {"name": "PostgreSQL",       "level": 78}
-  ]'::jsonb,
-  ADD COLUMN IF NOT EXISTS highlights JSONB DEFAULT '[
-    {"icon": "briefcase", "label": "Years Experience",   "value": "5+"},
-    {"icon": "calendar",  "label": "Projects Completed", "value": "30+"},
-    {"icon": "coffee",    "label": "Cups of Coffee",     "value": "∞"},
-    {"icon": "heart",     "label": "Happy Clients",      "value": "20+"}
-  ]'::jsonb;
-
--- Backfill existing personal rows with default top_skills and highlights if null
-UPDATE personal
-SET
-  top_skills = '[
-    {"name": "React / Next.js", "level": 95},
-    {"name": "TypeScript",       "level": 90},
-    {"name": "Node.js",          "level": 85},
-    {"name": "Tailwind CSS",     "level": 92},
-    {"name": "PostgreSQL",       "level": 78}
-  ]'::jsonb,
-  highlights = '[
-    {"icon": "briefcase", "label": "Years Experience",   "value": "5+"},
-    {"icon": "calendar",  "label": "Projects Completed", "value": "30+"},
-    {"icon": "coffee",    "label": "Cups of Coffee",     "value": "∞"},
-    {"icon": "heart",     "label": "Happy Clients",      "value": "20+"}
-  ]'::jsonb
-WHERE top_skills IS NULL OR highlights IS NULL;
-
--- Phase 3 Migrations
--- SEO fields for blog posts
-ALTER TABLE blog_posts
-  ADD COLUMN IF NOT EXISTS meta_title       TEXT,
-  ADD COLUMN IF NOT EXISTS meta_description TEXT,
-  ADD COLUMN IF NOT EXISTS og_image         TEXT;
-
--- Scheduling for blog posts
-ALTER TABLE blog_posts
-  ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMPTZ;
-
--- Project galleries
-ALTER TABLE projects
-  ADD COLUMN IF NOT EXISTS gallery_images JSONB DEFAULT '[]'::jsonb;
-
--- Backfill gallery_images for existing project rows
-UPDATE projects
-SET gallery_images = '[]'::jsonb
-WHERE gallery_images IS NULL;
 
 -- ============================================
 -- AUTO-UPDATE updated_at TRIGGER
@@ -225,6 +162,7 @@ CREATE OR REPLACE TRIGGER blog_posts_updated_at BEFORE UPDATE ON blog_posts
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
+
 -- Enable RLS on all tables
 ALTER TABLE personal ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -236,26 +174,6 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resume ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_rate_limits ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies to avoid conflicts
-DROP POLICY IF EXISTS "Public read personal" ON personal;
-DROP POLICY IF EXISTS "Public read projects" ON projects;
-DROP POLICY IF EXISTS "Public read skills" ON skill_categories;
-DROP POLICY IF EXISTS "Public read experiences" ON experiences;
-DROP POLICY IF EXISTS "Public read published posts" ON blog_posts;
-DROP POLICY IF EXISTS "Public read testimonials" ON testimonials;
-DROP POLICY IF EXISTS "Public read resume" ON resume;
-DROP POLICY IF EXISTS "Public insert messages" ON messages;
-DROP POLICY IF EXISTS "Admin full access personal" ON personal;
-DROP POLICY IF EXISTS "Admin full access projects" ON projects;
-DROP POLICY IF EXISTS "Admin full access skills" ON skill_categories;
-DROP POLICY IF EXISTS "Admin full access experiences" ON experiences;
-DROP POLICY IF EXISTS "Admin full access blog" ON blog_posts;
-DROP POLICY IF EXISTS "Admin full access testimonials" ON testimonials;
-DROP POLICY IF EXISTS "Admin full access messages" ON messages;
-DROP POLICY IF EXISTS "Admin full access resume" ON resume;
-DROP POLICY IF EXISTS "Admin full access contact_rate_limits" ON contact_rate_limits;
-DROP POLICY IF EXISTS "Admin full access app_settings" ON app_settings;
 
 -- PUBLIC READ policies (anyone can read published content)
 CREATE POLICY "Public read personal" ON personal FOR SELECT TO anon USING (true);
@@ -284,11 +202,6 @@ CREATE POLICY "Admin full access app_settings" ON app_settings FOR ALL USING (au
 -- ============================================
 -- STORAGE POLICIES (portfolio-assets bucket)
 -- ============================================
--- Drop existing storage policies to avoid conflicts
-DROP POLICY IF EXISTS "Public read storage" ON storage.objects;
-DROP POLICY IF EXISTS "Admin upload storage" ON storage.objects;
-DROP POLICY IF EXISTS "Admin update storage" ON storage.objects;
-DROP POLICY IF EXISTS "Admin delete storage" ON storage.objects;
 
 -- Allow public to read files
 CREATE POLICY "Public read storage"
@@ -318,9 +231,9 @@ USING (bucket_id = 'portfolio-assets' AND auth.role() = 'authenticated');
 -- 4. Validate and sanitize all user inputs before database operations
 -- 5. Implement rate limiting for public insert operations (e.g., contact form)
 -- 6. contact_rate_limits table uses authenticated-only access (admin manages via API)
--- 6. Regularly audit RLS policies and access patterns
--- 7. Use Supabase's built-in auth for user authentication
--- 8. Never expose service role key in client-side code
+-- 7. Regularly audit RLS policies and access patterns
+-- 8. Use Supabase's built-in auth for user authentication
+-- 9. Never expose service role key in client-side code
 
 -- ============================================
 -- TESTING RLS POLICIES

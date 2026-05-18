@@ -4,17 +4,18 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import type {
-  TopSkill,
-  Highlight,
-  PersonalInfo,
-  Project,
-  SkillCategory,
-  Experience,
-  BlogPost,
-  Testimonial,
-  Message,
-  Resume,
-} from "@/lib/types";
+   TopSkill,
+   Highlight,
+   SocialLink,
+   PersonalInfo,
+   Project,
+   SkillCategory,
+   Experience,
+   BlogPost,
+   Testimonial,
+   Message,
+   Resume,
+ } from "@/lib/types";
 import { useConfirmDialog } from "@/components/react/ConfirmDialog";
 import { type AnalyticsProvider } from "@/components/react/AnalyticsProvider";
 import ReactIcon from "@/components/react/ReactIcon";
@@ -197,28 +198,27 @@ export default function AdminDashboard() {
             .single();
         
           if (!error && data) {
-            setPersonal({
-              id:               data.id,
-              name:             data.name             ?? "",
-              title:            data.title            ?? "",
-              tagline:          data.tagline          ?? "",
-              bio:              data.bio              ?? "",
-              location:         data.location         ?? "",
-              email:            data.email            ?? "",
-              availability:     data.availability     ?? "",
-              github_url:       data.github_url       ?? null,
-              linkedin_url:     data.linkedin_url     ?? null,
-              twitter_url:      data.twitter_url      ?? null,
-              profile_photo_url: data.profile_photo_url ?? null,
-              updated_at:        data.updated_at      ?? new Date().toISOString(),
-              top_skills: Array.isArray(data.top_skills) && data.top_skills.length > 0
-                ? data.top_skills
-                : DEFAULT_TOP_SKILLS,
-              highlights: Array.isArray(data.highlights) && data.highlights.length > 0
-                ? data.highlights
-                : DEFAULT_HIGHLIGHTS,
-            });
-          }
+             setPersonal({
+               id:               data.id,
+               name:             data.name             ?? "",
+               title:            data.title            ?? "",
+               tagline:          data.tagline          ?? "",
+               bio:              data.bio              ?? "",
+               location:         data.location         ?? "",
+               email:            data.email            ?? "",
+               availability:     data.availability     ?? "",
+               
+               profile_photo_url: data.profile_photo_url ?? null,
+               socials: Array.isArray(data.socials) ? data.socials : [],
+               updated_at:        data.updated_at      ?? new Date().toISOString(),
+               top_skills: Array.isArray(data.top_skills) && data.top_skills.length > 0
+                 ? data.top_skills
+                 : DEFAULT_TOP_SKILLS,
+               highlights: Array.isArray(data.highlights) && data.highlights.length > 0
+                 ? data.highlights
+                 : DEFAULT_HIGHLIGHTS,
+             });
+           }
           break;
         }
         case "projects": {
@@ -252,18 +252,20 @@ export default function AdminDashboard() {
           break;
         }
         case "resume": {
-           const { data: currentResume } = await supabase
-             .from("resume")
-             .select("*")
-             .order("uploaded_at", { ascending: false })
-             .limit(1)
-             .maybeSingle();
-           setResumeData(currentResume);
-           const { data: history } = await supabase
+           const removedIds: string[] = JSON.parse(
+             localStorage.getItem("removed_resume_ids") || "[]"
+           );
+           const { data: allResumes } = await supabase
              .from("resume")
              .select("*")
              .order("uploaded_at", { ascending: false });
-           if (history) setResumeHistory(history ?? []);
+
+           const allResumesArr = allResumes ?? [];
+           const currentResume = allResumesArr.find(
+             (r: any) => !removedIds.includes(r.id)
+           ) ?? null;
+           setResumeData(currentResume);
+           setResumeHistory(allResumesArr);
            break;
          }
       }
@@ -283,10 +285,16 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const handleLogout = async () => {
-    setAuthState("unauthenticated");
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  };
+     setAuthState("unauthenticated");
+     await supabase.auth.signOut();
+     // Force clear all Supabase auth storage keys to ensure clean logout
+     Object.keys(localStorage).forEach((k) => {
+       if (k.includes("auth") && (k.includes("supabase") || k.startsWith("sb-"))) {
+         localStorage.removeItem(k);
+       }
+     });
+     window.location.href = "/";
+   };
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "personal",     label: "Profile",      icon: "user"      },
@@ -342,7 +350,7 @@ export default function AdminDashboard() {
         `}
       >
         {/* ── Logo ── */}
-        <div className={`flex items-center border-b border-zinc-100 dark:border-zinc-800 h-14 px-3 shrink-0 transition-all duration-300 ${sidebarExpanded ? "gap-3" : "justify-center"}`}>
+        <div className={`flex items-center border-b border-zinc-100 dark:border-zinc-800 h-14 px-3 shrink-0 transition-all duration-300 ${sidebarExpanded ? "gap-3" : "px-2"}`}>
           <a
             href="/"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-50"
@@ -372,16 +380,16 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(tab.key)}
                 title={!sidebarExpanded ? tab.label : undefined}
                 className={`
-                  relative w-full flex items-center rounded-xl
+                  relative w-full flex rounded-xl
                   transition-colors duration-150
-                  ${sidebarExpanded ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-2.5"}
+                  ${sidebarExpanded ? "items-center gap-3 px-3 py-2.5 justify-start" : "justify-center py-2.5"}
                   ${isActive
                     ? "bg-brand-500/10 text-brand-500"
                     : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                   }
                 `}
               >
-                <span className="shrink-0">
+                <span className="shrink-0 w-5 flex justify-center">
                   <ReactIcon name={tab.icon} size={18} />
                 </span>
 
@@ -418,11 +426,45 @@ export default function AdminDashboard() {
               setSyncing(true);
               setSyncResult(null);
               try {
+                // Get Supabase session to include auth token
+                const { data: { session } } = await supabase.auth.getSession();
+                const authToken = session?.access_token;
+                
+                // Read "Use Static Data" toggles from localStorage
+                const staticDataKey = "section_use_static";
+                let sectionsToSync: string[] | null = null;
+                try {
+                  const staticDataStr = localStorage.getItem(staticDataKey);
+                  if (staticDataStr) {
+                    const staticData = JSON.parse(staticDataStr);
+                    // Only sync sections where Use Static Data is enabled
+                    sectionsToSync = Object.entries(staticData)
+                      .filter(([_, enabled]) => enabled)
+                      .map(([key]) => key);
+                  }
+                } catch (e) {}
+                
+                const headers: Record<string, string> = { "Content-Type": "application/json" };
+                if (authToken) {
+                  headers["Authorization"] = `Bearer ${authToken}`;
+                }
+                
                 const response = await fetch("/api/sync", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
+                  headers,
+                  body: sectionsToSync ? JSON.stringify({ sections: sectionsToSync }) : undefined,
                 });
                 const result = await response.json();
+                
+                // Handle API error responses that don't have standard structure
+                if (!response.ok || result.error) {
+                  const errorMsg = result.error || `Server error: ${response.status}`;
+                  setSyncResult({ success: false, errors: [errorMsg], synced: [] });
+                  notify("error", errorMsg);
+                  setSyncing(false);
+                  return;
+                }
+                
                 setSyncResult(result);
                 if (result.success) {
                   notify("success", `Synced: ${result.synced.join(", ")}`);
@@ -440,13 +482,13 @@ export default function AdminDashboard() {
             disabled={syncing}
             title={!sidebarExpanded ? "Sync Static Data" : undefined}
             className={`
-              w-full flex items-center rounded-xl transition-colors
+              w-full flex rounded-xl transition-colors
               bg-brand-500/10 text-brand-500 hover:bg-brand-500/20
               disabled:opacity-50
-              ${sidebarExpanded ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-2.5"}
+              ${sidebarExpanded ? "items-center gap-3 px-3 py-2.5 justify-start" : "justify-center py-2.5"}
             `}
           >
-            <ReactIcon name={syncing ? "loader" : "arrow-up"} size={18} className={syncing ? "animate-spin" : ""} />
+            <span className="w-5 flex justify-center"><ReactIcon name={syncing ? "loader" : "arrow-up"} size={18} className={syncing ? "animate-spin" : ""} /></span>
             {sidebarExpanded && (
               <span className="text-sm font-medium whitespace-nowrap">
                 {syncing ? "Syncing..." : "Sync Static Data"}
@@ -474,27 +516,27 @@ export default function AdminDashboard() {
             target="_blank"
             title={!sidebarExpanded ? "View Portfolio" : undefined}
             className={`
-              flex items-center rounded-xl py-2 text-sm text-zinc-500
+              flex rounded-xl py-2 text-sm text-zinc-500
               hover:bg-zinc-100 hover:text-zinc-900
               dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50
               transition-colors
-              ${sidebarExpanded ? "gap-3 px-3" : "justify-center"}
+              ${sidebarExpanded ? "items-center gap-3 px-3 justify-start" : "justify-center"}
             `}
           >
-            <ReactIcon name="external-link" size={16} />
+            <span className="w-5 flex justify-center"><ReactIcon name="external-link" size={16} /></span>
             {sidebarExpanded && <span className="whitespace-nowrap">View Portfolio</span>}
           </a>
           <button
             onClick={handleLogout}
             title={!sidebarExpanded ? "Sign Out" : undefined}
             className={`
-              w-full flex items-center rounded-xl py-2 text-sm text-red-500
+              w-full flex rounded-xl py-2 text-sm text-red-500
               hover:bg-red-50 dark:hover:bg-red-950/30
               transition-colors
-              ${sidebarExpanded ? "gap-3 px-3" : "justify-center"}
+              ${sidebarExpanded ? "items-center gap-3 px-3 justify-start" : "justify-center"}
             `}
           >
-            <ReactIcon name="log-out" size={16} />
+            <span className="w-5 flex justify-center"><ReactIcon name="log-out" size={16} /></span>
             {sidebarExpanded && <span className="whitespace-nowrap">Sign Out</span>}
           </button>
         </div>

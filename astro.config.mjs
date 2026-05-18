@@ -20,20 +20,10 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     resolve: {
-      // Force Vite to use ONE copy of React across all dependencies
-      dedupe: ["react", "react-dom", "react-dom/server", "react/jsx-runtime"],
-    },
-    ssr: {
-      // Bundle these instead of treating them as external CJS modules
-      noExternal: [
-        "lucide-react",
-        "motion",
-        "@supabase/supabase-js",
-      ],
+      dedupe: ["react", "react-dom"],
     },
     optimizeDeps: {
-      // Pre-bundle React to prevent duplicate instances
-      include: ["react", "react-dom", "react-dom/server"],
+      include: ["react", "react-dom"],
     },
   },
 

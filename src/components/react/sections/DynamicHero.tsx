@@ -23,10 +23,17 @@ const STATIC_FALLBACK: PersonalInfo = {
   availability: "Open to freelance & full-time opportunities",
 };
 
-export default function DynamicHero() {
-  const [data, setData] = useState<PersonalInfo>(STATIC_FALLBACK);
+interface Props {
+  initialData?: PersonalInfo | null;
+}
+
+export default function DynamicHero({ initialData }: Props) {
+  const [data, setData] = useState<PersonalInfo>(initialData || STATIC_FALLBACK);
 
   useEffect(() => {
+    // Only fetch if no initial data (for client-side updates)
+    if (initialData) return;
+    
     async function fetchData() {
       try {
         const { data: row, error } = await supabase
@@ -43,7 +50,7 @@ export default function DynamicHero() {
       }
     }
     fetchData();
-  }, []);
+  }, [initialData]);
 
   return (
     <section id="hero" className="relative flex min-h-[70vh] md:min-h-[90vh] items-center pt-16">

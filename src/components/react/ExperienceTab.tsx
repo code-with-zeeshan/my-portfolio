@@ -34,28 +34,39 @@ export default function ExperienceTab({
   const achievementsToText = (arr: string[]) => arr.join("\n");
 
   const handleAddExperience = async () => {
-    await handleAdd({
-      tableName: "Experience",
-      defaultItem: {
+    const updatedItems = experiences.map((e: any, idx: number) => ({
+      ...e,
+      sort_order: idx + 2,
+    }));
+    
+    const { data, error } = await supabase
+      .from("experiences")
+      .insert({
         company: "Company Name",
         role: "Job Title",
         period: "2024 — Present",
         description: "Description here.",
         achievements: [],
-        sort_order: 0,
-      },
-      onInsert: async (item) => {
-        const { data, error } = await supabase
+        sort_order: 1,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      notify("error", error.message);
+    } else {
+      for (const item of updatedItems) {
+        await supabase
           .from("experiences")
-          .insert(item)
-          .select()
-          .single();
-        return error ? { error } : { data };
-      },
-      items: experiences,
-      setItems: setExperiences,
-      notify,
-    });
+          .update({ sort_order: item.sort_order })
+          .eq("id", item.id);
+      }
+      const sortedItems = [data, ...updatedItems].sort((a: any, b: any) => 
+        (a.sort_order || 0) - (b.sort_order || 0)
+      );
+      setExperiences(sortedItems);
+      notify("success", "Experience added! Edit below.");
+    }
   };
 
   const handleSaveExperience = async (exp: any) => {
@@ -100,13 +111,34 @@ export default function ExperienceTab({
           return error ? { error } : {};
         },
         onLocalDelete: () => {
-          setExperiences(experiences.filter((x: any) => x.id !== exp.id));
+          const filtered = experiences.filter((x: any) => x.id !== exp.id);
+          const reindexed = filtered.map((x: any, i: number) => ({
+            ...x,
+            sort_order: i + 1,
+          }));
+          setExperiences(reindexed);
+          reindexed.forEach(async (x: any) => {
+            await supabase
+              .from("experiences")
+              .update({ sort_order: x.sort_order })
+              .eq("id", x.id);
+          });
         },
         onUndo: (restored: any) => {
           setExperiences((prev: any[]) => {
             const newArr = [...prev];
             newArr.splice(idx, 0, restored);
-            return newArr;
+            const reindexed = newArr.map((x: any, i: number) => ({
+              ...x,
+              sort_order: i + 1,
+            }));
+            reindexed.forEach(async (x: any) => {
+              await supabase
+                .from("experiences")
+                .update({ sort_order: x.sort_order })
+                .eq("id", x.id);
+            });
+            return reindexed;
           });
         },
         notify,
@@ -211,12 +243,12 @@ export default function ExperienceTab({
             <Field label="Sort Order">
               <input
                 type="number"
-                value={exp.sort_order}
+                value={exp.sort_order || 1}
                 onChange={(e) =>
                   updateExperienceField(
                     exp.id,
                     "sort_order",
-                    Number(e.target.value)
+                    Math.max(1, Number(e.target.value))
                   )
                 }
                 className={inputCls + " w-24"}

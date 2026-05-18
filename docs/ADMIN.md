@@ -25,16 +25,17 @@ Closing the browser tab does **not** sign you out. Your session persists in `loc
 
 | Tab | What You Can Do |
 |---|---|
-| **Profile** | Edit name, title, bio, location, social links, availability, profile photo |
+| **Profile** | Edit name, title, bio, location, social links, availability, profile photo; **drag & drop** to reorder social links and highlights |
 | **Profile → Top Skills** | Add/edit/remove skill bars with name and % level |
-| **Profile → Highlights** | Edit stat cards (icon, label, value) shown below bio |
-| **Projects** | Add, edit, delete projects; upload images via Cloudinary; toggle featured |
-| **Skills** | Edit skill category names and tag lists |
-| **Experience** | Edit work history, roles, achievements |
+| **Profile → Highlights** | Edit stat cards (icon, label, value) shown below bio; **drag & drop** to reorder |
+| **Projects** | Add, edit, delete projects; upload images via Cloudinary; toggle featured; sort order auto-adjusts (1,2,3...) |
+| **Skills** | Edit skill category names and tag lists; sort order auto-adjusts |
+| **Experience** | Edit work history, roles, achievements; sort order auto-adjusts |
 | **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images; **search posts** |
-| **Testimonials** | Add, edit, remove testimonials |
+| **Testimonials** | Add, edit, remove testimonials; sort order auto-adjusts |
 | **Messages** | Read contact form submissions; mark as read/unread; delete (with **undo support** via ConfirmDialog + UndoToast) |
-| **Resume** | Upload new PDF resume (auto-updates Download Resume button site-wide) |
+| **Resume** | Upload new PDF resume (auto-updates Download Resume button site-wide); removed resumes go to history |
+| **Settings** | Toggle section visibility (Projects, Skills, Experience, Testimonials, Blog) and sync specific static data sections |
 | **Analytics** | View Plausible analytics dashboard; generate cron secrets for scheduled posts |
 
 ### New Features
@@ -48,12 +49,49 @@ Closing the browser tab does **not** sign you out. Your session persists in `loc
 - **CSP Security** — Content Security Policy now uses nonce-based approach for better security
 - **Input Sanitization** — Blog post HTML is now sanitized using `sanitize-html` library
 - **Server-Side Contact Form** — Contact form now submits via `/api/contact` with server-side validation and rate limiting
+- **Section Visibility Toggle** — Settings tab allows hiding/showing sections on homepage and about page
+- **Use Static Data** — Per-section toggle to sync specific static data to Supabase
+- **Instant Preview** — Section visibility changes reflect immediately without page refresh
+- **Resume with History** — Removed resumes move to history; can be restored or deleted permanently
+- **Drag & Drop Reordering** — Drag social links and highlights in Profile tab to reorder them (grab handle on left side)
+- **Clickable Social Handles** — Click on social platform names (GitHub, LinkedIn, X, etc.) in Profile tab to add as highlights
+- **Clickable Icons** — Click on icon names in Profile tab to add them as highlights with smart default labels
+- **Auto Sort Order** — Sort orders auto-adjust (1,2,3,4...) when adding/deleting items in Projects, Skills, Experience, Testimonials
+- **Add at Top** — New items are added at the top with sort_order: 1, existing items shift down
+- **Centered Sidebar Icons** — Admin panel sidebar icons are centered when collapsed
+
+### Contact Page Quick Edit
+
+The contact section on the homepage now supports quick editing without needing the full admin panel:
+
+- **Access:** Press `Ctrl+Shift+C` (or `Cmd+Shift+C` on Mac) on the homepage
+- **Login:** Enter your admin credentials
+- **Edit:** Contact info becomes editable with dropdown menus to change social platforms
+- **Email + Socials:** You can edit email and up to 4 social handles (3 minimum, 5 maximum including email)
+- **Platform Selection:** Click on any handle label (Email, GitHub, LinkedIn, etc.) to see a dropdown of available platforms
+- **Add/Remove:** Use + and X buttons on the last handle to add or remove social handles
+- **Save:** Click the Save button to persist edit mode across page refreshes
+- **Exit:** Click Exit to close edit mode, with option to stay logged in or log out
+
+The editable state uses ReactIcon component for all SVG icons, ensuring consistent rendering across all social platforms.
 
 ## Syncing Static Data
 
 The **⬆ Sync Static Data** button in the sidebar imports your `src/data/*.ts` files into Supabase. It is:
 - **Safe to run multiple times** — skips tables that already have data
 - **Required on first setup** — populates the database before you customize
+- **Per-section sync** — Use the "Use Static Data" toggle on each section in Settings tab to sync specific sections only
+
+### Section Visibility
+
+In the **Settings** tab, you can:
+1. **Toggle section visibility** — Show or hide sections (Projects, Skills, Experience, Testimonials, Blog) on homepage and about page
+2. **Use Static Data** — Enable per-section toggle to sync specific static data when clicking "Sync Static Data"
+3. **Instant preview** — Changes reflect immediately on the site without page refresh (uses localStorage + storage events)
+
+The section visibility is stored in both:
+- **Supabase** (`app_settings` table) — for persistence
+- **localStorage** — for instant homepage/about page updates without refresh
 
 ## How Data Flows
 
@@ -88,11 +126,46 @@ When editing highlight icons, use these names:
 | `mail` | Envelope |
 | `github` | GitHub logo |
 | `linkedin` | LinkedIn logo |
-| `twitter` | X/Twitter logo |
+| `x` | X (Twitter) logo |
+| `instagram` | Instagram logo |
+| `facebook` | Facebook logo |
+| `youtube` | YouTube logo |
+| `tiktok` | TikTok logo |
+| `reddit` | Reddit logo |
+| `pinterest` | Pinterest logo |
+| `discord` | Discord logo |
+| `telegram` | Telegram logo |
+| `whatsapp` | WhatsApp logo |
+| `medium` | Medium logo |
+| `devto` | DEV.to logo |
+| `stackoverflow` | Stack Overflow logo |
+| `codepen` | CodePen logo |
+| `dribbble` | Dribbble logo |
+| `behance` | Behance logo |
+| `figma` | Figma logo |
+| `slack` | Slack logo |
 | `map-pin` | Location pin |
 | `quote` | Quote marks |
 | `download` | Download arrow |
 | `check-circle` | Success checkmark |
+| `trophy` | Trophy icon |
+| `award` | Award icon |
+| `target` | Target icon |
+| `code` | Code icon |
+| `palette` | Palette icon |
+| `rocket` | Rocket icon |
+| `globe` | Globe icon |
+| `phone` | Phone icon |
+| `message` | Message icon |
+| `zap` | Zap icon |
+
+## Social Platform Names
+
+Available social platforms to add in Profile tab:
+
+- GitHub, LinkedIn, X (Twitter), Instagram, Facebook, YouTube, TikTok
+- Reddit, Pinterest, Discord, Telegram, WhatsApp
+- Medium, DEV.to, StackOverflow, CodePen, Dribbble, Behance, Figma, Slack
 
 ## Image Uploads
 

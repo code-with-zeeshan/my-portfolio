@@ -6,43 +6,82 @@ import { supabase } from "@/lib/supabase";
 import ReactIcon from "@/components/react/ReactIcon";
 import MagneticHover from "@/components/react/MagneticHover";
 
+interface SocialLink {
+  platform: string;
+  url: string;
+}
+
 interface PersonalInfo {
   name: string;
-  github_url: string | null;
-  linkedin_url: string | null;
-  twitter_url: string | null;
+  socials: SocialLink[];
   email: string;
 }
 
 const STATIC_FALLBACK: PersonalInfo = {
   name: "Your Name",
-  github_url: "https://github.com/yourusername",
-  linkedin_url: "https://linkedin.com/in/yourusername",
-  twitter_url: "https://x.com/yourusername",
+  socials: [
+    { platform: "GitHub", url: "https://github.com/yourusername" },
+    { platform: "LinkedIn", url: "https://linkedin.com/in/yourusername" },
+    { platform: "Twitter", url: "https://x.com/yourusername" },
+  ],
   email: "you@email.com",
 };
 
-export default function DynamicFooter() {
-  const [data, setData] = useState<PersonalInfo>(STATIC_FALLBACK);
+interface Props {
+  initialData?: PersonalInfo | null;
+}
+
+export default function DynamicFooter({ initialData }: Props) {
+  const [data, setData] = useState<PersonalInfo>(initialData || STATIC_FALLBACK);
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
+    // Only fetch if no initial data (for client-side updates)
+    if (initialData) return;
+    
     supabase
       .from("personal")
-      .select("name, github_url, linkedin_url, twitter_url, email")
+      .select("name, socials, email")
       .limit(1)
       .single()
       .then(({ data: row, error }) => {
         if (!error && row) setData(row);
       });
-  }, []);
+  }, [initialData]);
+
+  // ─── Platform name → icon/label mapping ───
+const platformMap: Record<string, { icon: string; label: string }> = {
+    github:       { icon: "github",       label: "GitHub"        },
+    linkedin:     { icon: "linkedin",     label: "LinkedIn"     },
+    x:            { icon: "x",            label: "X"            },
+    twitter:      { icon: "twitter",      label: "Twitter"      },
+    instagram:    { icon: "instagram",    label: "Instagram"    },
+    facebook:     { icon: "facebook",     label: "Facebook"     },
+    youtube:      { icon: "youtube",      label: "YouTube"      },
+    tiktok:       { icon: "tiktok",       label: "TikTok"       },
+    reddit:       { icon: "reddit",       label: "Reddit"       },
+    pinterest:    { icon: "pinterest",    label: "Pinterest"    },
+    discord:      { icon: "discord",      label: "Discord"      },
+    telegram:     { icon: "telegram",     label: "Telegram"     },
+    medium:       { icon: "medium",       label: "Medium"       },
+    devto:        { icon: "devto",        label: "DEV.to"       },
+    stackoverflow:{ icon: "stackoverflow",label: "Stack Overflow"},
+    codepen:      { icon: "codepen",      label: "CodePen"      },
+    dribbble:     { icon: "dribbble",     label: "Dribbble"     },
+    behance:      { icon: "behance",      label: "Behance"      },
+    figma:        { icon: "figma",        label: "Figma"        },
+    slack:        { icon: "slack",        label: "Slack"        },
+    whatsapp:     { icon: "whatsapp",     label: "WhatsApp"     },
+  };
 
   // ─── Build social links from live Supabase data ───
   const socials = [
-    data.github_url   && { href: data.github_url,   icon: "github",   label: "GitHub"      },
-    data.linkedin_url && { href: data.linkedin_url, icon: "linkedin", label: "LinkedIn"    },
-    data.twitter_url  && { href: data.twitter_url,  icon: "twitter",  label: "X (Twitter)" },
-    data.email        && { href: `mailto:${data.email}`, icon: "mail", label: "Email"      },
+    ...(data.socials || []).map((s) => {
+      const key = s.platform.toLowerCase();
+      const mapped = platformMap[key];
+      return mapped ? { href: s.url, icon: mapped.icon, label: mapped.label } : null;
+    }).filter(Boolean),
+    data.email && { href: `mailto:${data.email}`, icon: "mail", label: "Email" },
   ].filter(Boolean) as { href: string; icon: string; label: string }[];
 
   // ─── Extract first name & last name for display ───

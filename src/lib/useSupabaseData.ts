@@ -71,6 +71,9 @@ export function useSupabaseData<T>({
       if (error) {
         console.warn(`Supabase error fetching ${table}:`, error.message);
         setSupabaseDown(true);
+        if (fallback) {
+          setData(fallback);
+        }
         return;
       }
 
@@ -86,6 +89,9 @@ export function useSupabaseData<T>({
     } catch {
       // Network error — Supabase unreachable
       setSupabaseDown(true);
+      if (fallback) {
+        setData(fallback);
+      }
     } finally {
       setLoading(false);
     }
