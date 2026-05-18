@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS personal (
     {"platform": "LinkedIn", "url": "https://linkedin.com/in/mohammad-zeeshan-37637a1a5"},
     {"platform": "Twitter", "url": "https://twitter.com/yourusername"}
   ]'::jsonb,
+  contact_socials JSONB DEFAULT '[
+    {"platform": "GitHub", "url": "https://github.com/code-with-zeeshan"},
+    {"platform": "LinkedIn", "url": "https://linkedin.com/in/mohammad-zeeshan-37637a1a5"}
+  ]'::jsonb,
   profile_photo_url TEXT,
   top_skills JSONB DEFAULT '[
     {"name": "React / Next.js", "level": 95},

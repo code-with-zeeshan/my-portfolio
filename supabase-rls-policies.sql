@@ -126,27 +126,37 @@ ALTER TABLE personal ADD COLUMN IF NOT EXISTS profile_photo_url TEXT;
 -- Migrate social links from flat columns to JSONB array (Phase 4)
 ALTER TABLE personal ADD COLUMN IF NOT EXISTS socials JSONB DEFAULT '[]'::jsonb;
 
--- Backfill socials from old flat columns where they exist
-UPDATE personal t
-SET socials = s.socials
-FROM (
-  SELECT id, jsonb_agg(jsonb_build_object('platform', platform, 'url', url) ORDER BY platform) AS socials
-  FROM (
-    SELECT id, 'GitHub' AS platform, github_url AS url FROM personal WHERE github_url IS NOT NULL
-    UNION ALL
-    SELECT id, 'LinkedIn' AS platform, linkedin_url AS url FROM personal WHERE linkedin_url IS NOT NULL
-    UNION ALL
-    SELECT id, 'Twitter' AS platform, twitter_url AS url FROM personal WHERE twitter_url IS NOT NULL
-  ) sub
-  GROUP BY id
-) s
-WHERE t.id = s.id
-AND t.socials = '[]'::jsonb;
+-- Backfill socials from old flat columns ONLY if they exist
+-- First add temporary columns if they don't exist (will be dropped later)
+DO $$
+BEGIN
+  -- Try to backfill only if columns exist (ignore errors if they don't)
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'personal' AND column_name = 'github_url') THEN
+    UPDATE personal t
+    SET socials = s.socials
+    FROM (
+      SELECT id, jsonb_agg(jsonb_build_object('platform', platform, 'url', url) ORDER BY platform) AS socials
+      FROM (
+        SELECT id, 'GitHub' AS platform, github_url AS url FROM personal WHERE github_url IS NOT NULL
+        UNION ALL
+        SELECT id, 'LinkedIn' AS platform, linkedin_url AS url FROM personal WHERE linkedin_url IS NOT NULL
+        UNION ALL
+        SELECT id, 'Twitter' AS platform, twitter_url AS url FROM personal WHERE twitter_url IS NOT NULL
+      ) sub
+      GROUP BY id
+    ) s
+    WHERE t.id = s.id
+    AND t.socials = '[]'::jsonb;
+  END IF;
+END $$;
 
--- Remove old flat social URL columns
+-- Remove old flat social URL columns (will silently succeed even if they don't exist)
 ALTER TABLE personal DROP COLUMN IF EXISTS github_url;
 ALTER TABLE personal DROP COLUMN IF EXISTS linkedin_url;
 ALTER TABLE personal DROP COLUMN IF EXISTS twitter_url;
+
+-- Add contact_socials column for contact section (separate from footer socials)
+ALTER TABLE personal ADD COLUMN IF NOT EXISTS contact_socials JSONB DEFAULT '[{"platform": "GitHub", "url": "https://github.com/code-with-zeeshan"}, {"platform": "LinkedIn", "url": "https://linkedin.com/in/mohammad-zeeshan-37637a1a5"}]'::jsonb;
 
 -- Add top_skills and highlights as JSONB columns on personal table
 ALTER TABLE personal

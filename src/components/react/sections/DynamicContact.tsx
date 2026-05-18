@@ -67,6 +67,7 @@ export default function DynamicContact() {
   const [editable, setEditable] = useState(false);
   const [showDropdown, setShowDropdown] = useState<number | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [personalId, setPersonalId] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -91,12 +92,13 @@ export default function DynamicContact() {
   useEffect(() => {
     supabase
       .from("personal")
-      .select("email, socials")
+      .select("id, email, contact_socials")
       .limit(1)
       .single()
       .then(({ data: row, error }) => {
         if (!error && row) {
-          let socials = row.socials || DEFAULT_SOCIALS;
+          setPersonalId(row.id);
+          let socials = row.contact_socials || DEFAULT_SOCIALS;
           const totalItems = 1 + socials.length;
           if (totalItems > MAX_TOTAL) {
             socials = socials.slice(0, MAX_TOTAL - 1);
@@ -117,13 +119,7 @@ export default function DynamicContact() {
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
-      if (s && localStorage.getItem("openContactEdit") === "true") {
-        localStorage.removeItem("openContactEdit");
-        setEditable(true);
-      } else if (s && localStorage.getItem("contactEditSaved") === "true") {
-        localStorage.removeItem("contactEditSaved");
-        setEditable(true);
-      }
+      // Contact only editable after Ctrl+Shift+C - no persistence
     });
 
     const handleClickOutside = (e: MouseEvent) => {
@@ -146,8 +142,8 @@ export default function DynamicContact() {
     setData({ ...data, socials: updated });
     setShowDropdown(null);
     
-    if (session) {
-      await supabase.from("personal").update({ socials: updated }).eq("id", session.user.id);
+    if (personalId) {
+      await supabase.from("personal").update({ contact_socials: updated }).eq("id", personalId);
     }
   };
 
@@ -156,15 +152,15 @@ export default function DynamicContact() {
     updated[idx] = { ...updated[idx], url };
     setData({ ...data, socials: updated });
     
-    if (session) {
-      await supabase.from("personal").update({ socials: updated }).eq("id", session.user.id);
+    if (personalId) {
+      await supabase.from("personal").update({ contact_socials: updated }).eq("id", personalId);
     }
   };
 
   const handleEmailChange = async (email: string) => {
     setData({ ...data, email });
-    if (session) {
-      await supabase.from("personal").update({ email }).eq("id", session.user.id);
+    if (personalId) {
+      await supabase.from("personal").update({ email }).eq("id", personalId);
     }
   };
 
@@ -179,8 +175,8 @@ export default function DynamicContact() {
     const updated = [...data.socials, { platform: newPlatform, url: "" }];
     setData({ ...data, socials: updated });
     
-    if (session) {
-      await supabase.from("personal").update({ socials: updated }).eq("id", session.user.id);
+    if (personalId) {
+      await supabase.from("personal").update({ contact_socials: updated }).eq("id", personalId);
     }
   };
 
@@ -190,8 +186,8 @@ export default function DynamicContact() {
     const updated = data.socials.filter((_, i) => i !== idx);
     setData({ ...data, socials: updated });
     
-    if (session) {
-      await supabase.from("personal").update({ socials: updated }).eq("id", session.user.id);
+    if (personalId) {
+      await supabase.from("personal").update({ contact_socials: updated }).eq("id", personalId);
     }
   };
 
@@ -472,10 +468,7 @@ export default function DynamicContact() {
       {editable && (
         <div className="fixed top-6 right-6 z-40 flex gap-2">
           <button
-            onClick={() => {
-              localStorage.setItem("contactEditSaved", "true");
-              setShowSaveConfirm(true);
-            }}
+            onClick={() => setShowSaveConfirm(true)}
             className="px-3 py-1.5 text-xs font-medium text-green-600 hover:text-green-700 border border-green-300 rounded-lg hover:border-green-500 bg-white dark:bg-zinc-800 dark:border-zinc-700"
           >
             Save
