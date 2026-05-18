@@ -1,216 +1,141 @@
-# 🚀 Personal Portfolio Website
+# Personal Portfolio Website
 
-A modern, full-stack portfolio website built with **Astro 6**, **React 18**, **Tailwind CSS v4**, **Supabase**, and **Cloudinary** — featuring a hidden admin dashboard for live content management.
+A modern, full-stack portfolio built with **Astro 6**, **React 18**, **Tailwind CSS**, **Supabase**, and **Cloudinary** — featuring a hidden admin dashboard for live content management.
 
-![Astro](https://img.shields.io/badge/Astro-6.1-purple?style=flat-square&logo=astro)
+![Astro](https://img.shields.io/badge/Astro-6.x-purple?style=flat-square&logo=astro)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38bdf8?style=flat-square&logo=tailwindcss)
 ![React](https://img.shields.io/badge/React-18.3-61dafb?style=flat-square&logo=react)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase)
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-CDN-3448c5?style=flat-square&logo=cloudinary)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-## ✨ Features
+## Features
 
-- **Blazing Fast** — Astro's island architecture ships zero JavaScript by default
-- **Dark/Light Mode** — Toggle with localStorage persistence and system preference detection (now using View Transitions API)
-- **Responsive Design** — Mobile-first layouts that look great on all devices
-- **Animated Sections** — SSR-safe scroll animations using IntersectionObserver + CSS transitions
+### Content & Display
+- **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
 - **Blog with MDX** — Write blog posts in Markdown/MDX with syntax highlighting
 - **Project Showcase** — Featured project carousel and card grid with case studies
-- **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
-- **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A` with error boundary protection
-- **Contact Page Quick Edit** — Edit email and social handles on homepage via `Ctrl+Shift+C` (max 5 items, min 3, with save/exit options)
+- **Testimonials Carousel** — Animated client testimonials section
+- **Dark/Light Mode** — Toggle with localStorage persistence and system preference detection
 - **Section Visibility** — Toggle sections (Projects, Skills, Experience, Testimonials, Blog) to show/hide on homepage and about page
-- **Use Static Data** — Per-section toggle in Settings to sync specific static data sections
-- **Instant Preview** — Section visibility changes reflect immediately without page refresh (localStorage + storage events)
-- **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
-- **Contact Form** — Messages saved to Supabase inbox, readable in admin panel (with rate limiting & validation)
-- **Resume Management** — Upload and update resume PDF via admin; auto-downloads for visitors
-- **Analytics** — Plausible, Vercel, PostHog, or Umami Analytics integration with admin dashboard
-- **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data, sitemap
-- **Accessible** — Semantic HTML, ARIA labels, keyboard navigation, color contrast, skip-to-content links
-- **Security Hardened** — CSP with nonce-based approach, CSRF protection, input sanitization with `sanitize-html`
-- **Blog Search** — Client-side search functionality for blog posts
-- **Undo Support** — Undo toast notifications for delete operations in admin panel
-- **Confirm Dialogs** — Safe confirmation dialogs for destructive actions
-- **Drag & Drop Reordering** — Drag social links and highlights in Profile tab to reorder them
-- **Clickable Social Handles** — Click on social platform names in Profile tab to add as highlights
-- **Clickable Icons** — Click on icon names to add them as highlights with smart default labels
-- **Auto Sort Order** — Sort orders (1,2,3...) auto-adjust when adding/deleting items in Projects, Skills, Experience, Testimonials
-- **Centered Sidebar Icons** — Admin panel sidebar icons centered when collapsed
-- **ReactIcon Component** — Unified SVG icon system for all social platforms with consistent rendering
+- **Instant Preview** — Section visibility changes reflect immediately without page refresh
 
-## 🛠 Tech Stack
+### Admin & CMS
+- **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A`
+- **Contact Page Quick Edit** — Edit email and social handles directly on homepage via `Ctrl+Shift+C`
+- **Drag & Drop Reordering** — Reorder social links and highlights in Profile tab
+- **Clickable Social Handles** — Click platform names to add as highlights
+- **Clickable Icons** — Click icon names to add highlights with smart default labels
+- **Auto Sort Order** — Sort orders auto-adjust (1,2,3...) when adding/deleting items
+- **Undo Support** — Undo toast notifications for delete operations
+- **Confirm Dialogs** — Safe confirmation for destructive actions
+
+### Media & Assets
+- **Cloudinary CDN** — Auto-optimized images (WebP/AVIF, responsive sizing)
+- **Resume Management** — Upload and update resume PDF via admin
+- **Image Compression** — Fallback images compressed at quality 70
+
+### Security & Performance
+- **Security Hardened** — CSP, CSRF protection, input sanitization with `sanitize-html`
+- **Server-Side Contact Form** — Rate limiting & server-side validation
+- **Rate Limiting** — Per-email rate limiting for contact form
+- **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data, sitemap
+- **Accessible** — Semantic HTML, ARIA labels, keyboard navigation
+
+### Analytics
+- Supports Plausible, Vercel, PostHog, or Umami Analytics
+
+## Tech Stack
 
 | Technology | Purpose |
 |---|---|
-| [Astro 6](https://astro.build) | Static site framework with island architecture |
-| [TypeScript](https://typescriptlang.org) | Type-safe JavaScript |
-| [Tailwind CSS v4](https://tailwindcss.com) | Utility-first CSS framework |
-| [React 18](https://react.dev) | Interactive UI components (islands) |
-| [Supabase](https://supabase.com) | PostgreSQL database, authentication, storage |
-| [Cloudinary](https://cloudinary.com) | CDN image delivery and optimization |
-| [shadcn/ui](https://ui.shadcn.com) | Accessible component library (Base UI) |
-| [MDX](https://mdxjs.com) | Markdown with JSX for blog posts |
-| [Vercel](https://vercel.com) | Hosting and deployment |
+| Astro 6 | Static site framework with island architecture |
+| TypeScript | Type-safe JavaScript |
+| Tailwind CSS v4 | Utility-first CSS framework |
+| React 18 | Interactive UI components (islands) |
+| Supabase | PostgreSQL database, authentication, storage |
+| Cloudinary | CDN image delivery and optimization |
+| shadcn/ui | Accessible component library |
+| MDX | Markdown with JSX for blog posts |
+| Vercel | Hosting and deployment |
 
-## 📁 Project Structure
+## Project Structure
 
-```text
+```
 my-portfolio/
-├── public/                        # Static assets
-│   ├── images/
-│   │   ├── profile.webp           # Profile photo fallback
-│   │   └── projects/              # Project screenshot fallbacks
+├── public/                      # Static assets
+│   ├── images/                  # Fallback images
 │   ├── favicon.svg
-│   ├── og-image.png               # Social share image (1200×630)
-│   ├── resume.pdf                 # Resume fallback (override via admin)
-│   └── robots.txt
+│   └── resume.pdf               # Resume fallback
 │
 ├── src/
 │   ├── components/
-│   │   ├── layout/
-│   │   │   ├── Header.astro       # Fixed navbar with resume button
-│   │   │   ├── Footer.astro       # Footer with social links
-│   │   │   ├── MobileNav.tsx      # Mobile hamburger menu
-│   │   │   └── ThemeToggle.tsx    # Dark/light mode toggle
-│   │   │
+│   │   ├── layout/             # Header, Footer, ThemeToggle, MobileNav
 │   │   ├── react/
-│   │   │   ├── sections/          # Dynamic sections (fetch from Supabase)
-│   │   │   │   ├── DynamicHero.tsx
-│   │   │   │   ├── DynamicAbout.tsx
-│   │   │   │   ├── DynamicProjects.tsx
-│   │   │   │   ├── DynamicProjectsIndex.tsx
-│   │   │   │   ├── DynamicProjectPage.tsx
-│   │   │   │   ├── DynamicSkills.tsx
-│   │   │   │   ├── DynamicExperience.tsx
-│   │   │   │   ├── DynamicTestimonials.tsx
-│   │   │   │   ├── DynamicBlogPreview.tsx
-│   │   │   │   ├── DynamicBlogIndex.tsx
-│   │   │   │   ├── DynamicBlogPost.tsx
-│   │   │   │   └── DynamicContact.tsx
-│   │   │   ├── AdminDashboard.tsx # Full CMS dashboard
-│   │   │   ├── AdminGate.tsx      # Hidden login modal (Ctrl+Shift+A)
-│   │   │   ├── AnalyticsProvider.tsx # Client-side analytics wrapper
-│   │   │   ├── BlogPreviewModal.tsx # Post preview for admin
-│   │   │   ├── CloudinaryImage.tsx # Optimized image component
-│   │   │   ├── CloudinaryMultiUpload.tsx # Multiple image upload support
-│   │   │   ├── CloudinaryUpload.tsx # Drag & drop upload widget
-│   │   │   ├── ContactForm.tsx    # Contact form → Supabase messages
-│   │   │   ├── DynamicFooter.tsx  # Dynamic footer components
-│   │   │   ├── FadeIn.tsx         # Scroll-triggered fade animation
-│   │   │   ├── ImageCropUpload.tsx # Image cropping utility
-│   │   │   ├── MagneticHover.tsx  # Cursor-following hover effect
-│   │   │   ├── MarkdownEditor.tsx # Rich text editor for admin
-│   │   │   ├── PageTransition.tsx # Page load fade-in (used in BlogLayout)
-│   │   │   ├── PlausibleAnalytics.tsx # Plausible analytics integration
-│   │   │   ├── ProjectPreviewModal.tsx # Project preview for admin
-│   │   │   ├── ReactIcon.tsx      # SVG icon system for .tsx files
-│   │   │   ├── ResumeButton.tsx   # Resume link (fetches URL from Supabase)
-│   │   │   ├── ScrollProgress.tsx # Page scroll progress bar
-│   │   │   ├── SectionWrapper.tsx # Section visibility wrapper
-│   │   │   ├── SecretGenerator.tsx # Generate CRON_SECRET & CSRF_SECRET
-│   │   │   ├── SettingsTab.tsx   # Section visibility & secret generators
-│   │   │   ├── SkillBar.tsx       # Animated progress bars
-│   │   │   ├── StaggerChildren.tsx # Staggered child animations
-│   │   │   ├── TextReveal.tsx     # Word-by-word text reveal
-│   │   │   ├── UndoToast.tsx     # Undo delete operations
-│   │   │   └── ConfirmDialog.tsx  # Safe delete confirmation dialogs
-│   │   │
-│   │   └── ui/
-│   │       ├── Icons.astro        # SVG icon system for .astro files
-│   │       └── *.tsx              # shadcn/ui components (Base UI)
+│   │   │   ├── sections/        # Dynamic sections (DynamicHero, DynamicAbout, etc.)
+│   │   │   ├── AdminDashboard.tsx
+│   │   │   ├── AdminGate.tsx
+│   │   │   ├── ContactForm.tsx
+│   │   │   ├── ReactIcon.tsx
+│   │   │   ├── ResumeButton.tsx
+│   │   │   └── *.tsx            # UI components
+│   │   └── ui/                  # shadcn/ui components
 │   │
-│   ├── content.config.ts          # Astro Content Collection schemas
+│   ├── content.config.ts        # Astro Content Collection schemas
 │   │
-│   ├── data/                      # Static fallback data
-│   │   ├── blog/                  # MDX blog posts
-│   │   ├── projects/              # MDX project case studies
-│   │   ├── personal.ts            # Personal info fallback
-│   │   ├── projects.ts            # Projects fallback
-│   │   ├── skills.ts              # Skills fallback
-│   │   ├── experience.ts          # Experience fallback
-│   │   └── testimonials.ts        # Testimonials fallback
+│   ├── data/                    # Static fallback data
+│   │   ├── blog/                # MDX blog posts
+│   │   └── *.ts                # Personal, projects, skills, etc.
 │   │
-│   ├── layouts/
-│   │   ├── BaseLayout.astro       # Main HTML shell with SEO meta
-│   │   ├── BlogLayout.astro       # Blog post layout with PageTransition
-│   │   └── AdminLayout.astro      # Admin-only layout (noindex)
+│   ├── layouts/                # BaseLayout, BlogLayout, AdminLayout
 │   │
-│   ├── lib/
-│   │   ├── cloudinary.ts          # Upload, delete, URL optimization helpers
-│   │   ├── config.ts              # Site URL config
-│   │   ├── data.ts                # Supabase fetch helpers with fallbacks
-│   │   ├── datetime.ts            # Date and time formatting utilities
-│   │   ├── supabase.ts            # Supabase clients (public + admin)
-│   │   ├── syncFallbackData.ts    # One-time static → Supabase sync
-│   │   ├── types.ts               # Shared TypeScript interfaces
-│   │   └── utils.ts               # cn(), formatDate(), readingTime()
+│   ├── lib/                    # Utilities, supabase, cloudinary, types
 │   │
 │   ├── pages/
-│   │   ├── index.astro            # Home (all Dynamic* sections)
-│   │   ├── about.astro            # About page (Dynamic* sections)
-│   │   ├── 404.astro              # Custom 404 page
-│   │   ├── admin/
-│   │   │   └── index.astro        # Admin dashboard (SSR, auth-gated)
-│   │   ├── api/
-│   │   │   ├── contact.ts         # POST /api/contact — form submissions (server-side rate limiting)
-│   │   │   ├── sync.ts            # POST /api/sync — seed Supabase from static data
-│   │   │   ├── generate-secret.ts # API key generation for webhooks
-│   │   │   └── publish-scheduled.ts # Webhook for scheduled publishing
-│   │   ├── blog/
-│   │   │   ├── index.astro        # Blog listing (DynamicBlogIndex)
-│   │   │   ├── [slug].astro       # SSR blog posts from Supabase
-│   │   │   └── [...slug].astro    # Static MDX blog posts
-│   │   └── projects/
-│   │       ├── index.astro        # Projects listing (DynamicProjectsIndex)
-│   │       └── [id].astro         # Dynamic project pages (Supabase UUID)
+│   │   ├── index.astro          # Home page
+│   │   ├── about.astro          # About page
+│   │   ├── admin/               # Admin dashboard
+│   │   ├── api/                 # API endpoints (contact, sync, publish-scheduled)
+│   │   ├── blog/                # Blog listing and posts
+│   │   └── projects/            # Projects listing and pages
 │   │
-│   └── styles/
-│       └── global.css             # Tailwind imports + design tokens
+│   └── styles/                  # global.css
 │
-├── docs/                          # Project documentation
-│   ├── ADMIN.md                   # Admin panel usage guide
-│   ├── ANIMATIONS.md              # Animation system reference
-│   ├── CONTENT.md                 # Content management guide
-│   ├── CUSTOMIZATION.md           # How to personalize the portfolio
-│   ├── DEPLOYMENT.md              # Deployment instructions
-│   └── SETUP.md                   # Initial setup guide
+├── docs/                        # Documentation
+│   ├── ADMIN.md
+│   ├── CONTENT.md
+│   ├── SETUP.md
+│   └── *.md
 │
-├── .env.example                   # Environment variable template
-├── astro.config.mjs               # Astro + Vite configuration
-├── components.json                # shadcn/ui configuration
-├── tsconfig.json                  # TypeScript configuration
-├── vercel.json                    # Vercel routing rules
+├── supabase-rls-policies.sql          # Schema for existing database (migrations)
+├── supabase-rls-policies-prod.sql     # Fresh install schema
 └── package.json
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-| Tool | Minimum Version |
+| Tool | Version |
 |---|---|
 | Node.js | 22.12.0+ |
 | npm | 10.0.0+ |
 | Git | 2.0+ |
 
-### Installation
+### Quick Start
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/code-with-zeeshan/my-portfolio.git
 cd my-portfolio
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Copy environment variables
+# Copy environment variables
 cp .env.example .env
-# Fill in your Supabase and Cloudinary credentials
 
-# 4. Start development server
+# Start development server
 npm run dev
 ```
 
@@ -224,11 +149,9 @@ Open [http://localhost:4321](http://localhost:4321) in your browser.
 | `npm run build` | Type-check and build for production |
 | `npm run preview` | Preview production build locally |
 | `npm run check` | Run Astro type checking only |
-| `npm run compress:images` | Compress fallback images at quality 70 (Sharp) |
+| `npm run compress:images` | Compress fallback images at quality 70 |
 
-## ⚙️ Environment Variables
-
-Copy `.env.example` to `.env` and fill in your values:
+## Environment Variables
 
 ```env
 PUBLIC_SITE_URL=https://yourdomain.com
@@ -238,66 +161,64 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
-# Cron job security
 CRON_SECRET=your_random_secret_string
-# CSRF protection for POST API endpoints
 CSRF_SECRET=your_random_csrf_secret_string
-# Optional: restrict admin access to specific email
-# ADMIN_EMAIL=admin@example.com
-# Analytics provider (vercel | plausible | posthog | umami | none)
 PUBLIC_ANALYTICS_PROVIDER=plausible
 PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com
-PUBLIC_PLAUSIBLE_API_KEY=your_plausible_api_key
 ```
 
-> ⚠️ `SUPABASE_SERVICE_ROLE_KEY` has no `PUBLIC_` prefix — it is server-only and never exposed to the browser.
-> ⚠️ `CRON_SECRET` secures scheduled post publishing — generate a random string.
+> ⚠️ `SUPABASE_SERVICE_ROLE_KEY` is server-only — never exposed to the browser.
 
-See [`docs/SETUP.md`](docs/SETUP.md) for the full setup walkthrough.
+### Supabase API Keys — Legacy vs New Format
 
-## 🏗 Architecture
+Supabase offers two API key formats:
 
-### Data Flow
+| Format | Key Prefix | Where to Find |
+|--------|------------|---------------|
+| **Legacy** | `eyJ...` (JWT) | Settings → API → "Project API keys" |
+| **New** | `sb_publishable...` (anon), `sb_secret...` (secret) | Settings → API → "New API keys" |
 
+**Both formats work** — just replace the values in your `.env`:
+
+```env
+# Legacy format (JWT tokens starting with eyJ...)
+PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# New format (sb_publishable + sb_secret)
+PUBLIC_SUPABASE_ANON_KEY=sb_publishable_key_xxxxxxxxxxxxxxxxxxxxx
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_key_xxxxxxxxxxxxxxxxxxxxx
 ```
-Static files (src/data/*.ts)
-       ↓ fallback if Supabase unreachable
-Supabase PostgreSQL ←→ Admin Dashboard (Ctrl+Shift+A)
-       ↓
-Dynamic* React components (client:visible)
-       ↓
-Portfolio pages
-```
 
-### Why Two Icon Systems?
+The codebase automatically handles both formats — no code changes needed.
 
-| File | Used In | Why |
-|---|---|---|
-| `Icons.astro` | `.astro` files only | Pure SVG — zero JS, SSR-safe |
-| `ReactIcon.tsx` | `.tsx` files only | React component — required for React rendering context |
+## Database Setup
 
-You **cannot** import `Icons.astro` in `.tsx` files — Astro components run server-side only and cannot cross into React's client-side rendering boundary.
+1. **Create a Supabase project** at [supabase.com](https://supabase.com)
+2. **Run SQL** in the SQL Editor:
+   - **Fresh database**: Use `supabase-rls-policies-prod.sql`
+   - **Existing database**: Use `supabase-rls-policies.sql` (includes migrations)
+3. **Create storage bucket** named `portfolio-assets` (make it public)
+4. **Add admin user** in Authentication → Users
 
-### Why Not Framer Motion?
+See [`docs/SETUP.md`](docs/SETUP.md) for detailed instructions.
 
-Framer Motion has SSR compatibility issues with Astro's server rendering. All animations use native `IntersectionObserver` + CSS transitions — achieving the same visual results with zero SSR errors and minimal bundle size.
+## Accessing Admin
 
-### Dark Mode Strategy
+| Shortcut | Action |
+|---|---|
+| `Ctrl+Shift+A` | Open admin login |
+| `Ctrl+Shift+C` | Quick edit contact info (after login) |
 
-Uses `@custom-variant dark (&:where(.dark, .dark *))` in Tailwind v4 for class-based toggling, with `localStorage` persistence and system preference detection on first visit.
-
-## 🎨 Customization
+## Customization
 
 1. **Edit content** — Update `src/data/*.ts` files or use the admin panel
-2. **Change colors** — Edit `--color-brand-500` hue in `src/styles/global.css`
-3. **Update branding** — Replace `YN.` in `Header.astro` and `Footer.astro`
-4. **Add images** — Drop into `public/images/` or upload via admin Cloudinary integration
+2. **Change colors** — Edit `--color-brand-500` in `src/styles/global.css`
+3. **Update branding** — Replace logo/name in Header and Footer components
 
-See [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) for the complete guide.
+See [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) for complete guide.
 
-## 🌐 Deployment
-
-Recommended: **Vercel** (auto-detects Astro, free tier available)
+## Deployment
 
 ```bash
 git push origin main  # Vercel auto-deploys on every push
@@ -305,60 +226,22 @@ git push origin main  # Vercel auto-deploys on every push
 
 Set environment variables in Vercel Dashboard → Project → Settings → Environment Variables.
 
-See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions including custom domains.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full instructions.
 
-## 📊 Performance Targets
+## Documentation
 
-| Metric | Target |
+| Document | Description |
 |---|---|
-| Performance | 95+ |
-| Accessibility | 95+ |
-| Best Practices | 95+ |
-| SEO | 100 |
+| [`docs/SETUP.md`](docs/SETUP.md) | Initial setup walkthrough |
+| [`docs/ADMIN.md`](docs/ADMIN.md) | Admin panel usage guide |
+| [`docs/CONTENT.md`](docs/CONTENT.md) | Content management guide |
+| [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) | Personalization guide |
+| [`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md) | AI agent setup guide |
 
-## 📄 License
+## License
 
 [MIT License](LICENSE) — feel free to use this as a template for your own portfolio.
 
-## ✅ Phase 3 Complete (All Implemented)
-```
-├── Rich text / Markdown editor for blog posts     ✅ MarkdownEditor.tsx
-├── Drag-and-drop mutiple image uploads       ✅ CloudinaryMultiUpload.tsx
-├── Preview before publish                  ✅ BlogPreviewModal + ProjectPreviewModal
-├── Blog post scheduling                  ✅ scheduled_for field + /api/publish-scheduled
-├── SEO metadata editor per page           ✅ meta_title, meta_description, og_image
-├── Blog search functionality               ✅ BlogSearch.tsx
-├── Undo support for delete operations     ✅ UndoToast.tsx + ConfirmDialog.tsx
-├── Admin error boundary                   ✅ AdminErrorBoundary.tsx
-├── CSP with nonce-based security          ✅ src/middleware.ts
-├── Input sanitization                     ✅ sanitize-html integration
-├── Rate limiting for API endpoints       ✅ Supabase-backed rate limiting
-├── Server-side contact form endpoint     ✅ /api/contact with rate limiting
-├── CSRF protection for POST endpoints    ✅ CSRF_SECRET + safeCompare
-├── Image compression for fallbacks       ✅ scripts/compress-images.mjs (Sharp, quality=70)
-├── Section visibility toggle             ✅ SettingsTab.tsx + SectionWrapper.tsx
-├── Per-section Use Static Data toggle    ✅ SettingsTab.tsx (sync specific sections)
-├── Instant visibility updates            ✅ localStorage + storage events (no refresh)
-└── Resume management with history        ✅ ResumeTab.tsx + removed_resume_ids localStorage
-```
-
-## 🤖 AI Setup Guide
-
-For AI agents and automated setup, see **[`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)** - a comprehensive guide that allows AI agents to:
-- Set up the entire portfolio from user-provided configuration
-- Deploy to Vercel automatically
-- Configure all services (Supabase, Cloudinary, Analytics)
-- Customize all content (projects, blog posts, experience, etc.)
-
-**Quick Start for Users:** Fill in the `USER CONFIGURATION SECTION` in [`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md) and provide it to any AI agent for automated setup!
-
-> **Note:** You can also edit all your details through the **Admin Dashboard** (`Ctrl+Shift+A`) after deployment - no coding required!
-
-## 🔜 Future Ideas
-- Analytics dashboard in admin (connect to Plausible API)
-- Custom OG images per project
-- Newsletter signup integration
-- More animation effects
 ---
 
 Built with ❤️ using [Astro](https://astro.build) + [Supabase](https://supabase.com) + [Cloudinary](https://cloudinary.com)

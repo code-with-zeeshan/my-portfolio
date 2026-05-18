@@ -1,228 +1,141 @@
-# AI Portfolio Setup Guide
+# AI Setup Guide
 
-This file contains all the information an AI agent needs to set up and deploy this portfolio for a new user.
-
-## 🔧 USER CONFIGURATION SECTION
-
-**Fill in the following details before asking the AI agent to set up your portfolio:**
-
-```yaml
-# ── Personal Information ──
-PERSONAL:
-  name: "Your Name"
-  title: "Your Title (e.g., Full-Stack Developer)"
-  tagline: "Your tagline (e.g., I craft modern web experiences)"
-  bio: "Your bio (2-3 sentences about yourself)"
-  location: "Your City, Country"
-  email: "your.email@example.com"
-  availability: "Open to opportunities" # or "Freelance available", "Not available", etc.
-  
-  # Social Links
-  github_url: "https://github.com/yourusername"
-  linkedin_url: "https://linkedin.com/in/yourusername"
-  twitter_url: "https://twitter.com/yourusername" # Optional
-  
-  # Profile Photo (upload to Cloudinary or place in public/images/)
-  profile_photo_url: "https://res.cloudinary.com/your-cloud-name/image/upload/your-profile.jpg"
-  
-  # Top Skills (name and proficiency 0-100)
-  top_skills:
-    - name: "React"
-      level: 95
-    - name: "TypeScript"
-      level: 90
-    - name: "Node.js"
-      level: 85
-  
-  # Highlights (icons: briefcase, calendar, coffee, heart, etc.)
-  highlights:
-    - icon: "briefcase"
-      label: "Years Experience"
-      value: "5+"
-    - icon: "calendar"
-      label: "Projects Completed"
-      value: "30+"
-
-# ── Credentials (to be provided securely to AI agent) ──
-CREDENTIALS:
-  # Supabase (https://supabase.com)
-  SUPABASE_URL: "https://xxxxx.supabase.co"
-  SUPABASE_ANON_KEY: "eyJhbGciOi..."  # Public anon key
-  SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOi..."  # Service role key (keep secret!)
-  
-  # Cloudinary (https://cloudinary.com)
-  CLOUDINARY_CLOUD_NAME: "your_cloud_name"
-  CLOUDINARY_API_KEY: "your_api_key"
-  # Note: CLOUDINARY_UPLOAD_PRESET is "portfolio_unsigned" (already configured)
-  
-  # Cron Secret (generate with: openssl rand -hex 32)
-  CRON_SECRET: "your_random_secret_string"
-  
-  # CSRF Secret (generate with: openssl rand -hex 32)
-  CSRF_SECRET: "your_random_csrf_secret"
-
-# ── Site Configuration ──
-SITE:
-  url: "https://yourdomain.com"  # Or your Vercel app URL temporarily
-  analytics_provider: "vercel"  # Options: vercel, plausible, posthog, umami, none
-  
-  # Plausible (if using)
-  PLAUSIBLE_DOMAIN: "yourdomain.com"
-  PLAUSIBLE_API_KEY: "your_plausible_api_key"
-  PLAUSIBLE_API_HOST: ""  # Leave empty for cloud, or set for self-hosted
-  
-  # Umami (if using)
-  UMAMI_WEBSITE_ID: "your_website_id"
-  UMAMI_URL: "https://umami.example.com"
-  
-  # PostHog (if using)
-  # No additional config needed, just set analytics_provider to "posthog"
-
-# ── Admin Configuration ──
-ADMIN:
-  email: "your.admin@email.com"  # Email for admin access (Ctrl+Shift+A)
-  # Optional: restrict admin to specific email
-  ADMIN_EMAIL: "your.admin@email.com"
-
-# ── Projects (add as many as you want) ──
-PROJECTS:
-  - title: "Project Name"
-    description: "Short description"
-    longDescription: "Detailed description of the project, challenges, solutions..."
-    tags: ["React", "TypeScript", "Node.js"]
-    liveUrl: "https://project-live-url.com"  # Optional
-    githubUrl: "https://github.com/you/project"  # Optional
-    featured: true  # Show on homepage
-    year: "2025"
-    outcome: "Increased performance by 50%"
-    image: "/images/projects/project-name.webp"  # Place in public/images/projects/
-
-# ── Blog Posts (add as many as you want) ──
-BLOG_POSTS:
-  - title: "Blog Post Title"
-    description: "Post description"
-    pubDate: "2025-01-15"
-    tags: ["Web Development", "React"]
-    heroImage: ""  # Optional, Cloudinary URL or local path
-    draft: false  # Set to true to hide from public
-    content: |
-      # Your Blog Post Content
-      Write in Markdown format...
-
-# ── Experience ──
-EXPERIENCE:
-  - company: "Company Name"
-    role: "Your Role"
-    period: "2023 — Present"
-    description: "Description of your role"
-    achievements:
-      - "Achievement 1"
-      - "Achievement 2"
-
-# ── Skills ──
-SKILLS:
-  - title: "Frontend"
-    skills: ["React", "TypeScript", "Tailwind CSS"]
-  - title: "Backend"
-    skills: ["Node.js", "PostgreSQL", "Python"]
-
-# ── Testimonials ──
-TESTIMONIALS:
-  - name: "Person Name"
-    role: "Their Role"
-    company: "Their Company"
-    content: "Testimonial content..."
-```
-
-> **💡 Note:** Filling in the USER CONFIGURATION SECTION is OPTIONAL! 
-> If you don't provide these details now, you can easily edit ALL of them later through the **Admin Dashboard**:
-> - Press `Ctrl+Shift+A` on your deployed site to open the Admin Login
-> - Log in with your admin credentials
-> - Use the dashboard to edit: Personal info, Projects, Blog posts, Experience, Skills, Testimonials, and more!
-> - No coding required - everything can be done through the user-friendly admin interface
-> - For quick contact info edits on homepage: Press `Ctrl+Shift+C` → Login → Edit email and social handles directly on the contact section
+This file provides an AI agent with everything needed to understand the project architecture, set up all services, and deploy the portfolio for a user — using only the credentials provided below.
 
 ---
 
-## 🤖 INSTRUCTIONS FOR AI AGENTS
+## 📋 USER CREDENTIALS SECTION
 
-Follow these steps in order to set up the portfolio for the user.
+**Non-technical user provides these credentials. AI validates and uses them directly.**
 
-### Step 1: Prerequisites Check
+### Supabase (Database & Auth)
+- **Project URL**: `https://xxxxx.supabase.co`
+- **API Key** (one of two formats accepted):
+  - **Legacy format**: JWT tokens starting with `eyJ...` (from Settings → API → "Project API keys")
+  - **New format**: `sb_publishable...` (anon) + `sb_secret...` (secret) (from Settings → API → "New API keys")
+- **Admin Email**: `your-admin@email.com`
+- **Admin Password**: `your-admin-password`
 
-Ensure the user has:
-- Node.js 22.12.0+ installed
-- Git installed
-- Accounts created at:
-  - [Supabase](https://supabase.com) (free tier)
-  - [Cloudinary](https://cloudinary.com) (free tier)
-  - [Vercel](https://vercel.com) (free tier, sign in with GitHub)
+### Cloudinary (Image CDN)
+- **Cloud Name**: `your-cloud-name`
+- **API Key**: `your-api-key`
+- **Upload Preset**: `portfolio_unsigned` (create this preset in Settings → Upload → Upload Presets)
 
-### Step 2: Clone and Install
+### Site Configuration
+- **Site URL**: `https://yourdomain.com`
+- **Analytics Provider**: `vercel` | `plausible` | `posthog` | `umami` | `none`
+
+### Security Secrets (generate if not provided)
+- **CRON_SECRET**: `openssl rand -hex 32`
+- **CSRF_SECRET**: `openssl rand -hex 32`
+
+---
+
+## 🏗️ PROJECT ARCHITECTURE
+
+### Tech Stack
+| Technology | Purpose |
+|---|---|
+| Astro 6 | Static site generator with island architecture |
+| React 18 | Interactive UI components (client-side islands) |
+| Tailwind CSS v4 | Styling framework |
+| Supabase | PostgreSQL database + auth + storage |
+| Cloudinary | Image CDN with auto-optimization |
+| shadcn/ui | Accessible component library |
+| Vercel | Deployment platform |
+
+### Data Flow
+```
+Static Fallbacks (src/data/*.ts)
+        ↓
+Supabase Database (primary)
+        ↓
+Dynamic* React Components (fetch live data)
+        ↓
+Portfolio Pages (visitor-facing)
+```
+
+### Key Files
+| File | Purpose |
+|---|---|
+| `src/components/react/sections/Dynamic*.tsx` | Sections that fetch from Supabase |
+| `src/components/react/AdminDashboard.tsx` | Full CMS dashboard |
+| `src/components/react/AdminGate.tsx` | Hidden login modal (`Ctrl+Shift+A`) |
+| `src/components/react/ReactIcon.tsx` | SVG icon system (40+ icons) |
+| `src/lib/supabase.ts` | Supabase client setup |
+| `src/lib/data.ts` | Fetch helpers with fallback logic |
+
+### Two SQL Files
+| File | When to Use |
+|---|---|
+| `supabase-rls-policies-prod.sql` | Fresh Supabase project (all CREATE TABLE) |
+| `supabase-rls-policies.sql` | Existing database (ALTER TABLE + migrations) |
+
+### Two Icon Systems
+| Component | File | Used In |
+|---|---|---|
+| `Icons.astro` | `src/components/ui/Icons.astro` | `.astro` files only (SSR-safe) |
+| `ReactIcon.tsx` | `src/components/react/ReactIcon.tsx` | `.tsx` files only (React components) |
+
+> ⚠️ Never import `Icons.astro` into a `.tsx` file — Astro components are server-only and cannot render in React.
+
+---
+
+## 🚀 DEPLOYMENT STEPS
+
+### Phase 1: Local Setup
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/code-with-zeeshan/my-portfolio.git
 cd my-portfolio
 
-# Install dependencies
+# 2. Install dependencies
 npm install
-```
 
-### Step 3: Set Up Supabase Database
-
-1. Go to [supabase.com](https://supabase.com) → New Project
-2. Enter project details (name, password, region)
-3. Wait for project to be ready (2-3 minutes)
-4. Go to **SQL Editor** in Supabase dashboard
-5. Copy the entire contents of `supabase-rls-policies-prod.sql` and run it
-   - This creates all tables, RLS policies, and storage policies
-   - For existing database updates, use `supabase-rls-policies.sql` instead
-6. Go to **Storage** → Create a new bucket named `portfolio-assets`
-   - Make it public (for serving images)
-7. Go to **Authentication → Users** → Add user
-   - Email: Use the `ADMIN_EMAIL` from user config
-   - Password: Generate a secure password
-   - This is the admin login for the portfolio
-8. Go to **Settings → API**
-   - Copy `Project URL` → Set as `SUPABASE_URL`
-   - Copy `anon public` key → Set as `SUPABASE_ANON_KEY`
-   - Copy `service_role` key → Set as `SUPABASE_SERVICE_ROLE_KEY`
-
-### Step 4: Set Up Cloudinary
-
-1. Go to [cloudinary.com](https://cloudinary.com) → Create free account
-2. From **Dashboard** copy your `Cloud Name` → Set as `CLOUDINARY_CLOUD_NAME`
-3. Go to **Programmable Image Media → Settings → Upload**
-4. Click **Upload Presets** → **Add Upload Preset**
-   - Preset Name: `portfolio_unsigned`
-   - Signing Mode: **Unsigned**
-   - Folder: `portfolio`
-   - Unique filename: ✅ Enabled
-5. Go to **Settings → Security** → Copy **API Key** → Set as `CLOUDINARY_API_KEY`
-
-### Step 5: Set Up Supabase Storage (Required for Images)
-
-1. Go to Supabase → **Storage** → **New Bucket**
-2. Bucket name: `portfolio-assets`
-3. Make bucket **public** (for serving images to visitors)
-4. Click **Create Bucket**
-
-### Step 6: Configure Environment Variables
-
-Create `.env` file from example:
-
-```bash
+# 3. Create environment file
 cp .env.example .env
 ```
 
-Fill in `.env` with values from the **USER CONFIGURATION SECTION** above:
+### Phase 2: Supabase Setup
+
+1. **Create Supabase project** at [supabase.com](https://supabase.com)
+2. **Run SQL** in SQL Editor:
+   - Copy entire content from `supabase-rls-policies-prod.sql`
+   - Paste and run
+3. **Create storage bucket**:
+   - Go to Storage → New Bucket
+   - Name: `portfolio-assets`
+   - ✅ Make public
+4. **Create admin user**:
+   - Go to Authentication → Users → Add user
+   - Email: use from USER CREDENTIALS
+   - Password: use from USER CREDENTIALS
+5. **Get API keys** (choose one format):
+   - **Legacy**: Copy `anon public` key (starts with `eyJ...`) + `service_role` key (starts with `eyJ...`)
+   - **New**: Copy `Publishable key` (starts with `sb_publishable...`) + `Secret key` (starts with `sb_secret...`)
+
+### Phase 3: Cloudinary Setup
+
+1. **Create Cloudinary account** at [cloudinary.com](https://cloudinary.com)
+2. **Get cloud name** from Dashboard
+3. **Create upload preset**:
+   - Settings → Upload → Upload Presets → Add Upload Preset
+   - Name: `portfolio_unsigned`
+   - Signing Mode: Unsigned
+   - Folder: `portfolio`
+   - Unique filename: ✅ Enabled
+4. **Get API key**: Settings → Security → Copy API Key
+
+### Phase 4: Environment Variables
+
+Fill `.env` with user credentials:
 
 ```env
-# Site URL
+# Site
 PUBLIC_SITE_URL=https://yourdomain.com
 
-# Supabase
+# Supabase (legacy format)
 PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
@@ -232,174 +145,123 @@ PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 PUBLIC_CLOUDINARY_UPLOAD_PRESET=portfolio_unsigned
 PUBLIC_CLOUDINARY_API_KEY=your_api_key
 
-# Security
+# Security (generate if not provided)
 CRON_SECRET=your_random_secret_string
 CSRF_SECRET=your_random_csrf_secret
 
 # Admin
-ADMIN_EMAIL=your.admin@email.com
+ADMIN_EMAIL=your-admin@email.com
 
 # Analytics (optional)
 PUBLIC_ANALYTICS_PROVIDER=vercel
-# Fill these only if using Plausible/Umami:
-# PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com
-# PUBLIC_PLAUSIBLE_API_KEY=your_key
-# PUBLIC_UMAMI_WEBSITE_ID=your_id
-# PUBLIC_UMAMI_URL=https://umami.example.com
 ```
 
-### Step 7: Update Personal Information
-
-Update `src/data/personal.ts` with user's information:
-
-```typescript
-// src/data/personal.ts
-export const personal = {
-  name: "User's Name",
-  title: "User's Title",
-  tagline: "User's tagline",
-  bio: "User's bio",
-  location: "User's location",
-  email: "user@email.com",
-  availability: "Open to opportunities",
-  socials: {
-    github: "https://github.com/username",
-    linkedin: "https://linkedin.com/in/username",
-    twitter: "https://twitter.com/username",
-  },
-  profilePhoto: "/images/profile.webp", // Upload to Cloudinary
-  topSkills: [
-    { name: "Skill 1", level: 95 },
-    { name: "Skill 2", level: 90 },
-  ],
-  highlights: [
-    { icon: "briefcase", label: "Years Experience", value: "X+" },
-    { icon: "calendar", label: "Projects", value: "X+" },
-  ],
-} as const;
-```
-
-### Step 8: Add Projects
-
-Option A: Update `src/data/projects.ts` for static fallback:
-
-```typescript
-// src/data/projects.ts
-export const projects: Project[] = [
-  {
-    title: "Project Name",
-    description: "Description",
-    longDescription: "Detailed description...",
-    image: "/images/projects/project.webp",
-    tags: ["React", "TypeScript"],
-    liveUrl: "https://...",
-    githubUrl: "https://...",
-    featured: true,
-    year: "2025",
-    outcome: "Result achieved",
-    gallery_images: undefined,
-    sortOrder: 0
-  },
-];
-```
-
-Option B: Use Admin Dashboard after deployment (recommended)
-
-### Step 9: Add Blog Posts
-
-Create MDX files in `src/data/blog/`:
-
-```mdx
----
-title: "Your Blog Post Title"
-description: "Post description"
-pubDate: "2025-01-15"
-tags: ["Web Development", "React"]
-heroImage: ""
-draft: false
----
-
-# Your Blog Post Title
-
-Content in Markdown format...
-```
-
-### Step 10: Update Experience, Skills, Testimonials
-
-Edit these files:
-- `src/data/experience.ts` - Work experience
-- `src/data/skills.ts` - Skill categories
-- `src/data/testimonials.ts` - Client testimonials
-
-### Step 11: Optimize Images
-
-Compress fallback images to reduce download size:
-
-```bash
-npm run compress:images
-```
-
-This uses Sharp to compress images at quality 70. Typical savings: **~70% reduction** on uncompressed PNGs (especially the 512×512 manifest icon).
-
-### Step 12: Test Locally
+### Phase 5: Test Locally
 
 ```bash
 npm run dev
 # Open http://localhost:4321
 ```
 
-Verify:
-- [ ] Site loads correctly
+**Verify:**
+- [ ] Site loads without errors
 - [ ] Dark mode toggle works
-- [ ] All sections display
-- [ ] Press `Ctrl+Shift+A` → Login with admin credentials
+- [ ] `Ctrl+Shift+A` opens login modal
+- [ ] Login with admin credentials works
 - [ ] Admin dashboard loads
 
-### Step 13: Deploy to Vercel
+### Phase 6: Deploy to Vercel
 
 ```bash
+# Commit all changes
 git add .
-git commit -m "Initial portfolio setup"
+git commit -m "feat: deploy portfolio"
 git push origin main
 ```
 
-1. Go to [vercel.com](https://vercel.com) → Sign in with GitHub
-2. Click **Add New Project** → Select `my-portfolio` repo
-3. Vercel auto-detects Astro → Click **Deploy**
-4. Go to **Settings → Environment Variables**
-5. Add ALL variables from `.env` file
-   - Set for: Production, Preview, Development
+1. Go to [vercel.com](https://vercel.com) → Add New Project → Select repo
+2. Vercel auto-detects Astro → Deploy
+3. Go to Settings → Environment Variables
+4. Add ALL variables from `.env`
+5. Set for: Production, Preview, Development
 6. Redeploy if needed
 
-### Step 13: Post-Deployment Setup
+### Phase 7: Post-Deployment
 
-1. Visit your Vercel URL (e.g., `https://your-project.vercel.app`)
-2. Press `Ctrl+Shift+A` → Login with admin credentials
+1. Visit deployed URL
+2. Press `Ctrl+Shift+A` → Login
 3. In Admin Dashboard:
-   - Click **Sync Static Data** to import `src/data/*.ts` to Supabase
-   - Go to **Settings** to configure section visibility (show/hide sections)
-   - Optionally enable "Use Static Data" per section for targeted syncing
-   - Add projects, blog posts via the UI
-   - Upload images via Cloudinary integration
-   - Upload resume PDF
-
-### Step 14: Custom Domain (Optional)
-
-1. Purchase domain (Namecheap, Cloudflare, Porkbun)
-2. Vercel → Project → Settings → Domains → **Add Domain**
-3. Follow DNS instructions (A record or CNAME)
-4. Update `PUBLIC_SITE_URL` in Vercel environment variables
-5. Redeploy
+   - Click **Sync Static Data** to import fallback data
+   - Go to **Settings** → Configure section visibility
+   - Optionally enable "Use Static Data" per section
 
 ---
 
-## 📋 Verification Checklist
+## 📂 FILE REFERENCE
+
+### Static Data Files (Fallback)
+| File | Content |
+|---|---|
+| `src/data/personal.ts` | Name, bio, title, location, email, socials |
+| `src/data/projects.ts` | Project list |
+| `src/data/skills.ts` | Skill categories |
+| `src/data/experience.ts` | Work history |
+| `src/data/testimonials.ts` | Client testimonials |
+| `src/data/blog/*.mdx` | Blog posts (MDX format) |
+
+### Admin Features
+| Feature | How to Access |
+|---|---|
+| Full Admin Panel | `Ctrl+Shift+A` → Login |
+| Contact Quick Edit | `Ctrl+Shift+C` → Login → Edit email/socials |
+| Sync Static Data | Admin sidebar → Sync button |
+| Section Visibility | Admin → Settings tab |
+| Resume Upload | Admin → Resume tab |
+
+### Available Social Platforms (for highlights)
+GitHub, LinkedIn, X (Twitter), Instagram, Facebook, YouTube, TikTok, Reddit, Pinterest, Discord, Telegram, WhatsApp, Medium, DEV.to, StackOverflow, CodePen, Dribbble, Behance, Figma, Slack (20 platforms)
+
+### Available Icons (for highlights)
+briefcase, calendar, coffee, heart, star, user, mail, github, linkedin, x, instagram, facebook, youtube, tiktok, reddit, pinterest, discord, telegram, whatsapp, medium, devto, stackoverflow, codepen, dribbble, behance, figma, slack, map-pin, quote, download, check-circle, trophy, award, target, code, palette, rocket, globe, phone, message, zap (40+ icons)
+
+---
+
+## 🔧 KEY COMPONENTS
+
+### Dynamic Sections (fetch from Supabase)
+- `DynamicHero.tsx` — Hero section with name, title, tagline
+- `DynamicAbout.tsx` — About section with bio, skills, highlights
+- `DynamicProjects.tsx` — Project showcase
+- `DynamicSkills.tsx` — Skills grid
+- `DynamicExperience.tsx` — Work experience timeline
+- `DynamicTestimonials.tsx` — Client testimonials
+- `DynamicContact.tsx` — Contact section (email + socials)
+
+### Admin Components
+- `AdminDashboard.tsx` — Full CMS with tabs
+- `AdminGate.tsx` — Hidden login modal
+- `BlogPreviewModal.tsx` — Preview before publish
+- `ProjectPreviewModal.tsx` — Project preview
+- `UndoToast.tsx` — Undo delete operations
+- `ConfirmDialog.tsx` — Safe delete confirmations
+- `CloudinaryUpload.tsx` — Single image upload
+- `CloudinaryMultiUpload.tsx` — Multiple image upload
+
+### Utility Components
+- `ReactIcon.tsx` — SVG icon system
+- `ThemeToggle.tsx` — Dark/light mode
+- `ContactForm.tsx` — Contact form with rate limiting
+- `ResumeButton.tsx` — Resume download button
+
+---
+
+## ✅ VERIFICATION CHECKLIST
 
 After deployment, verify:
 
-- [ ] Site loads at custom domain or Vercel URL
+- [ ] Site loads at Vercel URL or custom domain
 - [ ] HTTPS is working (Vercel provides free SSL)
-- [ ] Dark/light mode toggle works and persists
+- [ ] Dark mode toggle works and persists
 - [ ] All navigation links work
 - [ ] `Ctrl+Shift+A` opens admin login
 - [ ] `Ctrl+Shift+C` opens contact quick edit (after login)
@@ -410,65 +272,37 @@ After deployment, verify:
 - [ ] Project pages load
 - [ ] Images load from Cloudinary
 - [ ] Mobile layout is responsive
-- [ ] OG image preview works (test at [opengraph.xyz](https://opengraph.xyz))
-- [ ] Sitemap accessible at `/sitemap.xml`
-- [ ] Analytics tracking (if configured)
-- [ ] Run `npm run compress:images` to optimize fallback images
-- [ ] Section visibility toggles work in Settings tab
-- [ ] Homepage sections hide/show based on visibility settings
-- [ ] Use Static Data per-section toggle works correctly
+- [ ] Section visibility toggles work
 - [ ] Resume download works (navbar and about page)
-- [ ] Removed resume shows "No resume added yet" prompt
 
 ---
 
-## 🔒 Security Notes
-
-1. **Never commit `.env` file** - It's in `.gitignore`
-2. **`SUPABASE_SERVICE_ROLE_KEY`** - Server-only, never exposed to browser
-3. **`CRON_SECRET` and `CSRF_SECRET`** - Generate random strings, keep secret
-4. **Admin access** - Protected by Supabase Auth + `ADMIN_EMAIL` check
-5. **RLS Policies** - Database access restricted by Row Level Security
-6. **CSP Headers** - Content Security Policy set in `src/middleware.ts`
-
----
-
-## ✨ New Features (Latest Updates)
-
-This portfolio includes these additional features:
-
-- **Drag & Drop Reordering** — In Profile tab, drag social links and highlights to reorder them (grip handle on left)
-- **Clickable Social Handles** — Click on social platform names to add them as highlights
-- **Clickable Icons** — Click on icon names to add highlights with smart default labels
-- **Auto Sort Order** — Sort orders (1,2,3,4...) auto-adjust when adding/deleting items in Projects, Skills, Experience, Testimonials
-- **Add at Top** — New items are added at top with sort_order: 1, existing items shift down
-- **Centered Sidebar Icons** — Admin panel sidebar icons are centered when collapsed
-
----
-
-## 📚 Additional Documentation
-
-- [README.md](README.md) - Project overview and features
-- [docs/SETUP.md](docs/SETUP.md) - Detailed setup instructions
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Deployment guide
-- [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) - Customization options
-- [docs/ADMIN.md](docs/ADMIN.md) - Admin panel usage
-- [supabase-rls-policies.sql](supabase-rls-policies.sql) - Database schema
-
----
-
-## 🆘 Troubleshooting
+## 🆘 TROUBLESHOOTING
 
 | Problem | Solution |
-|---------|-----------|
-| `npm install` fails | Ensure Node.js 22+ is installed |
+|---|---|
+| `npm install` fails | Ensure Node.js 22.12.0+ installed |
 | Styles not loading | Clear cache: `rm -rf .astro node_modules/.vite && npm run dev` |
-| Admin login fails | Check Supabase credentials in `.env` |
-| Images not loading | Verify `PUBLIC_CLOUDINARY_CLOUD_NAME` is correct |
-| Sync fails | Check `SUPABASE_SERVICE_ROLE_KEY` (no `PUBLIC_` prefix) |
-| Build fails on Vercel | Check all environment variables are set |
+| Admin login fails | Verify Supabase credentials in `.env` |
+| Images not loading | Check `PUBLIC_CLOUDINARY_CLOUD_NAME` is correct |
+| Sync fails | Verify `SUPABASE_SERVICE_ROLE_KEY` (no `PUBLIC_` prefix) |
+| Build fails on Vercel | Ensure all environment variables set in Vercel dashboard |
 | Scheduled posts not publishing | Verify `CRON_SECRET` matches in env and Vercel |
 
 ---
 
-**For AI Agents:** When user provides their configuration details, follow the steps above in order. Ask for any missing information before proceeding. All credentials should be handled securely and never logged or exposed.
+## 📖 DOCUMENTATION REFERENCE
+
+| Document | For |
+|---|---|
+| [README.md](README.md) | Project overview |
+| [docs/SETUP.md](docs/SETUP.md) | Detailed setup instructions |
+| [docs/ADMIN.md](docs/ADMIN.md) | Admin panel usage |
+| [docs/CONTENT.md](docs/CONTENT.md) | Content management |
+| [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) | Customization options |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deployment guide |
+| [docs/ANIMATIONS.md](docs/ANIMATIONS.md) | Animation system |
+
+---
+
+**AI Agent:** Use this guide to set up the portfolio. Ask the user for any missing credentials before proceeding. Handle all credentials securely — never log or expose them.

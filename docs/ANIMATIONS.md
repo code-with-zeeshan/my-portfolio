@@ -2,13 +2,16 @@
 
 ## Overview
 
-All animations are **SSR-safe** — using native `IntersectionObserver` + CSS transitions instead of Framer Motion. This ensures zero hydration errors and minimal JavaScript bundle size.
+All animations are **SSR-safe** — using native `IntersectionObserver` + CSS transitions instead of Framer Motion. This ensures:
+- Zero hydration errors
+- Minimal JavaScript bundle size
+- Consistent behavior across all browsers
 
 ## Icon Systems
 
-This project has **two separate icon systems** for a specific architectural reason:
+This project has **two separate icon systems** for architectural reasons:
 
-| Component | File | Use In | Why |
+| Component | File | Used In | Why |
 |---|---|---|---|
 | `Icons.astro` | `src/components/ui/Icons.astro` | `.astro` files only | Runs server-side, pure SVG output |
 | `ReactIcon.tsx` | `src/components/react/ReactIcon.tsx` | `.tsx` files only | React component for client rendering |
@@ -20,6 +23,7 @@ This project has **two separate icon systems** for a specific architectural reas
 ## Animation Components
 
 ### FadeIn
+
 Wraps content to fade in (+ slide) when scrolled into view.
 
 ```tsx
@@ -33,9 +37,10 @@ Wraps content to fade in (+ slide) when scrolled into view.
 | `delay` | `number` | `0` | Delay in seconds before animation |
 | `duration` | `number` | `0.5` | Animation duration in seconds |
 | `direction` | `"up" \| "down" \| "left" \| "right" \| "none"` | `"up"` | Slide direction |
-| `className` | `string` | `""` | Passed to wrapper div (for grid col-span etc.) |
+| `className` | `string` | `""` | Passed to wrapper div |
 
 ### TextReveal
+
 Reveals text word-by-word with blur effect. Used in Hero section.
 
 ```tsx
@@ -44,6 +49,7 @@ Reveals text word-by-word with blur effect. Used in Hero section.
 ```
 
 ### StaggerChildren
+
 Animates child elements one-by-one in sequence.
 
 ```tsx
@@ -58,11 +64,12 @@ import { StaggerContainer, StaggerItem } from "@/components/react/StaggerChildre
 </StaggerContainer>
 ```
 
-- `StaggerContainer` wraps all items and controls the timing
+- `StaggerContainer` wraps all items and controls timing
 - `StaggerItem` wraps each individual child, receives `index` and optional `staggerDelay`
 
 ### SkillBar
-Animated horizontal progress bars. Data comes from Supabase `personal.top_skills` or falls back to static data.
+
+Animated horizontal progress bars. Data comes from Supabase `personal.top_skills` or static fallback.
 
 ```tsx
 <SkillBar skills={[
@@ -72,6 +79,7 @@ Animated horizontal progress bars. Data comes from Supabase `personal.top_skills
 ```
 
 ### MagneticHover
+
 Element subtly follows the cursor on hover. Used on social icons in Footer.
 
 ```tsx
@@ -82,7 +90,7 @@ Element subtly follows the cursor on hover. Used on social icons in Footer.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `strength` | `number` | `0.3` | Magnetic pull strength (0-1)
+| `strength` | `number` | `0.3` | Magnetic pull strength (0-1) |
 
 ### ScrollProgress
 
@@ -90,9 +98,10 @@ Thin brand-colored bar at the top of the page showing scroll position.
 
 Included automatically in `BaseLayout.astro` — no manual usage needed.
 
-> **Note:** The SVG icon that previously appeared on scroll has been removed for a cleaner experience. Only the progress bar remains.
+> **Note:** The scroll indicator SVG has been removed for a cleaner experience. Only the progress bar remains.
 
 ### PageTransition
+
 Fade-in animation on page load. Used in `BlogLayout.astro`.
 
 ```tsx
@@ -111,7 +120,7 @@ Fade-in animation on page load. Used in `BlogLayout.astro`.
 
 ## Inline Animation Pattern
 
-For components not using the animation wrappers, animations are applied via `style` props + `IntersectionObserver`:
+For components not using animation wrappers, use `style` props + `IntersectionObserver`:
 
 ```tsx
 const [visible, setVisible] = useState(false);
@@ -124,4 +133,4 @@ const [visible, setVisible] = useState(false);
 }}>
 ```
 
-This pattern is used in `DynamicProjects.tsx` (`ProjectCard`) and `SkillBar.tsx`.
+This pattern is used in `DynamicProjects.tsx` (ProjectCard) and `SkillBar.tsx`.
