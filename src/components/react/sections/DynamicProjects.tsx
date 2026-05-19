@@ -9,6 +9,7 @@ import FadeIn from "@/components/react/FadeIn";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import OptimizedImage from "@/components/react/OptimizedImage";
+import CoverflowCarousel from "@/components/react/CoverflowCarousel";
 
 interface Project {
   id: string;
@@ -25,7 +26,7 @@ interface Project {
 }
 
 // ─── Project Card ───
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+export function ProjectCard({ project, index }: { project: Project; index: number }) {
   const [visible, setVisible] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -319,7 +320,7 @@ export default function DynamicProjects() {
   return (
     <section
       id="projects"
-      className="py-16 md:py-24"
+      className="py-16"
       style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}
     >
       <div className="mx-auto max-w-5xl px-6">
@@ -357,8 +358,8 @@ export default function DynamicProjects() {
               </FadeIn>
             )}
 
-            {/* Cards Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {/* Cards Grid - Desktop only */}
+            <div className="hidden lg:grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {cardProjects.map((project, index) => (
                 <ProjectCard key={project.id} project={project} index={index} />
               ))}
@@ -371,8 +372,23 @@ export default function DynamicProjects() {
           />
         )}
 
+        <FadeIn>
+          {/* Mobile/Tablet Coverflow Carousel */}
+          <div className="lg:hidden mb-8">
+            <CoverflowCarousel 
+              items={carouselProjects}
+              renderItem={(item, isActive) => (
+                <ProjectCard 
+                  project={item as Project} 
+                  index={isActive ? 0 : 1} 
+                />
+              )}
+            />
+          </div>
+        </FadeIn>
+
         <FadeIn delay={0.3}>
-          <div className="mt-12 text-center">
+          <div className="mt-2 lg:mt-12 text-center">
             <a
               href="/projects"
               className="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:underline"

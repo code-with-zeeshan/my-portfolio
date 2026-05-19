@@ -96,10 +96,10 @@ const platformMap: Record<string, { icon: string; label: string }> = {
 
   return (
     <footer className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 py-10 md:flex-row md:gap-8 lg:gap-6">
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 py-10 lg:flex-row lg:gap-6">
 
         {/* Brand */}
-        <div className="flex flex-col items-center md:items-start gap-2">
+        <div className="flex flex-col items-center lg:items-start gap-2">
           <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {initials}<span className="text-brand-500">.</span>
           </span>
@@ -126,7 +126,7 @@ const platformMap: Record<string, { icon: string; label: string }> = {
         </div>
 
         {/* Copyright */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center md:text-right shrink-0">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center lg:text-right shrink-0">
           &copy; {currentYear} {firstName} {lastName}. All rights reserved.
         </p>
 
