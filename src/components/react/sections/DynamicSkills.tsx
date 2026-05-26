@@ -24,6 +24,7 @@ export default function DynamicSkills() {
     supabaseDown,
   } = useSupabaseData<SkillCategory>({
     table: "skill_categories",
+    select: "id, title, skills, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: staticSkills.map((s, i) => mapStaticSkillCategory(s, i)),
   });

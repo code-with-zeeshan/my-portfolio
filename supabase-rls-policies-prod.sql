@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS projects (
   github_url TEXT,
   featured BOOLEAN DEFAULT FALSE,
   year TEXT,
+  start_date TEXT,
+  end_date TEXT,
   outcome TEXT,
   sort_order INT DEFAULT 0,
   gallery_images JSONB DEFAULT '[]'::jsonb,
@@ -78,6 +80,8 @@ CREATE TABLE IF NOT EXISTS experiences (
   company TEXT NOT NULL,
   role TEXT NOT NULL,
   period TEXT NOT NULL,
+  start_date TEXT,
+  end_date TEXT,
   description TEXT NOT NULL,
   achievements TEXT[] DEFAULT '{}',
   sort_order INT DEFAULT 0

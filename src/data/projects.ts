@@ -11,6 +11,8 @@ export interface Project {
     githubUrl?: string;
     featured: boolean;
     year: string;
+    start_date?: string;
+    end_date?: string;
     outcome?: string;
   }
   

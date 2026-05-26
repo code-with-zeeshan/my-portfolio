@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { getCachedQuery, setCachedQuery } from "@/lib/queryCache";
 import ReactIcon from "@/components/react/ReactIcon";
 import MagneticHover from "@/components/react/MagneticHover";
 
@@ -36,18 +37,25 @@ export default function DynamicFooter({ initialData }: Props) {
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    // Only fetch if no initial data (for client-side updates)
-    if (initialData) return;
-    
+    const CACHE_KEY = 'personal:footer';
+    const cached = getCachedQuery<PersonalInfo>(CACHE_KEY);
+    if (cached) {
+      setData(cached);
+      return;
+    }
+
     supabase
       .from("personal")
       .select("name, socials, email")
       .limit(1)
       .single()
       .then(({ data: row, error }) => {
-        if (!error && row) setData(row);
+        if (!error && row) {
+          setCachedQuery(CACHE_KEY, row);
+          setData(row);
+        }
       });
-  }, [initialData]);
+  }, []);
 
   // ─── Platform name → icon/label mapping ───
 const platformMap: Record<string, { icon: string; label: string }> = {

@@ -21,6 +21,8 @@ interface Project {
   github_url: string | null;
   featured: boolean;
   year: string | null;
+  start_date: string | null;
+  end_date: string | null;
   outcome: string | null;
   sort_order: number;
 }
@@ -115,9 +117,11 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">
               {project.title}
             </h3>
-            {project.year && (
+            {(project.start_date || project.year) && (
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                {project.year}
+                {project.start_date
+                  ? `${project.start_date} — ${project.end_date || "Present"}`
+                  : project.year}
               </span>
             )}
           </div>
@@ -183,6 +187,7 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
           />
           {/* Arrows */}
           <button
+            aria-label="Previous project image"
             onClick={() => navigate(-1)}
             className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90 dark:text-zinc-50"
           >
@@ -201,6 +206,7 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
             </svg>
           </button>
           <button
+            aria-label="Next project image"
             onClick={() => navigate(1)}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:scale-110 transition-transform dark:bg-zinc-900/90 dark:text-zinc-50"
           >
@@ -223,6 +229,7 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
             {projects.map((_, i) => (
               <button
                 key={i}
+                aria-label={`Go to image ${i + 1}`}
                 onClick={() => {
                   setFading(true);
                   setTimeout(() => {
@@ -258,9 +265,11 @@ function ProjectCarousel({ projects }: { projects: Project[] }) {
           <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
             {project.title}
           </h3>
-          {project.year && (
+          {(project.start_date || project.year) && (
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
-              {project.year}
+              {project.start_date
+                ? `${project.start_date} — ${project.end_date || "Present"}`
+                : project.year}
             </p>
           )}
           <p className="text-zinc-600 dark:text-zinc-300 mb-4 leading-relaxed">
@@ -302,6 +311,7 @@ export default function DynamicProjects() {
     supabaseDown,
   } = useSupabaseData<Project>({
     table: "projects",
+    select: "id, title, description, image_url, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: staticProjects.map((p, i) => mapStaticProject(p, i)),
   });

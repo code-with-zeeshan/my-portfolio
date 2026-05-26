@@ -61,6 +61,8 @@ export async function syncFallbackToSupabase(
             github_url: p.githubUrl || null,
             featured: p.featured,
             year: p.year,
+            start_date: p.start_date || null,
+            end_date: p.end_date || null,
             outcome: p.outcome || null,
             sort_order: i + 1,
           }))
@@ -99,6 +101,8 @@ export async function syncFallbackToSupabase(
             company: e.company,
             role: e.role,
             period: e.period,
+            start_date: e.start_date || null,
+            end_date: e.end_date || null,
             description: e.description,
             achievements: e.achievements,
             sort_order: i + 1,

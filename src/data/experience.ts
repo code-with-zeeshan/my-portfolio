@@ -3,6 +3,8 @@ export interface Experience {
     company: string;
     role: string;
     period: string;
+    start_date?: string;
+    end_date?: string;
     description: string;
     achievements: string[];
   }
@@ -12,6 +14,8 @@ export interface Experience {
       company: "Tech Corp",
       role: "Senior Full-Stack Developer",
       period: "2023 — Present",
+      start_date: "Jan 2023",
+      end_date: "Present",
       description: "Leading frontend architecture for the main product.",
       achievements: [
         "Reduced page load time by 45% through performance optimization",
@@ -23,6 +27,8 @@ export interface Experience {
       company: "StartupXYZ",
       role: "Frontend Developer",
       period: "2021 — 2023",
+      start_date: "Mar 2021",
+      end_date: "Dec 2023",
       description: "Built and maintained the core product UI.",
       achievements: [
         "Shipped 15+ features from ideation to production",

@@ -45,6 +45,8 @@ export default function ExperienceTab({
         company: "Company Name",
         role: "Job Title",
         period: "2024 — Present",
+        start_date: "Jan 2024",
+        end_date: "Present",
         description: "Description here.",
         achievements: [],
         sort_order: 1,
@@ -193,15 +195,45 @@ export default function ExperienceTab({
                   className={inputCls}
                 />
               </Field>
-              <Field label="Period (e.g. 2023 — Present)">
+              <Field label="Start Date">
                 <input
                   type="text"
-                  value={exp.period}
+                  value={exp.start_date || ""}
                   onChange={(e) =>
-                    updateExperienceField(exp.id, "period", e.target.value)
+                    updateExperienceField(exp.id, "start_date", e.target.value)
                   }
                   className={inputCls}
+                  placeholder="e.g. Jan 2023"
                 />
+              </Field>
+              <Field label="End Date">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={exp.end_date || ""}
+                    onChange={(e) =>
+                      updateExperienceField(exp.id, "end_date", e.target.value)
+                    }
+                    className={inputCls}
+                    placeholder="e.g. Dec 2024"
+                    disabled={exp.end_date === "Present"}
+                  />
+                  <label className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={exp.end_date === "Present"}
+                      onChange={(e) =>
+                        updateExperienceField(
+                          exp.id,
+                          "end_date",
+                          e.target.checked ? "Present" : ""
+                        )
+                      }
+                      className="rounded"
+                    />
+                    Present
+                  </label>
+                </div>
               </Field>
             </div>
             <div className="mb-3">

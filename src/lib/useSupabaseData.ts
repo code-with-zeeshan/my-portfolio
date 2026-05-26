@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
+import { getCachedQuery, setCachedQuery } from "./queryCache";
 
 interface UseSupabaseDataOptions<T> {
   /** Table name to query */
@@ -49,7 +50,25 @@ export function useSupabaseData<T>({
   const [loading, setLoading] = useState(true);
   const [supabaseDown, setSupabaseDown] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  // Stable JSON key to compare deps by VALUE not by reference
+  // (fixes infinite loop when inline objects like { column: "sort_order" } are recreated every render)
+  const depsKey = JSON.stringify({ table, select, filter, order, limit, single });
+
+  const fetchData = useCallback(async (useCache = true) => {
+    setLoading(true);
+
+    const cacheKey = depsKey;
+
+    if (useCache) {
+      const cached = getCachedQuery<T[] | null>(cacheKey);
+      if (cached !== null) {
+        setData(cached);
+        setSupabaseDown(false);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       let query = supabase.from(table).select(select);
 
@@ -84,10 +103,10 @@ export function useSupabaseData<T>({
           : [transform(result)];
       }
 
+      setCachedQuery(cacheKey, transformed);
       setData(transformed);
       setSupabaseDown(false);
     } catch {
-      // Network error — Supabase unreachable
       setSupabaseDown(true);
       if (fallback) {
         setData(fallback);
@@ -95,13 +114,14 @@ export function useSupabaseData<T>({
     } finally {
       setLoading(false);
     }
-  }, [table, select, filter, order, limit, single, transform]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, select, depsKey, transform]);
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
   }, [fetchData]);
 
-  const refetch = useCallback(() => fetchData(), [fetchData]);
+  const refetch = useCallback(() => fetchData(false), [fetchData]);
 
   return { data, loading, supabaseDown, refetch };
 }

@@ -58,6 +58,7 @@ const STATIC_FALLBACK: Testimonial[] = [
 export default function DynamicTestimonials() {
   const { data: testimonials, supabaseDown } = useSupabaseData<Testimonial>({
     table: "testimonials",
+    select: "id, name, role, company, content, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: STATIC_FALLBACK,
   });

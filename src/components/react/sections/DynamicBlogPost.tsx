@@ -34,7 +34,7 @@ export default function DynamicBlogPost({ slug }: Props) {
 
     supabase
       .from("blog_posts")
-      .select("*")
+      .select("id, title, slug, description, content, tags, hero_image, pub_date, updated_at")
       .eq("slug", slug)
       .eq("published", true)
       .single()

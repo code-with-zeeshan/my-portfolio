@@ -315,6 +315,8 @@ export default function DynamicProjectPage({ projectId }: Props) {
           github_url: p.githubUrl || null,
           featured: p.featured,
           year: p.year,
+          start_date: p.start_date || null,
+          end_date: p.end_date || null,
           outcome: p.outcome || null,
           sort_order: p.sortOrder,
           created_at: new Date().toISOString(),
@@ -328,7 +330,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
     // ── Supabase path ──
     supabase
       .from("projects")
-      .select("*")
+      .select("id, title, description, long_description, image_url, gallery_images, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order, created_at, updated_at")
       .eq("id", projectId)
       .single()
       .then(({ data, error }) => {
@@ -425,8 +427,12 @@ export default function DynamicProjectPage({ projectId }: Props) {
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
                 {project.title}
               </h1>
-              {project.year && (
-                <p className="mt-2 text-sm text-zinc-500">{project.year}</p>
+              {(project.start_date || project.year) && (
+                <p className="mt-2 text-sm text-zinc-500">
+                  {project.start_date
+                    ? `${project.start_date} — ${project.end_date || "Present"}`
+                    : project.year}
+                </p>
               )}
             </div>
             {project.outcome && (

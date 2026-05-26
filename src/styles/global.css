@@ -308,11 +308,11 @@ body {
 
 .author-role {
   font-size: 0.78rem;
-  color: var(--text-muted, #888);
+  color: var(--text-muted, #6b7280);
 }
 
 .dark .author-role {
-  color: var(--text-muted, #71717a);
+  color: var(--text-muted, #a1a1aa);
 }
 
 /* ─── DOTS ─────────────────────────────────────────────────── */

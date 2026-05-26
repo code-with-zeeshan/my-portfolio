@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { getCachedQuery, setCachedQuery } from "@/lib/queryCache";
 import FadeIn from "@/components/react/FadeIn";
 import SkillBar from "@/components/react/SkillBar";
 import ReactIcon from "@/components/react/ReactIcon";
@@ -97,40 +98,48 @@ export default function DynamicAbout() {
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch personal info including JSONB columns
-    supabase
-      .from("personal")
-      .select("*")
-      .limit(1)
-      .single()
-      .then(({ data: row, error }) => {
-        if (error) {
-          console.warn("DynamicAbout: Supabase fetch failed:", error.message);
-          return; // keep static fallback
-        }
+    const CACHE_KEY = 'personal:about';
 
-        if (!row) {
-          console.warn("DynamicAbout: No personal data found in Supabase");
-          return;
-        }
+    const cached = getCachedQuery<PersonalInfo>(CACHE_KEY);
+    if (cached) {
+      setData(cached);
+    } else {
+      supabase
+        .from("personal")
+        .select("id, name, bio, profile_photo_url, socials, top_skills, highlights")
+        .limit(1)
+        .single()
+        .then(({ data: row, error }) => {
+          if (error) {
+            console.warn("DynamicAbout: Supabase fetch failed:", error.message);
+            return;
+          }
 
-        setData({
-          id: row.id,
-          name: row.name ?? STATIC_FALLBACK.name,
-          bio: row.bio ?? STATIC_FALLBACK.bio,
-          socials: Array.isArray(row.socials) ? row.socials : [],
-          profile_photo_url: row.profile_photo_url ?? null,
-          // Explicit null/empty checks — don't silently fall back
-          top_skills:
-            Array.isArray(row.top_skills) && row.top_skills.length > 0
-              ? row.top_skills
-              : STATIC_FALLBACK.top_skills,
-          highlights:
-            Array.isArray(row.highlights) && row.highlights.length > 0
-              ? row.highlights
-              : STATIC_FALLBACK.highlights,
+          if (!row) {
+            console.warn("DynamicAbout: No personal data found in Supabase");
+            return;
+          }
+
+          const result = {
+            id: row.id,
+            name: row.name ?? STATIC_FALLBACK.name,
+            bio: row.bio ?? STATIC_FALLBACK.bio,
+            socials: Array.isArray(row.socials) ? row.socials : [],
+            profile_photo_url: row.profile_photo_url ?? null,
+            top_skills:
+              Array.isArray(row.top_skills) && row.top_skills.length > 0
+                ? row.top_skills
+                : STATIC_FALLBACK.top_skills,
+            highlights:
+              Array.isArray(row.highlights) && row.highlights.length > 0
+                ? row.highlights
+                : STATIC_FALLBACK.highlights,
+          };
+
+          setCachedQuery(CACHE_KEY, result);
+          setData(result);
         });
-      });
+    }
 
     // Fetch resume URL with removed check
     async function fetchResume() {

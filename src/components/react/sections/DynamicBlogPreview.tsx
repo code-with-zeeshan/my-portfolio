@@ -13,10 +13,8 @@ interface BlogPost {
   title: string;
   slug: string;
   description: string;
-  content: string;
   tags: string[];
   hero_image: string | null;
-  published: boolean;
   pub_date: string;
 }
 
@@ -29,7 +27,7 @@ export default function DynamicBlogPreview() {
       try {
         const { data, error } = await supabase
           .from("blog_posts")
-          .select("*")
+          .select("id, title, slug, description, tags, hero_image, pub_date")
           .eq("published", true)
           .order("pub_date", { ascending: false })
           .limit(3);

@@ -36,14 +36,17 @@ export default function ProfileTab({
   const [bioModalOpen, setBioModalOpen] = useState(false);
   const [draggedSocialIdx, setDraggedSocialIdx] = useState<number | null>(null);
   const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null);
+  const [draggedSkillIdx, setDraggedSkillIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const { ConfirmDialogComponent } = useConfirmDialog();
 
-  const handleDragStart = (e: React.DragEvent, idx: number, type: 'social' | 'highlight') => {
+  const handleDragStart = (e: React.DragEvent, idx: number, type: 'social' | 'highlight' | 'skill') => {
     if (type === 'social') {
       setDraggedSocialIdx(idx);
-    } else {
+    } else if (type === 'highlight') {
       setDraggedHighlightIdx(idx);
+    } else {
+      setDraggedSkillIdx(idx);
     }
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', idx.toString());
@@ -59,7 +62,7 @@ export default function ProfileTab({
     setDragOverIdx(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropIdx: number, type: 'social' | 'highlight') => {
+  const handleDrop = (e: React.DragEvent, dropIdx: number, type: 'social' | 'highlight' | 'skill') => {
     e.preventDefault();
     if (type === 'social' && draggedSocialIdx !== null && draggedSocialIdx !== dropIdx) {
       const newSocials = [...personal.socials];
@@ -71,15 +74,22 @@ export default function ProfileTab({
       const [removed] = newHighlights.splice(draggedHighlightIdx, 1);
       newHighlights.splice(dropIdx, 0, removed);
       setPersonal({ ...personal, highlights: newHighlights });
+    } else if (type === 'skill' && draggedSkillIdx !== null && draggedSkillIdx !== dropIdx) {
+      const newSkills = [...personal.top_skills];
+      const [removed] = newSkills.splice(draggedSkillIdx, 1);
+      newSkills.splice(dropIdx, 0, removed);
+      setPersonal({ ...personal, top_skills: newSkills });
     }
     setDraggedSocialIdx(null);
     setDraggedHighlightIdx(null);
+    setDraggedSkillIdx(null);
     setDragOverIdx(null);
   };
 
   const handleDragEnd = () => {
     setDraggedSocialIdx(null);
     setDraggedHighlightIdx(null);
+    setDraggedSkillIdx(null);
     setDragOverIdx(null);
   };
 
@@ -530,7 +540,8 @@ export default function ProfileTab({
           </button>
         </div>
 
-        <div className="grid grid-cols-[1fr_100px_40px] gap-3 px-1">
+        <div className="grid grid-cols-[32px_1fr_100px_40px] gap-3 px-1">
+          <span />
           <span className="text-xs font-medium text-zinc-400">Skill Name</span>
           <span className="text-xs font-medium text-zinc-400 text-center">Level (0–100)</span>
           <span />
@@ -538,8 +549,22 @@ export default function ProfileTab({
 
         <div className="space-y-3">
           {personal.top_skills.map((skill: any, idx: number) => (
-            <div key={idx} className="space-y-1.5">
-              <div className="grid grid-cols-[1fr_100px_40px] gap-3 items-center">
+            <div
+              key={idx}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx, 'skill')}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx, 'skill')}
+              onDragEnd={handleDragEnd}
+              className={`space-y-1.5 rounded-lg p-1 transition-all cursor-grab active:cursor-grabbing ${
+                dragOverIdx === idx ? 'bg-brand-50 dark:bg-brand-900/20 ring-2 ring-brand-500 ring-offset-2' : ''
+              } ${draggedSkillIdx === idx ? 'opacity-50' : ''}`}
+            >
+              <div className="grid grid-cols-[32px_1fr_100px_40px] gap-3 items-center">
+                <div className="flex items-center justify-center w-8 h-9 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                </div>
                 <input
                   type="text"
                   value={skill.name}
@@ -589,7 +614,7 @@ export default function ProfileTab({
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 pl-1">
+              <div className="flex items-center gap-2 pl-9">
                 <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-brand-500 transition-all duration-300"

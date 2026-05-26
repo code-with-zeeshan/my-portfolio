@@ -287,7 +287,7 @@ export default function ProjectsTab({
               variant="bordered"
               className="bg-white dark:bg-zinc-900 rounded-2xl scroll-mt-8 p-6 gap-0"
             >
-              <div className="grid gap-3 md:grid-cols-2 mb-3">
+              <div className="grid gap-3 md:grid-cols-3 mb-3">
                 <Field label="Title">
                   <input
                     type="text"
@@ -298,16 +298,45 @@ export default function ProjectsTab({
                     className={inputCls}
                   />
                 </Field>
-                <Field label="Year">
+                <Field label="Start Date">
                   <input
                     type="text"
-                    value={project.year || ""}
+                    value={project.start_date || ""}
                     onChange={(e) =>
-                      updateProjectField(project.id, "year", e.target.value)
+                      updateProjectField(project.id, "start_date", e.target.value)
                     }
                     className={inputCls}
-                    placeholder="2025"
+                    placeholder="e.g. Jan 2024"
                   />
+                </Field>
+                <Field label="End Date">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={project.end_date || ""}
+                      onChange={(e) =>
+                        updateProjectField(project.id, "end_date", e.target.value)
+                      }
+                      className={inputCls}
+                      placeholder="e.g. Dec 2024"
+                      disabled={project.end_date === "Present"}
+                    />
+                    <label className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={project.end_date === "Present"}
+                        onChange={(e) =>
+                          updateProjectField(
+                            project.id,
+                            "end_date",
+                            e.target.checked ? "Present" : ""
+                          )
+                        }
+                        className="rounded"
+                      />
+                      Present
+                    </label>
+                  </div>
                 </Field>
               </div>
               <div className="mb-3">

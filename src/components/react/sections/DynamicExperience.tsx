@@ -12,6 +12,8 @@ interface Experience {
   company: string;
   role: string;
   period: string;
+  start_date: string | null;
+  end_date: string | null;
   description: string;
   achievements: string[];
   sort_order: number;
@@ -24,6 +26,7 @@ export default function DynamicExperience() {
     supabaseDown,
   } = useSupabaseData<Experience>({
     table: "experiences",
+    select: "id, company, role, period, start_date, end_date, description, achievements, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: staticExperiences.map((e, i) => mapStaticExperience(e, i)),
   });
@@ -77,7 +80,7 @@ export default function DynamicExperience() {
                               {exp.company}
                             </p>
                             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                              {exp.period}
+                              {exp.start_date ? `${exp.start_date} — ${exp.end_date || "Present"}` : exp.period}
                             </p>
                             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
                               {exp.description}
@@ -106,7 +109,7 @@ export default function DynamicExperience() {
                               {exp.company}
                             </p>
                             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                              {exp.period}
+                              {exp.start_date ? `${exp.start_date} — ${exp.end_date || "Present"}` : exp.period}
                             </p>
                             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
                               {exp.description}

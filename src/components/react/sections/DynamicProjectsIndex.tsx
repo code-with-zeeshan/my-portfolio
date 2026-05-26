@@ -19,6 +19,8 @@ interface Project {
   github_url: string | null;
   featured: boolean;
   year: string | null;
+  start_date: string | null;
+  end_date: string | null;
   outcome: string | null;
   sort_order: number;
 }
@@ -32,6 +34,7 @@ export default function DynamicProjectsIndex() {
     supabaseDown,
   } = useSupabaseData<Project>({
     table: "projects",
+    select: "id, title, description, image_url, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: staticProjects.map((p, i) => mapStaticProject(p, i)),
   });
@@ -117,9 +120,11 @@ export default function DynamicProjectsIndex() {
                     <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">
                       {project.title}
                     </h3>
-                    {project.year && (
+                    {(project.start_date || project.year) && (
                       <span className="text-xs text-zinc-500 ml-2 shrink-0">
-                        {project.year}
+                        {project.start_date
+                          ? `${project.start_date} — ${project.end_date || "Present"}`
+                          : project.year}
                       </span>
                     )}
                   </div>

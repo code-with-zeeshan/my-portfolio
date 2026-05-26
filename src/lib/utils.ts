@@ -98,6 +98,8 @@ export function mapStaticProject(p: {
   githubUrl?: string | null;
   featured: boolean;
   year?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   outcome?: string | null;
   longDescription?: string | null;
   gallery_images?: string[];
@@ -112,6 +114,8 @@ export function mapStaticProject(p: {
   github_url: string | null;
   featured: boolean;
   year: string | null;
+  start_date: string | null;
+  end_date: string | null;
   outcome: string | null;
   sort_order: number;
   long_description: string | null;
@@ -127,6 +131,8 @@ export function mapStaticProject(p: {
     github_url: p.githubUrl ?? null,
     featured: p.featured,
     year: p.year ?? null,
+    start_date: p.start_date ?? null,
+    end_date: p.end_date ?? null,
     outcome: p.outcome ?? null,
     sort_order: p.sortOrder ?? index,
     long_description: p.longDescription ?? null,
@@ -161,6 +167,8 @@ export function mapStaticExperience(e: {
   company: string;
   role: string;
   period: string;
+  start_date?: string | null;
+  end_date?: string | null;
   description: string;
   achievements: string[];
 }, index: number): {
@@ -168,6 +176,8 @@ export function mapStaticExperience(e: {
   company: string;
   role: string;
   period: string;
+  start_date: string | null;
+  end_date: string | null;
   description: string;
   achievements: string[];
   sort_order: number;
@@ -177,6 +187,8 @@ export function mapStaticExperience(e: {
     company: e.company,
     role: e.role,
     period: e.period,
+    start_date: e.start_date ?? null,
+    end_date: e.end_date ?? null,
     description: e.description,
     achievements: e.achievements,
     sort_order: index,

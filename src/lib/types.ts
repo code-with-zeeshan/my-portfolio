@@ -45,6 +45,8 @@ export interface Project {
   github_url: string | null;
   featured: boolean;
   year: string | null;
+  start_date: string | null;
+  end_date: string | null;
   outcome: string | null;
   sort_order: number;
   created_at: string;
@@ -63,6 +65,8 @@ export interface Experience {
   company: string;
   role: string;
   period: string;
+  start_date: string | null;
+  end_date: string | null;
   description: string;
   achievements: string[];
   sort_order: number;

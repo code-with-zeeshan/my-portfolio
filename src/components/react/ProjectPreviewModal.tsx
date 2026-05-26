@@ -17,6 +17,8 @@ interface Project {
   live_url: string | null;
   github_url: string | null;
   year: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   outcome: string | null;
   gallery_images?: string[];
 }
@@ -170,8 +172,12 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50">
                 {project.title || "Untitled Project"}
               </h1>
-              {project.year && (
-                <p className="mt-2 text-sm text-zinc-500">{project.year}</p>
+              {(project.start_date || project.year) && (
+                <p className="mt-2 text-sm text-zinc-500">
+                  {project.start_date
+                    ? `${project.start_date} — ${project.end_date || "Present"}`
+                    : project.year}
+                </p>
               )}
             </div>
             {project.outcome && (

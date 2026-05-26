@@ -123,6 +123,12 @@ CREATE TABLE IF NOT EXISTS app_settings (
 -- Add profile photo URL column to personal table
 ALTER TABLE personal ADD COLUMN IF NOT EXISTS profile_photo_url TEXT;
 
+-- Add start_date and end_date columns for date range support
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS end_date TEXT;
+ALTER TABLE experiences ADD COLUMN IF NOT EXISTS start_date TEXT;
+ALTER TABLE experiences ADD COLUMN IF NOT EXISTS end_date TEXT;
+
 -- Migrate social links from flat columns to JSONB array (Phase 4)
 ALTER TABLE personal ADD COLUMN IF NOT EXISTS socials JSONB DEFAULT '[]'::jsonb;
 

@@ -22,7 +22,7 @@ export default function ResumeButton({ className = "", label = "Resume", onClick
         );
         supabase
           .from("resume")
-          .select("*")
+          .select("id, file_url")
           .order("uploaded_at", { ascending: false })
           .then(({ data }) => {
             const latest = (data ?? []).find((r: any) => !removedIds.includes(r.id));
