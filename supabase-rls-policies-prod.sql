@@ -191,6 +191,7 @@ CREATE POLICY "Public read experiences" ON experiences FOR SELECT TO anon USING 
 CREATE POLICY "Public read published posts" ON blog_posts FOR SELECT TO anon USING (published = true);
 CREATE POLICY "Public read testimonials" ON testimonials FOR SELECT TO anon USING (true);
 CREATE POLICY "Public read resume" ON resume FOR SELECT TO anon USING (true);
+CREATE POLICY "Public read app_settings" ON app_settings FOR SELECT TO anon USING (true);
 
 -- PUBLIC INSERT for messages (visitors can send contact messages)
 CREATE POLICY "Public insert messages" ON messages FOR INSERT TO anon WITH CHECK (true);
