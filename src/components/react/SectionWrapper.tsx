@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { getCachedQuery, setCachedQuery } from "@/lib/queryCache";
+
+const CACHE_KEY = "section_visibility";
 
 interface SectionWrapperProps {
   sectionId: string;
@@ -18,32 +22,58 @@ interface VisibilitySettings {
 
 export default function SectionWrapper({
   sectionId,
-  storageKey = "section_visibility",
+  storageKey = CACHE_KEY,
   children,
 }: SectionWrapperProps) {
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkVisibility = () => {
-      if (typeof window === "undefined") return true;
-      
+    const applySettings = (settings: VisibilitySettings | null) => {
+      if (!settings) return;
+      const visible = settings[sectionId as keyof VisibilitySettings] ?? true;
+      setIsVisible(visible);
+    };
+
+    // 1. Read from localStorage instantly
+    const localRead = (): VisibilitySettings | null => {
       try {
         const stored = localStorage.getItem(storageKey);
-        if (!stored) return true;
-        
-        const settings: VisibilitySettings = JSON.parse(stored);
-        const visible = settings[sectionId as keyof VisibilitySettings] ?? true;
-        setIsVisible(visible);
+        if (!stored) return null;
+        return JSON.parse(stored) as VisibilitySettings;
       } catch {
-        setIsVisible(true);
+        return null;
       }
     };
 
-    checkVisibility();
+    const local = localRead();
+    if (local) applySettings(local);
 
+    // 2. Fetch from Supabase (authoritative source) in parallel
+    const cached = getCachedQuery<VisibilitySettings>(CACHE_KEY);
+    if (cached) {
+      applySettings(cached);
+      localStorage.setItem(storageKey, JSON.stringify(cached));
+      return;
+    }
+
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", CACHE_KEY)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) return;
+        const settings = data.value as VisibilitySettings;
+        setCachedQuery(CACHE_KEY, settings);
+        localStorage.setItem(storageKey, JSON.stringify(settings));
+        applySettings(settings);
+      });
+
+    // 3. Listen for cross-tab changes
     const handleStorage = (e: StorageEvent) => {
       if (e.key === storageKey) {
-        checkVisibility();
+        const fresh = localRead();
+        if (fresh) applySettings(fresh);
       }
     };
 
