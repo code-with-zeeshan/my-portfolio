@@ -9,7 +9,7 @@ import SkillBar from "@/components/react/SkillBar";
 import ReactIcon from "@/components/react/ReactIcon";
 import type { TopSkill, Highlight } from "@/lib/types";
 import OptimizedImage from "@/components/react/OptimizedImage";
-import { formatDate } from "@/lib/utils";
+import { parseMarkdown } from "@/lib/markdown";
 
 interface SocialLink {
   platform: string;
@@ -48,22 +48,14 @@ const STATIC_FALLBACK: PersonalInfo = {
   ],
 };
 
-// ─── Bio renderer — handles \n\n paragraphs and \n line breaks ───
+// ─── Bio renderer — renders markdown to HTML ───
 function BioText({ text }: { text: string }) {
-  const paragraphs = text.split(/\n\n+/);
+  const html = parseMarkdown(text);
   return (
-    <>
-      {paragraphs.map((para, i) => (
-        <p key={i} className="text-lg leading-relaxed text-zinc-600 dark:text-zinc-300 mt-4 first:mt-0">
-          {para.split("\n").map((line, j, arr) => (
-            <span key={j}>
-              {line}
-              {j < arr.length - 1 && <br />}
-            </span>
-          ))}
-        </p>
-      ))}
-    </>
+    <div
+      className="text-lg leading-relaxed text-zinc-600 dark:text-zinc-300 [&_p]:mt-4 [&_p:first-child]:mt-0"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
 

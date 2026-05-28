@@ -1,6 +1,7 @@
 ---
 // src/layouts/BaseLayout.astro
 import "../styles/global.css";
+import "@fontsource-variable/inter";
 import Header from "@/components/layout/Header.astro";
 import DynamicFooter from "@/components/react/DynamicFooter.tsx";
 import ScrollProgress from "@/components/react/ScrollProgress.tsx";
@@ -58,8 +59,6 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <meta name="generator" content={Astro.generator} />
 
     <!-- Preconnect to external domains for performance -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="preconnect" href="https://supabase.co" crossorigin />
     <link rel="preconnect" href="https://*.supabase.co" crossorigin />
@@ -67,9 +66,6 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <link rel="dns-prefetch" href="//plausible.io" />
     <link rel="dns-prefetch" href="//umami.is" />
     <link rel="dns-prefetch" href="//posthog.com" />
-
-    <!-- Preload Inter font for faster FCP -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" crossorigin />
 
     <!-- Primary Meta Tags -->
     <title>{title} | Mohammad Zeeshan</title>
@@ -98,18 +94,11 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <link rel="apple-touch-icon" sizes="180x180"   href="/apple-touch-icon.png" />
     <link rel="manifest"         href="/site.webmanifest" crossorigin="use-credentials" />
 
-    <!-- Fonts — preloaded above, display=swap for non-blocking rendering -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-      crossorigin
-    />
-
     <!-- Critical CSS (above-the-fold) — rest deferred -->
     <style is:inline>
       {`
         *,::before,::after{box-sizing:border-box;margin:0;padding:0}
-        html{font-family:"Inter",system-ui,-apple-system,sans-serif;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;font-display:optional}
+        html{font-family:"Inter Variable","Inter",system-ui,-apple-system,sans-serif;scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
         body{min-height:100vh}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
         .fixed{position:fixed}

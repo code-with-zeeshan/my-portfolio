@@ -30,20 +30,20 @@ try {
     <DynamicHero client:load initialData={heroData} />
   </div>
   <DynamicAbout client:load />
-  <SectionWrapper client:load sectionId="projects">
-    <DynamicProjects client:load />
+  <SectionWrapper client:visible sectionId="projects">
+    <DynamicProjects client:visible />
   </SectionWrapper>
-  <SectionWrapper client:load sectionId="skills">
-    <DynamicSkills client:load />
+  <SectionWrapper client:visible sectionId="skills">
+    <DynamicSkills client:visible />
   </SectionWrapper>
-  <SectionWrapper client:load sectionId="experience">
-    <DynamicExperience client:load />
+  <SectionWrapper client:visible sectionId="experience">
+    <DynamicExperience client:visible />
   </SectionWrapper>
-  <SectionWrapper client:load sectionId="testimonials">
-    <DynamicTestimonials client:load />
+  <SectionWrapper client:visible sectionId="testimonials">
+    <DynamicTestimonials client:visible />
   </SectionWrapper>
-  <SectionWrapper client:load sectionId="blog">
-    <DynamicBlogPreview client:load />
+  <SectionWrapper client:visible sectionId="blog">
+    <DynamicBlogPreview client:visible />
   </SectionWrapper>
-  <DynamicContact client:load />
+  <DynamicContact client:visible />
 </BaseLayout>

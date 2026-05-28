@@ -8,6 +8,7 @@ import vercel from "@astrojs/vercel";
 
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || "https://my-portfolio-gamma-six-70.vercel.app",
+  compressHTML: true,
   
   adapter: vercel(),
   

@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { updateItem } from "@/lib/utils";
 import { useAdminCrud } from "@/lib/useAdminCrud";
+import MarkdownEditor from "@/components/react/MarkdownEditor";
 
 export default function ProjectsTab({
   projects,
@@ -206,16 +207,15 @@ export default function ProjectsTab({
               {/* Editor */}
               <div className="flex-1 p-6">
                 <Field label="Description">
-                  <textarea
-                    rows={15}
+                  <MarkdownEditor
                     value={editingProject.description}
-                    onChange={(e) =>
+                    onChange={(val: string) =>
                       setEditingProject({
                         ...editingProject,
-                        description: e.target.value,
+                        description: val,
                       })
                     }
-                    className={inputCls + " min-h-[300px]"}
+                    height={400}
                     placeholder="Project description..."
                   />
                 </Field>
