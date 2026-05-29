@@ -15,6 +15,7 @@ interface Project {
   description: string;
   image_url: string | null;
   video_url: string | null;
+  videos: string[];
   tags: string[];
   live_url: string | null;
   github_url: string | null;
@@ -35,7 +36,7 @@ export default function DynamicProjectsIndex() {
     supabaseDown,
   } = useSupabaseData<Project>({
     table: "projects",
-    select: "id, title, description, image_url, video_url, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order",
+    select: "id, title, description, image_url, video_url, videos, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order",
     order: { column: "sort_order", ascending: true },
     fallback: staticProjects.map((p, i) => mapStaticProject(p, i)),
   });
@@ -102,7 +103,7 @@ export default function DynamicProjectsIndex() {
             <FadeIn key={project.id} delay={index * 0.05}>
               <a
                 href={`/projects/${project.id}`}
-                className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all hover:border-brand-500/30 hover:shadow-lg hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all hover:border-brand-500/30 hover:shadow-lg hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative">
                   <OptimizedImage
@@ -115,14 +116,14 @@ export default function DynamicProjectsIndex() {
                     height={300}
                     className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                   />
-                  {project.video_url && (
+                  {(project.videos?.length > 0 || project.video_url) && (
                     <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                       Video
                     </span>
                   )}
                 </div>
-                <div className="p-5">
+                <div className="flex flex-col flex-1 p-5">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">
                       {project.title}
@@ -143,7 +144,7 @@ export default function DynamicProjectsIndex() {
                       📈 {project.outcome}
                     </p>
                   )}
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
                     {project.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}

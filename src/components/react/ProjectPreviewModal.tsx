@@ -21,7 +21,8 @@ interface Project {
   start_date?: string | null;
   end_date?: string | null;
   outcome: string | null;
-  gallery_images?: string[];
+  gallery_images: string[];
+  videos: string[];
 }
 
 interface Props {
@@ -193,15 +194,20 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
           </p>
 
           {/* Hero image / video */}
-          {project.video_url ? (
-            <video
-              src={project.video_url}
-              controls
-              playsInline
-              className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-            >
-              Your browser does not support the video tag.
-            </video>
+          {(project.videos?.length > 0 || project.video_url) ? (
+            <div className="mb-8 space-y-4">
+              {(project.videos?.length > 0 ? project.videos : [project.video_url].filter(Boolean) as string[]).map((url: string, idx: number) => (
+                <video
+                  key={idx}
+                  src={url}
+                  controls
+                  playsInline
+                  className="w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ))}
+            </div>
           ) : (
             <OptimizedImage
               src={project.image_url}

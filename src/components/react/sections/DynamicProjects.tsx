@@ -56,7 +56,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         observerRef.current = observer;
         observer.observe(el);
       }}
-      className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+      className="group relative rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer h-full flex flex-col"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(30px)",
@@ -64,8 +64,8 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
       }}
     >
       {/* Clicking card opens dedicated project page */}
-      <a href={`/projects/${project.id}`} className="block">
-        <div className="relative aspect-video overflow-hidden">
+      <a href={`/projects/${project.id}`} className="flex flex-col flex-1">
+        <div className="relative aspect-video overflow-hidden rounded-t-2xl">
           <OptimizedImage
             src={project.image_url}
             alt={project.title}
@@ -112,7 +112,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
             )}
           </div>
         </div>
-        <div className="p-6">
+        <div className="flex flex-col flex-1 p-6">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 group-hover:text-brand-500 transition-colors">
               {project.title}
@@ -133,7 +133,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
               📈 {project.outcome}
             </p>
           )}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mt-auto">
             {(project.tags || []).map((tag) => (
               <span
                 key={tag}
@@ -335,7 +335,7 @@ export default function DynamicProjects() {
     >
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
-          <div className="mb-8 md:mb-12">
+          <div className="mb-12 md:mb-14">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-brand-500">
               Portfolio
             </p>

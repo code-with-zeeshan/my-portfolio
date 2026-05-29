@@ -90,23 +90,25 @@ featured: true                   # Shows on homepage
 ### New Project
 1. Admin → Projects tab → **+ Add Project** (added at top with sort_order: 1)
 2. Fill in fields: title, description (use the Markdown editor via "Expand editor"), tags, URLs
-3. **Video demo**: Add a direct URL to an MP4, WebM, or GIF file in the "Video URL" field
+3. **Video Gallery**: Upload MP4, WebM, or GIF files via drag-and-drop (Cloudinary) — supports multiple videos
 4. Upload image via Cloudinary drag & drop
 5. Toggle **Featured on homepage** if desired
 6. Click **Save**
 
 ### Project Videos
 
-Projects support video demos via the **Video URL** field:
-- Supported formats: MP4, WebM, GIF
-- Video appears as the hero on the project detail page (replaces the image)
-- A small "Video" badge appears on project cards in the grid view
-- Works alongside the main project image and gallery images
+Projects support video demos via the **Videos** section:
+- Drag-and-drop upload area for MP4, WebM, GIF files
+- Multiple videos supported — shown as a gallery on project detail pages
+- A "Video" badge appears on project cards that have videos
+- Video thumbnails show with HTML5 `<video>` controls
+- Works alongside the main project image and image gallery
 
 ## Reordering Content
 
 ### Profile Tab
-- **Social Links**: Drag by the grip handle on the left to reorder
+- **Social Links**: Drag by the grip handle on the left to reorder — these appear in the website **footer**
+- **Contact Information**: Drag by the grip handle on the left to reorder — these appear on the **Contact page**
 - **Highlights**: Drag by the grip handle on the left to reorder
 
 ### Projects, Skills, Experience, Testimonials
@@ -149,6 +151,21 @@ Edit contact info directly on the homepage without opening the full admin panel:
 Social handles display as @username (e.g., @code-with-zeeshan) instead of full URLs, with clickable links opening in a new tab.
 
 > 💡 All icons use ReactIcon component for consistent rendering.
+
+## Contact Information vs Social Links
+
+The portfolio has two separate sets of social handles with different placements:
+
+| Section | Location in Admin | Where It Displays | Best For |
+|---|---|---|---|
+| **Social Links** | Profile tab → Social Links section | Website **footer** (visible on every page) | General social profiles you want always visible |
+| **Contact Information** | Profile tab → Contact Information section | **Contact page** only | Additional handles specific to reaching you (Email, LinkedIn, etc.) |
+| **Quick Edit (Ctrl+Shift+C)** | Floating edit mode on homepage | Contact page only | Quick on-the-fly changes without opening admin |
+
+**When to use which:**
+- Use **Social Links** for profiles visitors see site-wide (GitHub, LinkedIn, X, etc.)
+- Use **Contact Information** for handles shown only on the Contact page (can include the same platforms or different ones)
+- Use **Ctrl+Shift+C** for quick edits to Contact Information without navigating to the admin panel
 
 ## Important Notes
 

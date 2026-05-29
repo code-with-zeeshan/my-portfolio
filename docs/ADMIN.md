@@ -26,10 +26,10 @@ Use the email and password created in **Supabase → Authentication → Users**.
 
 | Tab | Features |
 |---|---|
-| **Profile** | Edit name, title, bio (Markdown), location, social links, availability, profile photo; drag & drop to reorder social links, highlights, and top skills |
+| **Profile** | Edit name, title, bio (Markdown), location, social links (footer), contact information (Contact page), availability, profile photo; drag & drop to reorder social links, contact handles, highlights, and top skills |
 | **Top Skills** | Add/edit/remove skill bars with name and % level; drag & drop to reorder |
 | **Highlights** | Edit stat cards (icon, label, value) shown below bio; drag & drop to reorder |
-| **Projects** | Add, edit, delete projects; upload images via Cloudinary; add video demo URL (MP4/WebM/GIF); toggle featured; sort order auto-adjusts; rich Markdown editor for descriptions |
+| **Projects** | Add, edit, delete projects; upload images via Cloudinary; upload multiple video demos (MP4/WebM/GIF) via drag-and-drop; toggle featured; sort order auto-adjusts; rich Markdown editor for descriptions and long descriptions |
 | **Skills** | Edit skill category names and tag lists; sort order auto-adjusts |
 | **Experience** | Edit work history, roles, achievements; sort order auto-adjusts |
 | **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images; search posts |
@@ -53,6 +53,20 @@ Edit contact info directly on the homepage without opening the full admin panel:
 8. **Exit**: Click Exit to close edit mode, with option to stay logged in or log out
 
 > 💡 All icons use ReactIcon component for consistent rendering across all social platforms.
+
+## Contact Information vs Social Links
+
+The profile has two separate social handle sections:
+
+| Section | Admin Location | Displays In | Purpose |
+|---|---|---|---|
+| **Social Links** | Profile → Social Links | Website footer (every page) | General social profiles for site-wide visibility |
+| **Contact Information** | Profile → Contact Information | Contact page only | Handles shown when visitors reach out |
+| **Quick Edit (Ctrl+Shift+C)** | Floating edit on homepage | Contact page only | Quick on-the-fly changes |
+
+- **Social Links** and **Contact Information** are independent — you can have different platforms in each
+- Both support drag-and-drop reordering
+- Use the Profile tab in admin for full control; use Ctrl+Shift+C for quick edits
 
 ## Section Visibility & Font Settings
 

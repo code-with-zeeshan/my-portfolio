@@ -104,6 +104,7 @@ export function mapStaticProject(p: {
   longDescription?: string | null;
   gallery_images?: string[];
   video_url?: string | null;
+  videos?: string[];
   sortOrder?: number;
 }, index: number): {
   id: string;
@@ -122,6 +123,7 @@ export function mapStaticProject(p: {
   long_description: string | null;
   gallery_images: string[];
   video_url: string | null;
+  videos: string[];
 } {
   return {
     id: `static-${index}`,
@@ -140,6 +142,7 @@ export function mapStaticProject(p: {
     long_description: p.longDescription ?? null,
     gallery_images: p.gallery_images ?? [],
     video_url: p.video_url ?? null,
+    videos: p.videos ?? [],
   };
 }
 

@@ -56,7 +56,7 @@ export default function DynamicHero({ initialData }: Props) {
     <section id="hero" className="relative flex min-h-[70vh] md:min-h-[90vh] items-center pt-16">
       <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
         <FadeIn delay={0}>
-          <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 mb-6">
+          <div className="flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-6">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500"></span>
@@ -72,13 +72,13 @@ export default function DynamicHero({ initialData }: Props) {
         </h1>
 
         <FadeIn delay={0.5}>
-          <p className="mt-4 text-xl text-zinc-500 dark:text-zinc-400 sm:text-2xl lg:text-3xl font-light">
+          <p className="mt-4 text-xl text-zinc-500 dark:text-zinc-400 sm:text-2xl lg:text-3xl font-normal">
             {data.title}
           </p>
         </FadeIn>
 
         <FadeIn delay={0.6}>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed font-medium text-zinc-600 dark:text-zinc-400">
             {data.tagline}
           </p>
         </FadeIn>
@@ -96,7 +96,7 @@ export default function DynamicHero({ initialData }: Props) {
         </FadeIn>
 
         <FadeIn delay={0.8}>
-          <div className="mt-6 flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="mt-6 flex items-center gap-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
             {data.location}
           </div>

@@ -69,7 +69,7 @@ export default function DynamicSkills() {
                     {category.title}
                   </h3>
                   <StaggerContainer
-                    className="flex flex-wrap gap-3"
+                    className="flex flex-wrap gap-x-3 gap-y-4"
                     staggerDelay={0.06}
                   >
                     {category.skills.map((skill, skillIdx) => (

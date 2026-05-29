@@ -58,6 +58,8 @@ export default function ProjectsTab({
   const { handleDelete, handleAdd, handleSave, ConfirmDialogComponent } =
     useAdminCrud<any>();
 
+  const [expandField, setExpandField] = useState<'description' | 'long_description'>('description');
+
   const handleAddProject = async () => {
     const updatedItems = projects.map((p: any, idx: number) => ({
       ...p,
@@ -205,20 +207,70 @@ export default function ProjectsTab({
           <div className="flex-1 overflow-hidden">
             <div className="h-full flex flex-col">
               {/* Editor */}
-              <div className="flex-1 p-6">
-                <Field label="Description">
-                  <MarkdownEditor
-                    value={editingProject.description}
-                    onChange={(val: string) =>
-                      setEditingProject({
-                        ...editingProject,
-                        description: val,
-                      })
-                    }
-                    height={400}
-                    placeholder="Project description..."
-                  />
-                </Field>
+              <div className="flex-1 p-6 overflow-y-auto">
+                {expandField === 'description' ? (
+                  <>
+                    <Field label="Description">
+                      <MarkdownEditor
+                        value={editingProject.description}
+                        onChange={(val: string) =>
+                          setEditingProject({
+                            ...editingProject,
+                            description: val,
+                          })
+                        }
+                        height={300}
+                        placeholder="Project description..."
+                      />
+                    </Field>
+                    <div className="mt-6">
+                      <Field label="Long Description (optional — shown on project detail page)">
+                        <MarkdownEditor
+                          value={editingProject.long_description || ""}
+                          onChange={(val: string) =>
+                            setEditingProject({
+                              ...editingProject,
+                              long_description: val,
+                            })
+                          }
+                          height={300}
+                          placeholder="Detailed project description..."
+                        />
+                      </Field>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Field label="Long Description (optional — shown on project detail page)">
+                      <MarkdownEditor
+                        value={editingProject.long_description || ""}
+                        onChange={(val: string) =>
+                          setEditingProject({
+                            ...editingProject,
+                            long_description: val,
+                          })
+                        }
+                        height={300}
+                        placeholder="Detailed project description..."
+                      />
+                    </Field>
+                    <div className="mt-6">
+                      <Field label="Description">
+                        <MarkdownEditor
+                          value={editingProject.description}
+                          onChange={(val: string) =>
+                            setEditingProject({
+                              ...editingProject,
+                              description: val,
+                            })
+                          }
+                          height={300}
+                          placeholder="Project description..."
+                        />
+                      </Field>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Save button */}
@@ -237,11 +289,12 @@ export default function ProjectsTab({
                   type="button"
                   onClick={async () => {
                     setSavingProject(true);
-                    const { error } = await supabase
-                      .from("projects")
-                      .update({
-                        description: editingProject.description,
-                      })
+                      const { error } = await supabase
+                        .from("projects")
+                        .update({
+                          description: editingProject.description,
+                          long_description: editingProject.long_description || null,
+                        })
                       .eq("id", editingProject.id);
                     setSavingProject(false);
                     if (error) notify("error", error.message);
@@ -349,6 +402,7 @@ export default function ProjectsTab({
                       type="button"
                       onClick={() => {
                         setEditingProject(project);
+                        setExpandField('description');
                         setProjectModalOpen(true);
                       }}
                       className="flex items-center gap-1 text-xs text-brand-500 hover:underline"
@@ -364,6 +418,39 @@ export default function ProjectsTab({
                       updateProjectField(
                         project.id,
                         "description",
+                        e.target.value
+                      )
+                    }
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <div className="mb-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Long Description (optional — shown on project detail page)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProject(project);
+                        setExpandField('long_description');
+                        setProjectModalOpen(true);
+                      }}
+                      className="flex items-center gap-1 text-xs text-brand-500 hover:underline"
+                    >
+                      <ReactIcon name="expand" size={12} />
+                      Expand editor
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={project.long_description || ""}
+                    onChange={(e) =>
+                      updateProjectField(
+                        project.id,
+                        "long_description",
                         e.target.value
                       )
                     }
@@ -412,23 +499,7 @@ export default function ProjectsTab({
                   />
                 </Field>
               </div>
-              <div className="grid gap-3 md:grid-cols-2 mb-3">
-                <Field label="Video URL (MP4, WebM, GIF)">
-                  <input
-                    type="url"
-                    value={project.video_url || ""}
-                    onChange={(e) =>
-                      updateProjectField(
-                        project.id,
-                        "video_url",
-                        e.target.value || null
-                      )
-                    }
-                    className={inputCls}
-                    placeholder="https://example.com/demo.mp4"
-                  />
-                </Field>
-              </div>
+
               <div className="grid gap-3 md:grid-cols-2 mb-4">
                 <Field label="Outcome (e.g. Increased X by 30%)">
                   <input
@@ -585,6 +656,71 @@ export default function ProjectsTab({
                   }}
                 />
               </div>
+
+              {/* ── Video Gallery ── */}
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    Videos
+                    <span className="ml-1 text-zinc-400">(MP4, WebM, GIF)</span>
+                  </label>
+                  <span className="text-xs text-zinc-400">
+                    {(project.videos ?? []).length} videos
+                  </span>
+                </div>
+
+                {(project.videos ?? []).length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {(project.videos ?? []).map((url: string, vidIdx: number) => (
+                      <div
+                        key={vidIdx}
+                        className="relative group aspect-video overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800"
+                      >
+                        <video
+                          src={url}
+                          className="h-full w-full object-cover"
+                          controls
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setProjects((prev: any[]) =>
+                              updateItem(prev, project.id, (p) => ({
+                                ...p,
+                                videos: (p.videos ?? []).filter(
+                                  (_: unknown, i: number) => i !== vidIdx
+                                ),
+                              }))
+                            )
+                          }
+                          className="absolute top-1 right-1 rounded-full bg-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-white"
+                          title="Remove video"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* @ts-ignore */}
+                <CloudinaryMultiUpload
+                  folder="portfolio/projects/videos"
+                  accept="video/*,.gif"
+                  resourceType="video"
+                  maxFiles={10}
+                  onUploadMany={(urls: string[]) => {
+                    setProjects((prev: any[]) =>
+                      updateItem(prev, project.id, (p) => ({
+                        ...p,
+                        videos: [...(p.videos ?? []), ...urls],
+                      }))
+                    );
+                    notify("success", `Added ${urls.length} videos. Click Save.`);
+                  }}
+                />
+              </div>
+
               <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
                 {/* Status badges */}
                 <div className="flex items-center gap-2">

@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS personal (
   email TEXT NOT NULL,
   availability TEXT NOT NULL DEFAULT 'Open to opportunities',
   socials JSONB DEFAULT '[]'::jsonb,
+  contact_socials JSONB DEFAULT '[]'::jsonb,
+  profile_photo_url TEXT,
+  top_skills JSONB DEFAULT '[]'::jsonb,
+  highlights JSONB DEFAULT '[]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -31,13 +35,17 @@ CREATE TABLE IF NOT EXISTS projects (
   long_description TEXT,
   image_url TEXT,
   video_url TEXT,
+  videos JSONB DEFAULT '[]'::jsonb,
   tags TEXT[] DEFAULT '{}',
   live_url TEXT,
   github_url TEXT,
   featured BOOLEAN DEFAULT FALSE,
   year TEXT,
+  start_date TEXT,
+  end_date TEXT,
   outcome TEXT,
   sort_order INT DEFAULT 0,
+  gallery_images JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -56,6 +64,8 @@ CREATE TABLE IF NOT EXISTS experiences (
   company TEXT NOT NULL,
   role TEXT NOT NULL,
   period TEXT NOT NULL,
+  start_date TEXT,
+  end_date TEXT,
   description TEXT NOT NULL,
   achievements TEXT[] DEFAULT '{}',
   sort_order INT DEFAULT 0
@@ -72,7 +82,11 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   hero_image TEXT,
   published BOOLEAN DEFAULT FALSE,
   pub_date TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  meta_title TEXT,
+  meta_description TEXT,
+  og_image TEXT,
+  scheduled_for TIMESTAMPTZ
 );
 
 -- 6. TESTIMONIALS

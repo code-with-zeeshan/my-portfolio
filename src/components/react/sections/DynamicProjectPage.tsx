@@ -319,6 +319,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
           end_date: p.end_date || null,
           outcome: p.outcome || null,
           video_url: p.video_url || null,
+          videos: p.videos ?? [],
           sort_order: p.sortOrder,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -331,7 +332,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
     // ── Supabase path ──
     supabase
       .from("projects")
-      .select("id, title, description, long_description, image_url, video_url, gallery_images, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order, created_at, updated_at")
+      .select("id, title, description, long_description, image_url, video_url, videos, gallery_images, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order, created_at, updated_at")
       .eq("id", projectId)
       .single()
       .then(({ data, error }) => {
@@ -343,6 +344,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
             gallery_images: Array.isArray(data.gallery_images)
               ? data.gallery_images
               : [],
+            videos: Array.isArray(data.videos) ? data.videos : [],
           });
         }
         setLoading(false);
@@ -450,15 +452,20 @@ export default function DynamicProjectPage({ projectId }: Props) {
         </header>
 
         {/* ── Hero image / video — AVIF + WebP + fallback ── */}
-        {project.video_url ? (
-          <video
-            src={project.video_url}
-            controls
-            playsInline
-            className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-          >
-            Your browser does not support the video tag.
-          </video>
+        {(project.videos?.length > 0 || project.video_url) ? (
+          <div className="mb-10 space-y-4">
+            {(project.videos?.length > 0 ? project.videos : [project.video_url].filter(Boolean) as string[]).map((url: string, idx: number) => (
+              <video
+                key={idx}
+                src={url}
+                controls
+                playsInline
+                className="w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+              >
+                Your browser does not support the video tag.
+              </video>
+            ))}
+          </div>
         ) : (
           <OptimizedImage
             src={project.image_url}

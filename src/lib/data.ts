@@ -40,6 +40,7 @@ export async function getPersonalInfo(): Promise<PersonalInfo | null> {
       email: staticPersonal.email,
       availability: staticPersonal.availability,
       socials: staticPersonal.socials.map((s) => ({ ...s })),
+      contact_socials: [],
        profile_photo_url: staticPersonal.profilePhoto,
       top_skills: staticPersonal.topSkills.map((s) => ({
         name: s.name,
@@ -86,6 +87,7 @@ export async function getProjects(featuredOnly = false): Promise<Project[]> {
         end_date: p.end_date || null,
         outcome: p.outcome || null,
         video_url: p.video_url || null,
+        videos: p.videos ?? [],
         sort_order: i,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

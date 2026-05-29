@@ -197,26 +197,27 @@ export default function AdminDashboard() {
             .limit(1)
             .single();
         
-          if (!error && data) {
-             setPersonal({
-               id:               data.id,
-               name:             data.name             ?? "",
-               title:            data.title            ?? "",
-               tagline:          data.tagline          ?? "",
-               bio:              data.bio              ?? "",
-               location:         data.location         ?? "",
-               email:            data.email            ?? "",
-               availability:     data.availability     ?? "",
-               
-               profile_photo_url: data.profile_photo_url ?? null,
-               socials: Array.isArray(data.socials) ? data.socials : [],
-               updated_at:        data.updated_at      ?? new Date().toISOString(),
-               top_skills: Array.isArray(data.top_skills) && data.top_skills.length > 0
-                 ? data.top_skills
-                 : DEFAULT_TOP_SKILLS,
-               highlights: Array.isArray(data.highlights) && data.highlights.length > 0
-                 ? data.highlights
-                 : DEFAULT_HIGHLIGHTS,
+           if (!error && data) {
+              setPersonal({
+                id:               data.id,
+                name:             data.name             ?? "",
+                title:            data.title            ?? "",
+                tagline:          data.tagline          ?? "",
+                bio:              data.bio              ?? "",
+                location:         data.location         ?? "",
+                email:            data.email            ?? "",
+                availability:     data.availability     ?? "",
+                
+                profile_photo_url: data.profile_photo_url ?? null,
+                socials: Array.isArray(data.socials) ? data.socials : [],
+                contact_socials: Array.isArray(data.contact_socials) ? data.contact_socials : [],
+                updated_at:        data.updated_at      ?? new Date().toISOString(),
+                top_skills: Array.isArray(data.top_skills) && data.top_skills.length > 0
+                  ? data.top_skills
+                  : DEFAULT_TOP_SKILLS,
+                highlights: Array.isArray(data.highlights) && data.highlights.length > 0
+                  ? data.highlights
+                  : DEFAULT_HIGHLIGHTS,
              });
            }
           break;

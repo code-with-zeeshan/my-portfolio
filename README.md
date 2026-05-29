@@ -15,7 +15,7 @@ A modern, full-stack portfolio built with **Astro 6**, **React 18**, **Tailwind 
 - **Dynamic Content** — All sections fetch live data from Supabase with static fallbacks
 - **Blog with MDX** — Write blog posts in Markdown/MDX with syntax highlighting
 - **Project Showcase** — Featured project carousel and card grid with case studies
-- **Project Videos** — Add MP4, WebM, or GIF demos to projects; rendered with HTML5 video
+- **Project Videos** — Upload multiple MP4, WebM, or GIF demos via drag-and-drop; rendered with HTML5 video gallery
 - **Testimonials Carousel** — Animated client testimonials section
 - **Dark/Light Mode** — Toggle with localStorage persistence and system preference detection
 - **Section Visibility** — Toggle sections (Projects, Skills, Experience, Testimonials, Blog) to show/hide on homepage and about page
@@ -24,8 +24,11 @@ A modern, full-stack portfolio built with **Astro 6**, **React 18**, **Tailwind 
 
 ### Admin & CMS
 - **Hidden Admin Panel** — Full CRUD dashboard accessible via `Ctrl+Shift+A`
-- **Contact Page Quick Edit** — Edit email and social handles directly on homepage via `Ctrl+Shift+C`
-- **Drag & Drop Reordering** — Reorder social links, highlights, and top skills in Profile tab
+- **Contact Page Quick Edit** — Edit email and contact handles directly on homepage via `Ctrl+Shift+C`
+- **Social Links (Footer)** — Editable in Profile tab → Social Links; displayed site-wide in the footer
+- **Contact Information** — Editable in Profile tab → Contact Information; displayed on the Contact page only
+- **Ctrl+Shift+C** — Quick edit for Contact Information without opening the admin panel
+- **Drag & Drop Reordering** — Reorder social links, contact handles, highlights, and top skills in Profile tab
 - **Markdown Editors** — Rich markdown editing (bold, italic, links, headings, code blocks) for blog posts and project descriptions
 - **Clickable Social Handles** — Click platform names to add as highlights
 - **Clickable Icons** — Click icon names to add highlights with smart default labels

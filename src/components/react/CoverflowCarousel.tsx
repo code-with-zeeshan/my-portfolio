@@ -122,13 +122,13 @@ export default function CoverflowCarousel({
   return (
     <div
       ref={containerRef}
-      className="relative w-full pt-6"
+      className="relative w-full pt-6 md:pt-4"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* 3D Coverflow Container */}
-      <div className="relative flex items-center justify-center h-80 md:h-96 perspective-1000 overflow-visible">
+      <div className="relative flex items-center justify-center h-[460px] md:h-[500px] perspective-1000 overflow-visible">
         {getVisibleItems().map(({ index, position }) => {
           const item = items[index];
           const isActive = position === 0;
@@ -144,7 +144,7 @@ export default function CoverflowCarousel({
           return (
             <div
               key={`coverflow-${item.id}`}
-              className={`absolute transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+              className={`absolute transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] h-full ${
                 isActive ? "z-30" : "z-10"
               }`}
               style={{

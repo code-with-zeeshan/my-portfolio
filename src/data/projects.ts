@@ -15,6 +15,7 @@ export interface Project {
     end_date?: string;
     outcome?: string;
     video_url?: string;
+    videos?: string[];
   }
   
   export const projects: Project[] = [

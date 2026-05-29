@@ -35,14 +35,17 @@ export default function ProfileTab({
 }) {
   const [bioModalOpen, setBioModalOpen] = useState(false);
   const [draggedSocialIdx, setDraggedSocialIdx] = useState<number | null>(null);
+  const [draggedContactSocialIdx, setDraggedContactSocialIdx] = useState<number | null>(null);
   const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null);
   const [draggedSkillIdx, setDraggedSkillIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const { ConfirmDialogComponent } = useConfirmDialog();
 
-  const handleDragStart = (e: React.DragEvent, idx: number, type: 'social' | 'highlight' | 'skill') => {
+  const handleDragStart = (e: React.DragEvent, idx: number, type: 'social' | 'contact_social' | 'highlight' | 'skill') => {
     if (type === 'social') {
       setDraggedSocialIdx(idx);
+    } else if (type === 'contact_social') {
+      setDraggedContactSocialIdx(idx);
     } else if (type === 'highlight') {
       setDraggedHighlightIdx(idx);
     } else {
@@ -62,13 +65,18 @@ export default function ProfileTab({
     setDragOverIdx(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropIdx: number, type: 'social' | 'highlight' | 'skill') => {
+  const handleDrop = (e: React.DragEvent, dropIdx: number, type: 'social' | 'contact_social' | 'highlight' | 'skill') => {
     e.preventDefault();
     if (type === 'social' && draggedSocialIdx !== null && draggedSocialIdx !== dropIdx) {
       const newSocials = [...personal.socials];
       const [removed] = newSocials.splice(draggedSocialIdx, 1);
       newSocials.splice(dropIdx, 0, removed);
       setPersonal({ ...personal, socials: newSocials });
+    } else if (type === 'contact_social' && draggedContactSocialIdx !== null && draggedContactSocialIdx !== dropIdx) {
+      const newContactSocials = [...(personal.contact_socials ?? [])];
+      const [removed] = newContactSocials.splice(draggedContactSocialIdx, 1);
+      newContactSocials.splice(dropIdx, 0, removed);
+      setPersonal({ ...personal, contact_socials: newContactSocials });
     } else if (type === 'highlight' && draggedHighlightIdx !== null && draggedHighlightIdx !== dropIdx) {
       const newHighlights = [...personal.highlights];
       const [removed] = newHighlights.splice(draggedHighlightIdx, 1);
@@ -81,6 +89,7 @@ export default function ProfileTab({
       setPersonal({ ...personal, top_skills: newSkills });
     }
     setDraggedSocialIdx(null);
+    setDraggedContactSocialIdx(null);
     setDraggedHighlightIdx(null);
     setDraggedSkillIdx(null);
     setDragOverIdx(null);
@@ -88,6 +97,7 @@ export default function ProfileTab({
 
   const handleDragEnd = () => {
     setDraggedSocialIdx(null);
+    setDraggedContactSocialIdx(null);
     setDraggedHighlightIdx(null);
     setDraggedSkillIdx(null);
     setDragOverIdx(null);
@@ -489,22 +499,152 @@ export default function ProfileTab({
               )}
             </div>
           </div>
-       </div>
+        </div>
+
+        {/* ── Contact Information (shown on Contact page) ── */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                Contact Information
+              </h2>
+              <p className="text-xs text-zinc-400 mt-0.5">Social handles shown on the Contact page</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setPersonal({
+                  ...personal,
+                  contact_socials: [
+                    ...(personal.contact_socials ?? []),
+                    { platform: "", url: "" },
+                  ],
+                });
+              }}
+              className="rounded-lg bg-brand-500/10 px-3 py-1.5 text-xs font-medium text-brand-500 hover:bg-brand-500/20 transition-colors"
+            >
+              + Add Contact Handle
+            </button>
+          </div>
+
+          <div className="grid grid-cols-[32px_1fr_2fr_40px] gap-2 px-1 mb-1">
+            <span className="text-xs font-medium text-zinc-400">Order</span>
+            <span className="text-xs font-medium text-zinc-400">Platform</span>
+            <span className="text-xs font-medium text-zinc-400">URL</span>
+            <span />
+          </div>
+
+          <div className="space-y-3">
+            {(personal.contact_socials ?? []).map((social: any, idx: number) => (
+              <div
+                key={idx}
+                draggable
+                onDragStart={(e) => handleDragStart(e, idx, 'contact_social')}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, idx, 'contact_social')}
+                onDragEnd={handleDragEnd}
+                className={`grid grid-cols-[32px_1fr_2fr_40px] gap-2 items-center rounded-lg transition-all cursor-grab active:cursor-grabbing ${
+                  dragOverIdx === idx ? 'bg-brand-50 dark:bg-brand-900/20 ring-2 ring-brand-500 ring-offset-2' : ''
+                } ${draggedContactSocialIdx === idx ? 'opacity-50' : ''}`}
+              >
+                <div className="flex items-center justify-center w-8 h-9 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                </div>
+                <input
+                  type="text"
+                  value={social.platform}
+                  onChange={(e) => {
+                    const updated = (personal.contact_socials ?? []).map((s: any, i: number) =>
+                      i === idx ? { ...s, platform: e.target.value } : s
+                    );
+                    setPersonal({ ...personal, contact_socials: updated });
+                  }}
+                  className={inputCls}
+                  placeholder="e.g. GitHub"
+                />
+                <input
+                  type="url"
+                  value={social.url}
+                  onChange={(e) => {
+                    const updated = (personal.contact_socials ?? []).map((s: any, i: number) =>
+                      i === idx ? { ...s, url: e.target.value } : s
+                    );
+                    setPersonal({ ...personal, contact_socials: updated });
+                  }}
+                  className={inputCls}
+                  placeholder="https://"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPersonal({
+                      ...personal,
+                      contact_socials: (personal.contact_socials ?? []).filter((_: any, i: number) => i !== idx),
+                    })
+                  }
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:border-red-200 hover:text-red-500 dark:border-zinc-700 transition-colors"
+                  title="Remove"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {(personal.contact_socials ?? []).length === 0 && (
+            <p className="text-sm text-center text-zinc-400 py-4">
+              No contact handles yet. Click "+ Add Contact Handle" above.
+            </p>
+          )}
+
+          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">
+              Click to add handle
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {["GitHub", "LinkedIn", "X", "Instagram", "Facebook", "YouTube", "Email", "TikTok", "Reddit", "Medium"].map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    const exists = (personal.contact_socials ?? []).some((s: any) => s.platform.toLowerCase() === name.toLowerCase());
+                    if (!exists) {
+                      setPersonal({
+                        ...personal,
+                        contact_socials: [
+                          ...(personal.contact_socials ?? []),
+                          { platform: name, url: "" },
+                        ],
+                      });
+                    } else {
+                      notify("error", `${name} is already in your list`);
+                    }
+                  }}
+                  className="rounded bg-zinc-100 dark:bg-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-500 dark:text-zinc-400 hover:bg-brand-500/10 hover:text-brand-500 transition-colors"
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         <button
           type="button"
           onClick={async () => {
              setSavingProfile(true);
-             const { error } = await supabase.from("personal").update({
-               name: personal.name,
-               title: personal.title,
-               tagline: personal.tagline,
-               bio: personal.bio,
-               location: personal.location,
-               email: personal.email,
-               availability: personal.availability,
-               socials: personal.socials,
-               profile_photo_url: personal.profile_photo_url ?? null,
+              const { error } = await supabase.from("personal").update({
+                name: personal.name,
+                title: personal.title,
+                tagline: personal.tagline,
+                bio: personal.bio,
+                location: personal.location,
+                email: personal.email,
+                availability: personal.availability,
+                socials: personal.socials,
+                contact_socials: personal.contact_socials ?? [],
+                profile_photo_url: personal.profile_photo_url ?? null,
              }).eq("id", personal.id);
             setSavingProfile(false);
             if (error) notify("error", error.message);

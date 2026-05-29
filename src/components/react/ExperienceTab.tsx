@@ -174,7 +174,7 @@ export default function ExperienceTab({
             variant="bordered"
             className="bg-white dark:bg-zinc-900 rounded-2xl p-6 gap-0"
           >
-            <div className="grid gap-3 md:grid-cols-3 mb-3">
+            <div className="grid gap-3 md:grid-cols-4 mb-3">
               <Field label="Role / Job Title">
                 <input
                   type="text"

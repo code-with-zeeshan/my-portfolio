@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS projects (
   long_description TEXT,
   image_url TEXT,
   video_url TEXT,
+  videos JSONB DEFAULT '[]'::jsonb,
   tags TEXT[] DEFAULT '{}',
   live_url TEXT,
   github_url TEXT,

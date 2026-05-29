@@ -17,7 +17,7 @@ export interface SocialLink {
    url: string;
  }
 
- export interface PersonalInfo {
+  export interface PersonalInfo {
     id: string;
     name: string;
     title: string;
@@ -28,6 +28,7 @@ export interface SocialLink {
     availability: string;
     profile_photo_url?: string | null;
     socials: SocialLink[];
+    contact_socials: SocialLink[];
     top_skills: TopSkill[];
     highlights: Highlight[];
     updated_at: string;
@@ -40,6 +41,7 @@ export interface Project {
   long_description: string | null;
   image_url: string | null;
   video_url: string | null;
+  videos: string[];
   gallery_images: string[];
   tags: string[];
   live_url: string | null;
