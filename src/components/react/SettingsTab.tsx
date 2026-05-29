@@ -134,7 +134,25 @@ export default function SettingsTab() {
     // Load font preference
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(FONT_STORAGE_KEY);
-      if (saved) setSelectedFont(saved);
+      if (saved) {
+        setSelectedFont(saved);
+      } else {
+        // First visit — check Supabase for cross-device sync
+        supabase
+          .from("app_settings")
+          .select("value")
+          .eq("key", FONT_STORAGE_KEY)
+          .single()
+          .then(({ data, error }) => {
+            if (!error && data?.value) {
+              const fontName = data.value as string;
+              setSelectedFont(fontName);
+              const font = getFontByName(fontName);
+              document.documentElement.style.setProperty("--font-family", font.cssFamily);
+              localStorage.setItem(FONT_STORAGE_KEY, fontName);
+            }
+          });
+      }
     }
   }, []);
 
@@ -166,11 +184,21 @@ export default function SettingsTab() {
     }
   }, [visibility]);
 
-  const changeFont = useCallback((fontName: string) => {
+  const changeFont = useCallback(async (fontName: string) => {
     setSelectedFont(fontName);
     const font = getFontByName(fontName);
     document.documentElement.style.setProperty("--font-family", font.cssFamily);
     localStorage.setItem(FONT_STORAGE_KEY, fontName);
+
+    // Persist to Supabase for cross-device sync
+    try {
+      await supabase.from("app_settings").upsert(
+        { key: FONT_STORAGE_KEY, value: fontName, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+    } catch (err) {
+      console.error("[Settings] Failed to save font preference:", err);
+    }
   }, []);
 
   const updateStaticData = useCallback((key: keyof SectionVisibility, value: boolean) => {

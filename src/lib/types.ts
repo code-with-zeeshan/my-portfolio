@@ -39,6 +39,7 @@ export interface Project {
   description: string;
   long_description: string | null;
   image_url: string | null;
+  video_url: string | null;
   gallery_images: string[];
   tags: string[];
   live_url: string | null;

@@ -318,6 +318,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
           start_date: p.start_date || null,
           end_date: p.end_date || null,
           outcome: p.outcome || null,
+          video_url: p.video_url || null,
           sort_order: p.sortOrder,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -330,7 +331,7 @@ export default function DynamicProjectPage({ projectId }: Props) {
     // ── Supabase path ──
     supabase
       .from("projects")
-      .select("id, title, description, long_description, image_url, gallery_images, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order, created_at, updated_at")
+      .select("id, title, description, long_description, image_url, video_url, gallery_images, tags, live_url, github_url, featured, year, start_date, end_date, outcome, sort_order, created_at, updated_at")
       .eq("id", projectId)
       .single()
       .then(({ data, error }) => {
@@ -448,18 +449,29 @@ export default function DynamicProjectPage({ projectId }: Props) {
           </p>
         </header>
 
-        {/* ── Hero image — AVIF + WebP + fallback ── */}
-        <OptimizedImage
-          src={project.image_url}
-          alt={project.title}
-          preset="blogHero"
-          loading="eager"
-          width={1200}
-          height={630}
-          fallbackSrc={fallbackSrc}
-          onErrorFallback={fallbackSrc}
-          className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-        />
+        {/* ── Hero image / video — AVIF + WebP + fallback ── */}
+        {project.video_url ? (
+          <video
+            src={project.video_url}
+            controls
+            playsInline
+            className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <OptimizedImage
+            src={project.image_url}
+            alt={project.title}
+            preset="blogHero"
+            loading="eager"
+            width={1200}
+            height={630}
+            fallbackSrc={fallbackSrc}
+            onErrorFallback={fallbackSrc}
+            className="mb-10 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+          />
+        )}
 
         {/* ── Action buttons ── */}
         <div className="flex flex-wrap gap-4 mb-10">

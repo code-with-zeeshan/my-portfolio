@@ -412,6 +412,23 @@ export default function ProjectsTab({
                   />
                 </Field>
               </div>
+              <div className="grid gap-3 md:grid-cols-2 mb-3">
+                <Field label="Video URL (MP4, WebM, GIF)">
+                  <input
+                    type="url"
+                    value={project.video_url || ""}
+                    onChange={(e) =>
+                      updateProjectField(
+                        project.id,
+                        "video_url",
+                        e.target.value || null
+                      )
+                    }
+                    className={inputCls}
+                    placeholder="https://example.com/demo.mp4"
+                  />
+                </Field>
+              </div>
               <div className="grid gap-3 md:grid-cols-2 mb-4">
                 <Field label="Outcome (e.g. Increased X by 30%)">
                   <input

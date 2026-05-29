@@ -26,17 +26,17 @@ Use the email and password created in **Supabase → Authentication → Users**.
 
 | Tab | Features |
 |---|---|
-| **Profile** | Edit name, title, bio, location, social links, availability, profile photo; drag & drop to reorder social links and highlights |
-| **Top Skills** | Add/edit/remove skill bars with name and % level |
+| **Profile** | Edit name, title, bio (Markdown), location, social links, availability, profile photo; drag & drop to reorder social links, highlights, and top skills |
+| **Top Skills** | Add/edit/remove skill bars with name and % level; drag & drop to reorder |
 | **Highlights** | Edit stat cards (icon, label, value) shown below bio; drag & drop to reorder |
-| **Projects** | Add, edit, delete projects; upload images via Cloudinary; toggle featured; sort order auto-adjusts |
+| **Projects** | Add, edit, delete projects; upload images via Cloudinary; add video demo URL (MP4/WebM/GIF); toggle featured; sort order auto-adjusts; rich Markdown editor for descriptions |
 | **Skills** | Edit skill category names and tag lists; sort order auto-adjusts |
 | **Experience** | Edit work history, roles, achievements; sort order auto-adjusts |
 | **Blog** | Write/edit/delete posts in Markdown; publish/unpublish; schedule posts; upload hero images; search posts |
 | **Testimonials** | Add, edit, remove testimonials; sort order auto-adjusts |
 | **Messages** | Read contact form submissions; mark as read/unread; delete (with undo support) |
 | **Resume** | Upload new PDF resume; removed resumes go to history |
-| **Settings** | Toggle section visibility; configure per-section static data sync |
+| **Settings** | Toggle section visibility; configure per-section static data sync; choose portfolio font (Inter, Onest, Outfit, Geist) |
 | **Analytics** | View analytics dashboard; generate cron secrets |
 
 ## Contact Page Quick Edit
@@ -54,12 +54,13 @@ Edit contact info directly on the homepage without opening the full admin panel:
 
 > 💡 All icons use ReactIcon component for consistent rendering across all social platforms.
 
-## Section Visibility
+## Section Visibility & Font Settings
 
 In the **Settings** tab:
 1. Toggle section visibility (Projects, Skills, Experience, Testimonials, Blog) on homepage and about page
 2. Enable "Use Static Data" per-section to sync specific static data only
 3. Changes reflect immediately without page refresh (uses localStorage + storage events)
+4. Choose a portfolio font from Inter, Onest, Outfit, or Geist — persists cross-device via Supabase
 
 ## Static Data Sync
 

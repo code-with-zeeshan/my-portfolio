@@ -64,6 +64,7 @@ export async function syncFallbackToSupabase(
             start_date: p.start_date || null,
             end_date: p.end_date || null,
             outcome: p.outcome || null,
+            video_url: p.video_url || null,
             sort_order: i + 1,
           }))
         );

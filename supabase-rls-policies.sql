@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS projects (
   description TEXT NOT NULL,
   long_description TEXT,
   image_url TEXT,
+  video_url TEXT,
   tags TEXT[] DEFAULT '{}',
   live_url TEXT,
   github_url TEXT,
@@ -126,6 +127,7 @@ ALTER TABLE personal ADD COLUMN IF NOT EXISTS profile_photo_url TEXT;
 -- Add start_date and end_date columns for date range support
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS end_date TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS video_url TEXT;
 ALTER TABLE experiences ADD COLUMN IF NOT EXISTS start_date TEXT;
 ALTER TABLE experiences ADD COLUMN IF NOT EXISTS end_date TEXT;
 

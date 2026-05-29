@@ -13,6 +13,7 @@ interface Project {
   description: string;
   long_description: string | null;
   image_url: string | null;
+  video_url: string | null;
   tags: string[];
   live_url: string | null;
   github_url: string | null;
@@ -191,17 +192,28 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
             {project.description || "No description yet."}
           </p>
 
-          {/* Hero image — using OptimizedImage */}
-          <OptimizedImage
-            src={project.image_url}
-            alt={project.title}
-            preset="blogHero"
-            fallbackSrc="/images/projects/sample_project.webp"
-            className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-            loading="lazy"
-            width={1200}
-            height={630}
-          />
+          {/* Hero image / video */}
+          {project.video_url ? (
+            <video
+              src={project.video_url}
+              controls
+              playsInline
+              className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+            >
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <OptimizedImage
+              src={project.image_url}
+              alt={project.title}
+              preset="blogHero"
+              fallbackSrc="/images/projects/sample_project.webp"
+              className="mb-8 w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+              loading="lazy"
+              width={1200}
+              height={630}
+            />
+          )}
 
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-4 mb-8">

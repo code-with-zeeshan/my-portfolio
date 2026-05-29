@@ -85,6 +85,7 @@ export async function getProjects(featuredOnly = false): Promise<Project[]> {
         start_date: p.start_date || null,
         end_date: p.end_date || null,
         outcome: p.outcome || null,
+        video_url: p.video_url || null,
         sort_order: i,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

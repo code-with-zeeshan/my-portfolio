@@ -89,9 +89,19 @@ featured: true                   # Shows on homepage
 
 ### New Project
 1. Admin → Projects tab → **+ Add Project** (added at top with sort_order: 1)
-2. Fill in fields, upload image via Cloudinary drag & drop
-3. Toggle **Featured on homepage** if desired
-4. Click **Save**
+2. Fill in fields: title, description (use the Markdown editor via "Expand editor"), tags, URLs
+3. **Video demo**: Add a direct URL to an MP4, WebM, or GIF file in the "Video URL" field
+4. Upload image via Cloudinary drag & drop
+5. Toggle **Featured on homepage** if desired
+6. Click **Save**
+
+### Project Videos
+
+Projects support video demos via the **Video URL** field:
+- Supported formats: MP4, WebM, GIF
+- Video appears as the hero on the project detail page (replaces the image)
+- A small "Video" badge appears on project cards in the grid view
+- Works alongside the main project image and gallery images
 
 ## Reordering Content
 

@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS projects (
   description TEXT NOT NULL,
   long_description TEXT,
   image_url TEXT,
+  video_url TEXT,
   tags TEXT[] DEFAULT '{}',
   live_url TEXT,
   github_url TEXT,
