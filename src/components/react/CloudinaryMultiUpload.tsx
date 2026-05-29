@@ -22,6 +22,7 @@ interface Props {
   accept?: string;
   resourceType?: ResourceType;
   maxFiles?: number;
+  mediaLabel?: string;
 }
 
 export default function CloudinaryMultiUpload({
@@ -30,6 +31,7 @@ export default function CloudinaryMultiUpload({
   accept = "image/*",
   resourceType = "auto",
   maxFiles = 10,
+  mediaLabel,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -206,11 +208,11 @@ export default function CloudinaryMultiUpload({
             {isUploading
               ? "Uploading to Cloudinary..."
               : isDragging
-              ? "Drop images here!"
-              : "Drag & drop multiple images, or click to browse"}
+              ? `Drop ${mediaLabel || "images"} here!`
+              : `Drag & drop multiple ${mediaLabel || "images"}, or click to browse`}
           </p>
           <p className="text-xs text-zinc-400 mt-1">
-            PNG, JPG, WebP — up to {maxFiles} images at once
+            {accept === "video/*,.gif" ? "MP4, WebM, GIF" : "PNG, JPG, WebP"} — up to {maxFiles} {mediaLabel || "images"} at once
           </p>
         </div>
       </div>

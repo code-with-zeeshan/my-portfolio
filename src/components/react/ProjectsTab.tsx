@@ -709,6 +709,7 @@ export default function ProjectsTab({
                   accept="video/*,.gif"
                   resourceType="video"
                   maxFiles={10}
+                  mediaLabel="videos"
                   onUploadMany={(urls: string[]) => {
                     setProjects((prev: any[]) =>
                       updateItem(prev, project.id, (p) => ({
@@ -793,23 +794,23 @@ export default function ProjectsTab({
                      const el = document.getElementById(`project-${project.id}`);
                      el?.scrollIntoView({ behavior: "smooth", block: "start" });
                    }}
-                   className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
-                 >
-                   <span
-                      className={`mt-1.5 flex h-1.5 w-1.5 shrink-0 rounded-full ${
-                        project.live_url
-                          ? "bg-green-500"
-                          : project.featured
-                          ? "bg-blue-500"
-                          : "bg-zinc-300 dark:bg-zinc-600"
-                      }`}
-                    />
-                   <span className="text-xs text-zinc-600 dark:text-zinc-400 truncate group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors flex items-center gap-1">
-                     {project.title}
-                     {project.featured && (
-                       <span className="text-blue-500 shrink-0">★</span>
-                     )}
-                   </span>
+                    className="w-full flex items-start gap-2 px-4 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
+                  >
+                    <span
+                       className={`mt-1.5 flex h-1.5 w-1.5 shrink-0 rounded-full ${
+                         project.live_url
+                           ? "bg-green-500"
+                           : project.featured
+                           ? "bg-blue-500"
+                           : "bg-zinc-300 dark:bg-zinc-600"
+                       }`}
+                     />
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors leading-tight">
+                      {project.title}
+                      {project.featured && (
+                        <span className="text-blue-500 shrink-0">★</span>
+                      )}
+                    </span>
                  </button>
                ))}
              </nav>
