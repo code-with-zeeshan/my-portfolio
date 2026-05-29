@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { FONTS, FONT_STORAGE_KEY, getFontByName } from "@/lib/fonts";
 import { CronSecretGenerator, CSRFSecretGenerator } from "@/components/react/SecretGenerator";
 
 interface SectionVisibility {
@@ -85,6 +86,7 @@ export default function SettingsTab() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selectedFont, setSelectedFont] = useState("Inter");
 
   useEffect(() => {
     async function loadVisibility() {
@@ -128,6 +130,12 @@ export default function SettingsTab() {
       }
     }
     loadVisibility();
+
+    // Load font preference
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(FONT_STORAGE_KEY);
+      if (saved) setSelectedFont(saved);
+    }
   }, []);
 
   const updateVisibility = useCallback(async (key: keyof SectionVisibility, value: boolean) => {
@@ -157,6 +165,13 @@ export default function SettingsTab() {
       setSaving(false);
     }
   }, [visibility]);
+
+  const changeFont = useCallback((fontName: string) => {
+    setSelectedFont(fontName);
+    const font = getFontByName(fontName);
+    document.documentElement.style.setProperty("--font-family", font.cssFamily);
+    localStorage.setItem(FONT_STORAGE_KEY, fontName);
+  }, []);
 
   const updateStaticData = useCallback((key: keyof SectionVisibility, value: boolean) => {
     const updated = { ...useStatic, [key]: value };
@@ -238,6 +253,33 @@ export default function SettingsTab() {
                 onChange={(v) => updateVisibility("blog", v)}
                 onStaticDataChange={(v) => updateStaticData("blog", v)}
               />
+            </div>
+          </div>
+
+          {/* ── Font Selector ── */}
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">
+              Portfolio Font
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+              Choose a font for your portfolio
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {FONTS.map((font) => (
+                <button
+                  key={font.name}
+                  type="button"
+                  onClick={() => changeFont(font.name)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                    selectedFont === font.name
+                      ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 dark:border-zinc-50"
+                      : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600"
+                  }`}
+                  style={{ fontFamily: font.cssFamily }}
+                >
+                  {font.name}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -2,6 +2,9 @@
 // src/layouts/BaseLayout.astro
 import "../styles/global.css";
 import "@fontsource-variable/inter";
+import "@fontsource-variable/onest";
+import "@fontsource-variable/outfit";
+import "@fontsource/geist-sans";
 import Header from "@/components/layout/Header.astro";
 import DynamicFooter from "@/components/react/DynamicFooter.tsx";
 import ScrollProgress from "@/components/react/ScrollProgress.tsx";
@@ -98,7 +101,7 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <style is:inline>
       {`
         *,::before,::after{box-sizing:border-box;margin:0;padding:0}
-        html{font-family:"Inter Variable","Inter",system-ui,-apple-system,sans-serif;scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+        html{font-family:var(--font-family, "Inter Variable","Inter",system-ui,-apple-system,sans-serif);scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
         body{min-height:100vh}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
         .fixed{position:fixed}
@@ -152,6 +155,25 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
             ? "dark"
             : "light";
         document.documentElement.classList.toggle("dark", theme === "dark");
+      })();
+    </script>
+
+    <!-- Font: apply saved preference -->
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem("portfolio_font");
+          if (saved) {
+            var fonts = {
+              Inter: '"Inter Variable","Inter",system-ui,-apple-system,sans-serif',
+              Onest: '"Onest Variable","Onest",system-ui,-apple-system,sans-serif',
+              Outfit: '"Outfit Variable","Outfit",system-ui,-apple-system,sans-serif',
+              Geist: '"Geist Sans",system-ui,-apple-system,sans-serif',
+            };
+            var family = fonts[saved] || fonts.Inter;
+            document.documentElement.style.setProperty("--font-family", family);
+          }
+        } catch(e) {}
       })();
     </script>
   </head>
