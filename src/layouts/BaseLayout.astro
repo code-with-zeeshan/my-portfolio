@@ -27,14 +27,19 @@ const umamiUrl = import.meta.env.PUBLIC_UMAMI_URL ?? "";
 
 // Server-side fetch for footer data to avoid client-side delay
 let footerData = null;
+let fontName = "Inter";
 try {
   const supabase = createAdminClient();
-  const { data: personal } = await supabase
-    .from("personal")
-    .select("name, socials, email")
-    .limit(1)
-    .single();
-  if (personal) footerData = personal;
+  const [personalResult, fontResult] = await Promise.allSettled([
+    supabase.from("personal").select("name, socials, email").limit(1).single(),
+    supabase.from("app_settings").select("value").eq("key", "portfolio_font").single(),
+  ]);
+  if (personalResult.status === "fulfilled" && personalResult.value.data) {
+    footerData = personalResult.value.data;
+  }
+  if (fontResult.status === "fulfilled" && fontResult.value.data?.value) {
+    fontName = fontResult.value.data.value as string;
+  }
 } catch {}
 
 interface Props {
@@ -162,17 +167,15 @@ const ogImageURL   = new URL(ogImage, siteUrl).toString();
     <script is:inline>
       (function () {
         try {
-          var saved = localStorage.getItem("portfolio_font");
-          if (saved) {
-            var fonts = {
-              Inter: '"Inter Variable","Inter",system-ui,-apple-system,sans-serif',
-              Onest: '"Onest Variable","Onest",system-ui,-apple-system,sans-serif',
-              Outfit: '"Outfit Variable","Outfit",system-ui,-apple-system,sans-serif',
-              Geist: '"Geist Sans",system-ui,-apple-system,sans-serif',
-            };
-            var family = fonts[saved] || fonts.Inter;
-            document.documentElement.style.setProperty("--font-family", family);
-          }
+          var fonts = {
+            Inter: '"Inter Variable","Inter",system-ui,-apple-system,sans-serif',
+            Onest: '"Onest Variable","Onest",system-ui,-apple-system,sans-serif',
+            Outfit: '"Outfit Variable","Outfit",system-ui,-apple-system,sans-serif',
+            Geist: '"Geist Sans",system-ui,-apple-system,sans-serif',
+          };
+          var saved = localStorage.getItem("portfolio_font") || "{fontName}";
+          var family = fonts[saved] || fonts.Inter;
+          document.documentElement.style.setProperty("--font-family", family);
         } catch(e) {}
       })();
     </script>
