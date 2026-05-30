@@ -197,15 +197,24 @@ export default function ProjectPreviewModal({ project, onClose }: Props) {
           {(project.videos?.length > 0 || project.video_url) ? (
             <div className="mb-8 space-y-4">
               {(project.videos?.length > 0 ? project.videos : [project.video_url].filter(Boolean) as string[]).map((url: string, idx: number) => (
-                <video
-                  key={idx}
-                  src={url}
-                  controls
-                  playsInline
-                  className="w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
-                >
-                  Your browser does not support the video tag.
-                </video>
+                url.match(/\.gif($|\?)/i) ? (
+                  <img
+                    key={idx}
+                    src={url}
+                    alt={`${project.title} GIF ${idx + 1}`}
+                    className="w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+                  />
+                ) : (
+                  <video
+                    key={idx}
+                    src={url}
+                    controls
+                    playsInline
+                    className="w-full rounded-2xl shadow-lg aspect-video object-contain bg-zinc-100 dark:bg-zinc-900"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )
               ))}
             </div>
           ) : (

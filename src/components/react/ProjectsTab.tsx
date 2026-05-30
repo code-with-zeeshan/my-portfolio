@@ -707,7 +707,7 @@ export default function ProjectsTab({
                 <CloudinaryMultiUpload
                   folder="portfolio/projects/videos"
                   accept="video/*,.gif"
-                  resourceType="video"
+                  resourceType="auto"
                   maxFiles={10}
                   mediaLabel="videos"
                   onUploadMany={(urls: string[]) => {
